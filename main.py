@@ -131,20 +131,27 @@ def run_gemini_analysis(contract_text: str) -> Dict[str, Any]:
     
     prompt = f"Проанализируй текст договора:\n\n{contract_text}"
     
-    try:
-        # Используем актуальное имя модели Gemini
-        response = client.models.generate_content(
-            model='gemini-1.5-flash',
-            contents=prompt,
-            config=genai_types.GenerateContentConfig(
-                system_instruction=SYSTEM_PROMPT,
-                response_mime_type="application/json",
-                temperature=0.2,
-            ),
-        )
-        return json.loads(response.text)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Ошибка AI API: {str(e)}")
+    # Резервный перебор моделей на случай перегрузки или недоступности отдельных эндпоинтов
+    models_to_try = ["gemini-2.5-flash", "gemini-2.0-flash"]
+    last_exception = None
+
+    for model_name in models_to_try:
+        try:
+            response = client.models.generate_content(
+                model=model_name,
+                contents=prompt,
+                config=genai_types.GenerateContentConfig(
+                    system_instruction=SYSTEM_PROMPT,
+                    response_mime_type="application/json",
+                    temperature=0.2,
+                ),
+            )
+            return json.loads(response.text)
+        except Exception as e:
+            last_exception = e
+            continue
+
+    raise HTTPException(status_code=500, detail=f"Ошибка AI API: {str(last_exception)}")
 
 
 # ---------------- ИНТЕРФЕЙСЫ ЭНДПОИНТОВ ---------------- #
