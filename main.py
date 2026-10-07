@@ -2,6 +2,7 @@ import os
 import re
 import io
 import json
+import time
 from typing import Dict, Any, Optional
 
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
@@ -131,20 +132,32 @@ def run_gemini_analysis(contract_text: str) -> Dict[str, Any]:
     
     prompt = f"Проанализируй текст договора:\n\n{contract_text}"
     
-    try:
-        # Обращаемся напрямую к целевой модели gemini-3.8-flash
-        response = client.models.generate_content(
-            model='gemini-3.8-flash',
-            contents=prompt,
-            config=genai_types.GenerateContentConfig(
-                system_instruction=SYSTEM_PROMPT,
-                response_mime_type="application/json",
-                temperature=0.2,
-            ),
-        )
-        return json.loads(response.text)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Ошибка AI API: {str(e)}")
+    # При ошибке 503 или 404 сервер поочередно переберет доступные модели
+    candidate_models = ["gemini-3.8-flash", "gemini-1.5-flash", "gemini-2.5-flash"]
+    last_error = None
+
+    for model_name in candidate_models:
+        for attempt in range(2):  # По 2 попытки на модель
+            try:
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=genai_types.GenerateContentConfig(
+                        system_instruction=SYSTEM_PROMPT,
+                        response_mime_type="application/json",
+                        temperature=0.2,
+                    ),
+                )
+                return json.loads(response.text)
+            except Exception as e:
+                last_error = str(e)
+                # Если перегрузка (503), ждем 1 секунду перед повтором
+                if "503" in last_error or "UNAVAILABLE" in last_error:
+                    time.sleep(1)
+                else:
+                    break  # Если иная ошибка (например 404), переходим к следующей модели
+
+    raise HTTPException(status_code=500, detail=f"Сервис AI перегружен или недоступен: {last_error}")
 
 
 # ---------------- ИНТЕРФЕЙСЫ ЭНДПОИНТОВ ---------------- #
