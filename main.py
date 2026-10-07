@@ -143,7 +143,7 @@ def run_gemini_analysis(contract_text: str) -> Dict[str, Any]:
     prompt = f"Проанализируй договор:\n\n{contract_text}"
     try:
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-3.8-flash',
             contents=prompt,
             config=types.GenerateContentConfig(
                 system_instruction=SYSTEM_PROMPT,
