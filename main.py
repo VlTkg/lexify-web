@@ -132,8 +132,9 @@ def run_gemini_analysis(contract_text: str) -> Dict[str, Any]:
     prompt = f"Проанализируй текст договора:\n\n{contract_text}"
     
     try:
+        # Используем актуальное имя модели Gemini
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-1.5-flash',
             contents=prompt,
             config=genai_types.GenerateContentConfig(
                 system_instruction=SYSTEM_PROMPT,
@@ -162,7 +163,6 @@ async def analyze_file_v1(file: UploadFile = File(...)):
     return run_gemini_analysis(anonymized)
 
 
-# Поддержка альтернативного универсального вызова /api/analyze (FormData)
 @app.post("/api/analyze")
 async def analyze_universal(
     file: Optional[UploadFile] = File(None),
