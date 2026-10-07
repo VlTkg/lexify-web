@@ -142,8 +142,8 @@ async def analyze_file(file: UploadFile = File(...)) -> Dict[str, Any]:
 def run_gemini_analysis(contract_text: str) -> Dict[str, Any]:
     prompt = f"Проанализируй договор:\n\n{contract_text}"
     
-    # Из списка убраны невалидные строки вроде gemini-3-flash
-    models_to_try = ['gemini-3.8-flash', 'gemini-3.5-flash']
+    # Основная модель gemini-2.5-flash (или gemini-1.5-flash)
+    models_to_try = ['gemini-2.5-flash', 'gemini-1.5-flash']
     
     last_exception = None
     for model_name in models_to_try:
