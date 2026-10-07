@@ -141,16 +141,25 @@ async def analyze_file(file: UploadFile = File(...)) -> Dict[str, Any]:
 
 def run_gemini_analysis(contract_text: str) -> Dict[str, Any]:
     prompt = f"Проанализируй договор:\n\n{contract_text}"
-    try:
-        response = client.models.generate_content(
-            model='gemini-3.8-flash',
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_PROMPT,
-                response_mime_type="application/json",
-                temperature=0.2,
-            ),
-        )
-        return json.loads(response.text)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Ошибка AI API: {str(e)}")
+    
+    # 3.8-flash — основная модель, 2.5-flash и 1.5-flash — резервные на случай нагрузки (503)
+    models_to_try = ['gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-1.5-flash']
+    
+    last_exception = None
+    for model_name in models_to_try:
+        try:
+            response = client.models.generate_content(
+                model=model_name,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    system_instruction=SYSTEM_PROMPT,
+                    response_mime_type="application/json",
+                    temperature=0.2,
+                ),
+            )
+            return json.loads(response.text)
+        except Exception as e:
+            last_exception = e
+            continue
+            
+    raise HTTPException(status_code=500, detail=f"Ошибка AI API: {str(last_exception)}")
