@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lexify — Юридический ассистент фрилансера</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [mode, setMode] = useState('file');
+            const [file, setFile] = useState(null);
+            const [textInput, setTextInput] = useState('');
+            const [loading, setLoading] = useState(false);
+            const [result, setResult] = useState(null);
+            const [copied, setCopied] = useState(false);
+
+            const handleSubmit = async () => {
+                setLoading(true);
+                setResult(null);
+
+                try {
+                    let res;
+                    if (mode === 'file') {
+                        if (!file) return alert('Выберите файл');
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        res = await fetch('/api/v1/analyze-file', { method: 'POST', body: formData });
+                    } else {
+                        if (!textInput.trim()) return alert('Введите текст');
+                        res = await fetch('/api/v1/analyze-text', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ text: textInput })
+                        });
+                    }
+
+                    if (!res.ok) {
+                        const err = await res.json();
+                        throw new Error(err.detail || 'Ошибка анализа');
+                    }
+
+                    const data = await res.json();
+                    setResult(data);
+                } catch (err) {
+                    alert('Ошибка: ' + err.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const copyMessage = () => {
+                if (result?.negotiation_message) {
+                    navigator.clipboard.writeText(result.negotiation_message);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                }
+            };
+
+            const getBadge = (sev) => {
+                if (sev === 'RED') return 'bg-red-500/20 text-red-400 border-red-500/30';
+                if (sev === 'YELLOW') return 'bg-amber-500/20 text-amber-400 border-amber-500/30';
+                return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+            };
+
+            return (
+                <div class="max-w-4xl mx-auto px-4 py-8">
+                    <header class="flex items-center justify-between border-b border-slate-800 pb-6 mb-8">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-indigo-600 p-2.5 rounded-xl font-black text-2xl">L</div>
+                            <div>
+                                <h1 class="text-2xl font-bold">Lexify</h1>
+                                <p class="text-xs text-slate-400">Юридический аудитор фрилансера</p>
+                            </div>
+                        </div>
+                    </header>
+
+                    {!result && (
+                        <div class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-6">
+                            <div class="flex gap-4 border-b border-slate-700/60 pb-4 mb-6">
+                                <button onClick={() => setMode('file')} class={`px-4 py-2 rounded-lg text-sm ${mode === 'file' ? 'bg-indigo-600 text-white' : 'text-slate-400'}`}>📄 Загрузить файл</button>
+                                <button onClick={() => setMode('text')} class={`px-4 py-2 rounded-lg text-sm ${mode === 'text' ? 'bg-indigo-600 text-white' : 'text-slate-400'}`}>📝 Вставить текст</button>
+                            </div>
+
+                            {mode === 'file' ? (
+                                <div class="border-2 border-dashed border-slate-700 p-8 text-center rounded-xl">
+                                    <input type="file" id="f" accept=".docx,.pdf,.odt,.txt" onChange={(e) => setFile(e.target.files[0])} class="hidden" />
+                                    <label htmlFor="f" class="cursor-pointer text-slate-200">
+                                        {file ? file.name : "Выбрать файл (.docx, .pdf, .odt, .txt)"}
+                                    </label>
+                                </div>
+                            ) : (
+                                <textarea value={textInput} onChange={(e) => setTextInput(e.target.value)} placeholder="Вставьте текст договора..." rows="8" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 text-sm"></textarea>
+                            )}
+
+                            <button onClick={handleSubmit} disabled={loading} class="w-full mt-6 bg-indigo-600 hover:bg-indigo-500 py-3.5 rounded-xl font-semibold">
+                                {loading ? "Анализ и анонимизация данных..." : "Проверить договор"}
+                            </button>
+                        </div>
+                    )}
+
+                    {result && (
+                        <div class="space-y-6">
+                            <button onClick={() => setResult(null)} class="text-xs text-indigo-400 hover:underline">← Проверить другой договор</button>
+
+                            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 flex items-center gap-6">
+                                <div class={`w-20 h-20 rounded-xl border flex flex-col items-center justify-center font-bold ${getBadge(result.summary.overall_risk_level)}`}>
+                                    <span class="text-2xl">{result.summary.score}/100</span>
+                                </div>
+                                <p class="text-sm text-slate-300">{result.summary.verdict}</p>
+                            </div>
+
+                            {result.negotiation_message && (
+                                <div class="bg-indigo-950/40 border border-indigo-500/30 rounded-2xl p-6">
+                                    <div class="flex justify-between mb-2">
+                                        <h3 class="text-sm font-bold text-indigo-300">💬 Ответ для заказчика</h3>
+                                        <button onClick={copyMessage} class="text-xs bg-indigo-600 px-3 py-1 rounded">{copied ? 'Скопировано!' : 'Скопировать'}</button>
+                                    </div>
+                                    <pre class="text-xs bg-slate-900 p-4 rounded-xl whitespace-pre-wrap font-mono text-slate-300">{result.negotiation_message}</pre>
+                                </div>
+                            )}
+
+                            <div class="space-y-4">
+                                {result.risks.map((r) => (
+                                    <div key={r.id} class="bg-slate-800/40 border border-slate-700 p-5 rounded-xl space-y-2">
+                                        <div class="flex justify-between font-bold">
+                                            <span>{r.title}</span>
+                                            <span class={`text-xs px-2 py-0.5 border rounded ${getBadge(r.severity)}`}>{r.severity}</span>
+                                        </div>
+                                        <p class="text-xs text-slate-400 italic">"{r.quote}"</p>
+                                        <p class="text-xs"><strong class="text-slate-200">Риск:</strong> {r.explanation}</p>
+                                        <p class="text-xs text-emerald-400"><strong class="text-emerald-300">Исправление:</strong> {r.recommendation}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
