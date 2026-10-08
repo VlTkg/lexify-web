@@ -23,7 +23,7 @@
     .app-layout {
       display: grid;
       grid-template-columns: 1fr 360px;
-      align-items: start;
+      align-items: stretch; /* Обе колонки одинаковой высоты */
       gap: 20px;
       padding: 16px;
       min-height: 100vh;
@@ -98,6 +98,7 @@
       gap: 14px;
     }
 
+    /* Правый блок отзыва равен по высоте левому */
     .sidebar-card {
       background: #ffffff;
       border-radius: 12px;
@@ -106,6 +107,7 @@
       display: flex;
       flex-direction: column;
       gap: 14px;
+      height: 100%;
     }
 
     h2 {
@@ -117,6 +119,13 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
+    }
+
+    /* Группа с текстовым полем растягивается по высоте */
+    .form-group.flex-grow-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
     }
 
     label, .section-label {
@@ -160,12 +169,20 @@
       transition: border-color 0.2s;
     }
 
+    /* Растягивающееся поле отзыва */
+    textarea#feedback-comment {
+      flex: 1;
+      min-height: 100px;
+      height: auto;
+      resize: none;
+    }
+
     textarea:focus {
       outline: none;
       border-color: #3182ce;
     }
 
-    /* Кнопки переключения (цветные, не серые и не черные) */
+    /* Кнопки переключения */
     .button-selector {
       display: flex;
       flex-wrap: wrap;
@@ -190,7 +207,6 @@
       color: #1e1b4b;
     }
 
-    /* Активное состояние: глубокий сине-фиолетовый */
     .option-btn.active {
       background: #4338ca;
       color: #ffffff;
@@ -373,6 +389,12 @@
         padding: 10px;
         gap: 14px;
       }
+      .sidebar-card {
+        height: auto;
+      }
+      textarea#feedback-comment {
+        height: 100px;
+      }
       .action-bar {
         flex-direction: column;
       }
@@ -483,11 +505,12 @@
       <button type="button" class="thumb-btn" id="thumb-down">👎 Замечания</button>
     </div>
 
-    <div class="form-group">
-      <textarea id="feedback-comment" style="height: 80px;" placeholder="Ваш отзыв или описание проблемы..."></textarea>
+    <!-- Поле комментариев растягивается и занимает все свободное пространство -->
+    <div class="form-group flex-grow-group">
+      <textarea id="feedback-comment" placeholder="Ваш отзыв или описание проблемы..."></textarea>
     </div>
 
-    <!-- КНОПКА ОТПРАВКИ ОТЗЫВА СПРАВА -->
+    <!-- КНОПКА ОТПРАВКИ ОТЗЫВА ВНИЗУ СПРАВА -->
     <div class="feedback-action-bar">
       <button type="button" class="btn-feedback-submit" id="send-feedback-btn">Отправить отзыв</button>
     </div>
