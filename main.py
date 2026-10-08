@@ -58,11 +58,23 @@ def extract_text_from_file(file_bytes: bytes, filename: str) -> str:
 
         elif ext == "odt":
             odt_doc = load_odt(io.BytesIO(file_bytes))
+            
+            # Рекурсивный сбор всего текста из любых узлов ODT
+            def get_node_text(node):
+                texts = []
+                for child in node.childNodes:
+                    if child.nodeType == 3:  # Node.TEXT_NODE
+                        texts.append(child.data)
+                    else:
+                        texts.append(get_node_text(child))
+                return "".join(texts)
+
             paragraphs = []
-            for el in odt_doc.getElementsByType(text.P):
-                t = "".join([node.data for node in el.childNodes if node.nodeType == 3])
-                if t.strip():
+            for el in odt_doc.getElementsByType(text.P) + odt_doc.getElementsByType(text.H):
+                t = get_node_text(el).strip()
+                if t:
                     paragraphs.append(t)
+                    
             extracted_text = "\n".join(paragraphs)
 
         else:
