@@ -40,7 +40,20 @@ def extract_text_from_file(file_bytes: bytes, filename: str) -> str:
 
     try:
         if ext == "txt":
-            extracted_text = file_bytes.decode("utf-8", errors="ignore")
+            encodings_to_try = ["utf-8", "windows-1251", "cp1251", "utf-16", "gbk"]
+            decoded_text = None
+            
+            for enc in encodings_to_try:
+                try:
+                    decoded_text = file_bytes.decode(enc)
+                    break
+                except (UnicodeDecodeError, UnicodeError):
+                    continue
+            
+            if decoded_text is None:
+                decoded_text = file_bytes.decode("utf-8", errors="ignore")
+                
+            extracted_text = decoded_text
 
         elif ext == "docx":
             doc = docx.Document(io.BytesIO(file_bytes))
@@ -59,7 +72,6 @@ def extract_text_from_file(file_bytes: bytes, filename: str) -> str:
         elif ext == "odt":
             odt_doc = load_odt(io.BytesIO(file_bytes))
             
-            # Рекурсивный сбор всего текста из любых узлов ODT
             def get_node_text(node):
                 texts = []
                 for child in node.childNodes:
@@ -142,7 +154,6 @@ def run_gemini_analysis(contract_text: str) -> Dict[str, Any]:
     if not GEMINI_API_KEY:
         raise HTTPException(status_code=500, detail="Переменная GEMINI_API_KEY не задана на сервере.")
     
-    # Сжатие лишних пробелов и дублирующихся переносов строк для экономии токенов
     cleaned_text = re.sub(r'\n\s*\n', '\n\n', contract_text).strip()
     prompt = f"Проанализируй текст договора:\n\n{cleaned_text}"
     
@@ -164,7 +175,6 @@ def run_gemini_analysis(contract_text: str) -> Dict[str, Any]:
             return json.loads(response.text)
         except Exception as e:
             last_error = str(e)
-            # При перегрузке или лимитах делаем прогрессивную паузу (3с, 6с, 9с...)
             if any(code in last_error for code in ["503", "429", "UNAVAILABLE", "RESOURCE_EXHAUSTED"]):
                 time.sleep(3 * (attempt + 1))
             else:
