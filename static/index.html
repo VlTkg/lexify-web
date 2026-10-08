@@ -70,17 +70,17 @@
 
     .step-item {
       font-size: 12px;
-      color: #2d3748;
+      color: #475569;
       font-weight: 500;
       display: flex;
       align-items: center;
       gap: 6px;
     }
 
-    /* Приглушенные кружки с цифрами */
+    /* Приглушенные кружки с цифрами (неяркие, не черные) */
     .step-badge {
-      background: #64748b;
-      color: #fff;
+      background: #94a3b8;
+      color: #ffffff;
       border-radius: 50%;
       width: 18px;
       height: 18px;
@@ -131,7 +131,7 @@
       font-weight: 700;
     }
 
-    /* Блок загрузки файла без пунктира */
+    /* Блок загрузки файла */
     .file-input-wrapper {
       background: #f8fafc;
       border: 1px solid #cbd5e0;
@@ -165,6 +165,7 @@
       border-color: #3182ce;
     }
 
+    /* Кнопки переключения (неяркие цвета, не черные) */
     .button-selector {
       display: flex;
       flex-wrap: wrap;
@@ -172,8 +173,8 @@
     }
 
     .option-btn {
-      padding: 5px 10px;
-      border: 1px solid #e2e8f0;
+      padding: 6px 12px;
+      border: 1px solid #cbd5e0;
       border-radius: 14px;
       background: #f1f5f9;
       color: #64748b;
@@ -186,16 +187,17 @@
 
     .option-btn:hover {
       background: #e2e8f0;
-      color: #334155;
+      color: #475569;
     }
 
+    /* Активное состояние: приглушенный сдержанный синий */
     .option-btn.active {
       background: #475569;
       color: #ffffff;
       border-color: #475569;
     }
 
-    /* Панель основных кнопок управления */
+    /* Панель основных кнопок управления (все 3 в один ряд) */
     .action-bar {
       display: flex;
       gap: 10px;
@@ -238,20 +240,19 @@
       background-color: #cbd5e0;
     }
 
-    /* Кнопка отправки отзыва в боковой панели */
+    /* Кнопка отправки отзыва (в одном ряду с основными) */
     button.btn-feedback-submit {
-      width: 100%;
+      flex: 1.2;
       background-color: #38a169;
       color: #fff;
       border: none;
-      padding: 10px;
+      padding: 12px;
       font-size: 14px;
       border-radius: 8px;
       cursor: pointer;
       font-weight: 600;
       transition: background-color 0.2s;
       touch-action: manipulation;
-      margin-top: 4px;
     }
 
     button.btn-feedback-submit:hover {
@@ -341,14 +342,15 @@
       background: #fff;
       cursor: pointer;
       font-size: 11px;
+      color: #64748b;
       text-align: center;
       touch-action: manipulation;
     }
 
     .fb-type-btn.active {
-      background: #4a5568;
+      background: #64748b;
       color: #fff;
-      border-color: #4a5568;
+      border-color: #64748b;
     }
 
     .feedback-note {
@@ -381,10 +383,9 @@
   <div class="main-card">
     <div class="app-header">
       <h1>LegalGuard — Экспресс-анализ договоров</h1>
-      <!-- Заменено "кабальные" на "неприемлемые" -->
       <p class="app-description">Сервис автоматической проверки договоров для фрилансеров и специалистов. Находите неприемлемые пункты, скрытые штрафы и риски за пару секунд.</p>
       
-      <!-- Приглушенные кнопки 1, 2, 3 -->
+      <!-- Неяркие значки 1, 2, 3 -->
       <div class="steps-list">
         <div class="step-item"><span class="step-badge">1</span> Загрузите файл или текст</div>
         <div class="step-item"><span class="step-badge">2</span> Нажмите «Анализировать»</div>
@@ -405,7 +406,6 @@
         <input type="hidden" id="selected-category" value="general">
       </div>
 
-      <!-- Расширенное название для кнопки РФ -->
       <div class="form-group">
         <label>Юрисдикция:</label>
         <div class="button-selector" id="jurisdiction-selector">
@@ -416,7 +416,7 @@
         <input type="hidden" id="selected-jurisdiction" value="RU">
       </div>
 
-      <!-- Загрузка файла без пунктира -->
+      <!-- Загрузка файла -->
       <div class="form-group">
         <label class="prominent-label">📁 Загрузить файл (PDF, DOCX, ODT, TXT):</label>
         <div class="file-input-wrapper">
@@ -430,10 +430,11 @@
       </div>
     </div>
 
-    <!-- КНОПКИ УПРАВЛЕНИЯ -->
+    <!-- КНОПКИ УПРАВЛЕНИЯ (ВСЕ 3 В ОДИН РЯД) -->
     <div class="action-bar">
       <button type="button" class="btn-submit" id="submit-btn">Анализировать</button>
       <button type="button" class="btn-reset" id="reset-btn">Новый анализ</button>
+      <button type="button" class="btn-feedback-submit" id="send-feedback-btn">Отправить отзыв</button>
     </div>
 
     <!-- РЕЗУЛЬТАТ АНАЛИЗА -->
@@ -475,9 +476,6 @@
     <div class="form-group">
       <textarea id="feedback-comment" style="height: 80px;" placeholder="Ваш отзыв или описание проблемы..."></textarea>
     </div>
-
-    <!-- Кнопка перенесена в поле отзывов -->
-    <button type="button" class="btn-feedback-submit" id="send-feedback-btn">Отправить отзыв</button>
 
     <p class="feedback-note">Ваш отзыв помогает нам улучшать качество проверки документов.</p>
     <p id="feedback-status" style="font-weight: 600; font-size: 13px; display: none; text-align: center; color: #276749;"></p>
