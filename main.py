@@ -130,10 +130,12 @@ def run_gemini_analysis(contract_text: str) -> Dict[str, Any]:
     if not GEMINI_API_KEY:
         raise HTTPException(status_code=500, detail="Переменная GEMINI_API_KEY не задана на сервере.")
     
-    prompt = f"Проанализируй текст договора:\n\n{contract_text}"
+    # Сжатие лишних пробелов и дублирующихся переносов строк для экономии токенов
+    cleaned_text = re.sub(r'\n\s*\n', '\n\n', contract_text).strip()
+    prompt = f"Проанализируй текст договора:\n\n{cleaned_text}"
     
     model_name = "gemini-3.8-flash"
-    max_retries = 3
+    max_retries = 5
     last_error = None
 
     for attempt in range(max_retries):
@@ -150,12 +152,16 @@ def run_gemini_analysis(contract_text: str) -> Dict[str, Any]:
             return json.loads(response.text)
         except Exception as e:
             last_error = str(e)
-            if "503" in last_error or "UNAVAILABLE" in last_error:
-                time.sleep(2 * (attempt + 1))
+            # При перегрузке или лимитах делаем прогрессивную паузу (3с, 6с, 9с...)
+            if any(code in last_error for code in ["503", "429", "UNAVAILABLE", "RESOURCE_EXHAUSTED"]):
+                time.sleep(3 * (attempt + 1))
             else:
                 break
 
-    raise HTTPException(status_code=500, detail=f"Ошибка AI API: {last_error}")
+    raise HTTPException(
+        status_code=503, 
+        detail="Серверы Gemini временно перегружены (бесплатный тариф). Пожалуйста, повторите попытку через 1–2 минуты."
+    )
 
 
 # ---------------- ИНТЕРФЕЙСЫ ЭНДПОИНТОВ ---------------- #
