@@ -22,8 +22,8 @@
 
     .app-layout {
       display: grid;
-      grid-template-columns: 1fr 340px;
-      align-items: stretch;
+      grid-template-columns: 1fr 360px;
+      align-items: start;
       gap: 20px;
       padding: 16px;
       min-height: 100vh;
@@ -37,7 +37,57 @@
       box-shadow: 0 4px 20px rgba(0,0,0,0.08);
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 16px;
+    }
+
+    /* Описание и порядок действий */
+    .app-header {
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 12px;
+    }
+
+    .app-header h1 {
+      color: #1a202c;
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+
+    .app-description {
+      font-size: 13px;
+      color: #4a5568;
+      line-height: 1.4;
+      margin-bottom: 10px;
+    }
+
+    .steps-list {
+      display: flex;
+      gap: 8px;
+      background: #f8fafc;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #edf2f7;
+    }
+
+    .step-item {
+      font-size: 12px;
+      color: #2d3748;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .step-badge {
+      background: #3182ce;
+      color: #fff;
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: bold;
     }
 
     .form-fields {
@@ -53,19 +103,7 @@
       box-shadow: 0 4px 20px rgba(0,0,0,0.08);
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      height: 100%;
-    }
-
-    .sidebar-content {
-      display: flex;
-      flex-direction: column;
       gap: 14px;
-    }
-
-    h1 {
-      color: #1a202c;
-      font-size: 22px;
     }
 
     h2 {
@@ -85,21 +123,47 @@
       font-size: 14px;
     }
 
-    textarea, input[type="file"] {
-      width: 100%;
-      padding: 8px 10px;
-      border: 1px solid #cbd5e0;
-      border-radius: 8px;
+    /* Яркие, заметные поля ввода */
+    .prominent-label {
+      color: #1a202c;
       font-size: 14px;
-      background-color: #fff;
+      font-weight: 700;
+    }
+
+    .file-input-wrapper {
+      background: #f0f7ff;
+      border: 2px dashed #3182ce;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    input[type="file"] {
+      width: 100%;
+      font-size: 13px;
+      color: #2b6cb0;
+      cursor: pointer;
     }
 
     textarea {
-      height: 160px;
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #cbd5e0;
+      border-radius: 8px;
+      font-size: 14px;
+      background-color: #fff;
+      height: 140px;
       resize: vertical;
       font-family: inherit;
+      transition: border-color 0.2s;
     }
 
+    textarea:focus {
+      outline: none;
+      border-color: #3182ce;
+    }
+
+    /* Приглушенные кнопки переключателей */
     .button-selector {
       display: flex;
       flex-wrap: wrap;
@@ -107,13 +171,13 @@
     }
 
     .option-btn {
-      padding: 6px 12px;
-      border: 1px solid #cbd5e0;
-      border-radius: 16px;
-      background: #edf2f7;
-      color: #4a5568;
+      padding: 5px 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      background: #f1f5f9;
+      color: #64748b;
       cursor: pointer;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 500;
       transition: all 0.2s ease;
       touch-action: manipulation;
@@ -121,15 +185,17 @@
 
     .option-btn:hover {
       background: #e2e8f0;
+      color: #334155;
     }
 
     .option-btn.active {
-      background: #3182ce;
+      background: #475569;
       color: #ffffff;
-      border-color: #3182ce;
+      border-color: #475569;
     }
 
-    .btn-group {
+    /* Блок кнопок на одной линии */
+    .action-bar {
       display: flex;
       gap: 10px;
       margin-top: 6px;
@@ -140,8 +206,8 @@
       background-color: #3182ce;
       color: #fff;
       border: none;
-      padding: 12px 16px;
-      font-size: 15px;
+      padding: 12px;
+      font-size: 14px;
       border-radius: 8px;
       cursor: pointer;
       font-weight: 600;
@@ -158,8 +224,8 @@
       background-color: #e2e8f0;
       color: #4a5568;
       border: none;
-      padding: 12px 16px;
-      font-size: 15px;
+      padding: 12px;
+      font-size: 14px;
       border-radius: 8px;
       cursor: pointer;
       font-weight: 600;
@@ -169,6 +235,24 @@
 
     button.btn-reset:hover {
       background-color: #cbd5e0;
+    }
+
+    button.btn-feedback-submit {
+      flex: 1.2;
+      background-color: #38a169;
+      color: #fff;
+      border: none;
+      padding: 12px;
+      font-size: 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.2s;
+      touch-action: manipulation;
+    }
+
+    button.btn-feedback-submit:hover {
+      background-color: #2f855a;
     }
 
     #result-section {
@@ -199,10 +283,11 @@
     .risk-YELLOW { border-left: 5px solid #dd6b20; }
     .risk-GREEN { border-left: 5px solid #38a169; }
 
+    /* Элементы обратной связи */
     .stars {
       display: flex;
       gap: 6px;
-      font-size: 24px;
+      font-size: 22px;
       cursor: pointer;
     }
 
@@ -225,10 +310,10 @@
       flex: 1;
       background: #fff;
       border: 1px solid #cbd5e0;
-      padding: 8px 12px;
+      padding: 6px 10px;
       border-radius: 6px;
       cursor: pointer;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 500;
       text-align: center;
       touch-action: manipulation;
@@ -247,12 +332,12 @@
 
     .fb-type-btn {
       flex: 1;
-      padding: 6px 8px;
+      padding: 5px 8px;
       border: 1px solid #cbd5e0;
-      border-radius: 16px;
+      border-radius: 14px;
       background: #fff;
       cursor: pointer;
-      font-size: 12px;
+      font-size: 11px;
       text-align: center;
       touch-action: manipulation;
     }
@@ -264,29 +349,10 @@
     }
 
     .feedback-note {
-      font-size: 12px;
+      font-size: 11px;
       color: #718096;
-      line-height: 1.35;
-      margin-bottom: 8px;
+      line-height: 1.3;
       text-align: center;
-    }
-
-    .btn-feedback-submit {
-      background-color: #38a169;
-      color: #fff;
-      border: none;
-      padding: 12px 16px;
-      font-size: 15px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      width: 100%;
-      transition: background-color 0.2s;
-      touch-action: manipulation;
-    }
-
-    .btn-feedback-submit:hover {
-      background-color: #2f855a;
     }
 
     @media (max-width: 850px) {
@@ -295,8 +361,12 @@
         padding: 10px;
         gap: 14px;
       }
-      .sidebar-card, .main-card {
-        height: auto;
+      .action-bar {
+        flex-direction: column;
+      }
+      .steps-list {
+        flex-direction: column;
+        gap: 4px;
       }
     }
   </style>
@@ -304,19 +374,29 @@
 <body>
 
 <div class="app-layout">
-  <!-- ЛЕВАЯ КОЛОНКА -->
+  <!-- ЛЕВАЯ КОЛОНКА (ОСНОВНАЯ ФОРМА) -->
   <div class="main-card">
-    <h1>LegalGuard — Экспресс-анализ договоров</h1>
+    <div class="app-header">
+      <h1>LegalGuard — Экспресс-анализ договоров</h1>
+      <p class="app-description">Сервис автоматической проверки договоров для фрилансеров и специалистов. Находите кабальные пункты, скрытые штрафы и риски за пару секунд.</p>
+      
+      <div class="steps-list">
+        <div class="step-item"><span class="step-badge">1</span> Загрузите файл или текст</div>
+        <div class="step-item"><span class="step-badge">2</span> Нажмите «Анализировать»</div>
+        <div class="step-item"><span class="step-badge">3</span> Получите список рисков</div>
+      </div>
+    </div>
 
     <div class="form-fields">
+      <!-- Приглушённые параметры -->
       <div class="form-group">
         <label>Тип договора / Занятость:</label>
         <div class="button-selector" id="category-selector">
-          <button type="button" class="option-btn cat-btn active" data-value="general">Общий договор</button>
-          <button type="button" class="option-btn cat-btn" data-value="employment">Трудовой договор</button>
-          <button type="button" class="option-btn cat-btn" data-value="gph">Договор ГПХ / Услуги</button>
+          <button type="button" class="option-btn cat-btn active" data-value="general">Общий</button>
+          <button type="button" class="option-btn cat-btn" data-value="employment">Трудовой</button>
+          <button type="button" class="option-btn cat-btn" data-value="gph">ГПХ / Услуги</button>
           <button type="button" class="option-btn cat-btn" data-value="rent">Аренда</button>
-          <button type="button" class="option-btn cat-btn" data-value="supply">Поставка / Купля-продажа</button>
+          <button type="button" class="option-btn cat-btn" data-value="supply">Поставка</button>
         </div>
         <input type="hidden" id="selected-category" value="general">
       </div>
@@ -324,29 +404,35 @@
       <div class="form-group">
         <label>Юрисдикция:</label>
         <div class="button-selector" id="jurisdiction-selector">
-          <button type="button" class="option-btn jur-btn active" data-value="RU">Российская Федерация (РФ)</button>
-          <button type="button" class="option-btn jur-btn" data-value="KZ">Республика Казахстан (РК)</button>
-          <button type="button" class="option-btn jur-btn" data-value="BY">Республика Беларусь (РБ)</button>
+          <button type="button" class="option-btn jur-btn active" data-value="RU">РФ</button>
+          <button type="button" class="option-btn jur-btn" data-value="KZ">Казахстан (РК)</button>
+          <button type="button" class="option-btn jur-btn" data-value="BY">Беларусь (РБ)</button>
         </div>
         <input type="hidden" id="selected-jurisdiction" value="RU">
       </div>
 
+      <!-- Яркие, контрастные поля ввода -->
       <div class="form-group">
-        <label>Загрузить файл (PDF, DOCX, ODT, TXT):</label>
-        <input type="file" id="file-input" accept=".pdf,.docx,.doc,.odt,.txt">
+        <label class="prominent-label">📁 Загрузить файл (PDF, DOCX, ODT, TXT):</label>
+        <div class="file-input-wrapper">
+          <input type="file" id="file-input" accept=".pdf,.docx,.doc,.odt,.txt">
+        </div>
       </div>
 
       <div class="form-group">
-        <label>Или вставьте текстовый фрагмент договора:</label>
+        <label class="prominent-label">📝 Или вставьте текст договора:</label>
         <textarea id="text-input" placeholder="Вставьте текст договора здесь..."></textarea>
       </div>
     </div>
 
-    <div class="btn-group">
+    <!-- КНОПКИ В ОДИН РЯД -->
+    <div class="action-bar">
       <button type="button" class="btn-submit" id="submit-btn">Анализировать</button>
       <button type="button" class="btn-reset" id="reset-btn">Новый анализ</button>
+      <button type="button" class="btn-feedback-submit" id="send-feedback-btn">Отправить отзыв</button>
     </div>
 
+    <!-- РЕЗУЛЬТАТ В САМОМ НИЗУ (не сдвигает фидбек) -->
     <div id="result-section">
       <h2 id="doc-title" style="margin-bottom: 10px;">Результат анализа</h2>
       <div id="summary-container"></div>
@@ -354,45 +440,40 @@
     </div>
   </div>
 
-  <!-- ПРАВАЯ КОЛОНКА (ОБРАТНАЯ СВЯЗЬ) -->
+  <!-- ПРАВАЯ КОЛОНКА (ФОРМА ОБРАТНОЙ СВЯЗИ) -->
   <div class="sidebar-card">
-    <div class="sidebar-content">
-      <h2>Обратная связь</h2>
+    <h2>Обратная связь</h2>
 
-      <div class="form-group">
-        <div class="section-label">Тип обращения:</div>
-        <div class="fb-type-selector">
-          <button type="button" class="fb-type-btn active" data-type="quality">Оценка анализа</button>
-          <button type="button" class="fb-type-btn" data-type="tech_issue">Баг / Ошибка</button>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <div class="section-label">Оценка сервиса:</div>
-        <div class="stars" id="star-rating">
-          <span class="star" data-value="1">★</span>
-          <span class="star" data-value="2">★</span>
-          <span class="star" data-value="3">★</span>
-          <span class="star" data-value="4">★</span>
-          <span class="star" data-value="5">★</span>
-        </div>
-      </div>
-
-      <div class="thumbs">
-        <button type="button" class="thumb-btn" id="thumb-up">👍 Полезно</button>
-        <button type="button" class="thumb-btn" id="thumb-down">👎 Есть замечания</button>
-      </div>
-
-      <div class="form-group">
-        <textarea id="feedback-comment" style="height: 90px;" placeholder="Ваш отзыв или описание проблемы..."></textarea>
+    <div class="form-group">
+      <div class="section-label">Тип обращения:</div>
+      <div class="fb-type-selector">
+        <button type="button" class="fb-type-btn active" data-type="quality">Оценка анализа</button>
+        <button type="button" class="fb-type-btn" data-type="tech_issue">Баг / Ошибка</button>
       </div>
     </div>
 
-    <div>
-      <p class="feedback-note">Ваш отзыв очень важен для нас! Он помогает улучшать качество проверки документов.</p>
-      <button type="button" class="btn-feedback-submit" id="send-feedback-btn">Отправить отзыв</button>
-      <p id="feedback-status" style="margin-top: 8px; font-weight: 600; font-size: 13px; display: none; text-align: center;"></p>
+    <div class="form-group">
+      <div class="section-label">Оценка сервиса:</div>
+      <div class="stars" id="star-rating">
+        <span class="star" data-value="1">★</span>
+        <span class="star" data-value="2">★</span>
+        <span class="star" data-value="3">★</span>
+        <span class="star" data-value="4">★</span>
+        <span class="star" data-value="5">★</span>
+      </div>
     </div>
+
+    <div class="thumbs">
+      <button type="button" class="thumb-btn" id="thumb-up">👍 Полезно</button>
+      <button type="button" class="thumb-btn" id="thumb-down">👎 Замечания</button>
+    </div>
+
+    <div class="form-group">
+      <textarea id="feedback-comment" style="height: 80px;" placeholder="Ваш отзыв или описание проблемы..."></textarea>
+    </div>
+
+    <p class="feedback-note">Ваш отзыв помогает нам улучшать качество проверки документов.</p>
+    <p id="feedback-status" style="font-weight: 600; font-size: 13px; display: none; text-align: center; color: #276749;"></p>
   </div>
 </div>
 
@@ -470,7 +551,7 @@
     });
   });
 
-  // ПРЯМАЯ ОБРАБОТКА КЛИКА ПО КНОПКЕ "АНАЛИЗИРОВАТЬ"
+  // Анализ договора
   document.getElementById('submit-btn').addEventListener('click', async () => {
     const btn = document.getElementById('submit-btn');
     const fileInput = document.getElementById('file-input');
@@ -554,7 +635,6 @@
   // Отправка отзыва
   document.getElementById('send-feedback-btn').addEventListener('click', async () => {
     const statusText = document.getElementById('feedback-status');
-    statusText.style.color = '#276749';
     statusText.innerText = 'Спасибо! Ваш отзыв учтен.';
     statusText.style.display = 'block';
     document.getElementById('feedback-comment').value = '';
