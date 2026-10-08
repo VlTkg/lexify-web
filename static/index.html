@@ -241,15 +241,20 @@
       background-color: #cbd5e0;
     }
 
-    /* Кнопка сдвинута вправо на этой же линии */
+    /* Панель для кнопки в блоке отзывов */
+    .feedback-action-bar {
+      display: flex;
+      justify-content: flex-end;
+      width: 100%;
+    }
+
     button.btn-feedback-submit {
-      flex: 1.2;
       margin-left: auto;
       background-color: #38a169;
       color: #fff;
       border: none;
-      padding: 12px;
-      font-size: 14px;
+      padding: 10px 18px;
+      font-size: 13px;
       border-radius: 8px;
       cursor: pointer;
       font-weight: 600;
@@ -372,8 +377,8 @@
         flex-direction: column;
       }
       button.btn-feedback-submit {
-        margin-left: 0;
         width: 100%;
+        margin-left: 0;
       }
       .steps-list {
         flex-direction: column;
@@ -436,11 +441,10 @@
       </div>
     </div>
 
-    <!-- КНОПКИ УПРАВЛЕНИЯ (Кнопка отзыва сдвинута вправо) -->
+    <!-- ОСНОВНЫЕ КНОПКИ АНАЛИЗА -->
     <div class="action-bar">
       <button type="button" class="btn-submit" id="submit-btn">Анализировать</button>
       <button type="button" class="btn-reset" id="reset-btn">Новый анализ</button>
-      <button type="button" class="btn-feedback-submit" id="send-feedback-btn">Отправить отзыв</button>
     </div>
 
     <!-- РЕЗУЛЬТАТ АНАЛИЗА -->
@@ -481,6 +485,11 @@
 
     <div class="form-group">
       <textarea id="feedback-comment" style="height: 80px;" placeholder="Ваш отзыв или описание проблемы..."></textarea>
+    </div>
+
+    <!-- КНОПКА ОТПРАВКИ ОТЗЫВА СПРАВА -->
+    <div class="feedback-action-bar">
+      <button type="button" class="btn-feedback-submit" id="send-feedback-btn">Отправить отзыв</button>
     </div>
 
     <p class="feedback-note">Ваш отзыв помогает нам улучшать качество проверки документов.</p>
