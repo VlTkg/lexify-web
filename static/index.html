@@ -70,16 +70,16 @@
 
     .step-item {
       font-size: 12px;
-      color: #475569;
+      color: #334155;
       font-weight: 500;
       display: flex;
       align-items: center;
       gap: 6px;
     }
 
-    /* Приглушенные кружки с цифрами (неяркие, не черные) */
+    /* Цветные кружки с цифрами (индиго) */
     .step-badge {
-      background: #94a3b8;
+      background: #6366f1;
       color: #ffffff;
       border-radius: 50%;
       width: 18px;
@@ -165,7 +165,7 @@
       border-color: #3182ce;
     }
 
-    /* Кнопки переключения (неяркие цвета, не черные) */
+    /* Кнопки переключения (цветные, не серые и не черные) */
     .button-selector {
       display: flex;
       flex-wrap: wrap;
@@ -174,10 +174,10 @@
 
     .option-btn {
       padding: 6px 12px;
-      border: 1px solid #cbd5e0;
+      border: 1px solid #c7d2fe;
       border-radius: 14px;
-      background: #f1f5f9;
-      color: #64748b;
+      background: #e0e7ff;
+      color: #3730a3;
       cursor: pointer;
       font-size: 12px;
       font-weight: 500;
@@ -186,22 +186,23 @@
     }
 
     .option-btn:hover {
-      background: #e2e8f0;
-      color: #475569;
+      background: #c7d2fe;
+      color: #1e1b4b;
     }
 
-    /* Активное состояние: приглушенный сдержанный синий */
+    /* Активное состояние: глубокий сине-фиолетовый */
     .option-btn.active {
-      background: #475569;
+      background: #4338ca;
       color: #ffffff;
-      border-color: #475569;
+      border-color: #4338ca;
     }
 
-    /* Панель основных кнопок управления (все 3 в один ряд) */
+    /* Панель основных кнопок управления */
     .action-bar {
       display: flex;
       gap: 10px;
       margin-top: 6px;
+      align-items: center;
     }
 
     button.btn-submit {
@@ -240,9 +241,10 @@
       background-color: #cbd5e0;
     }
 
-    /* Кнопка отправки отзыва (в одном ряду с основными) */
+    /* Кнопка сдвинута вправо на этой же линии */
     button.btn-feedback-submit {
       flex: 1.2;
+      margin-left: auto;
       background-color: #38a169;
       color: #fff;
       border: none;
@@ -337,20 +339,20 @@
     .fb-type-btn {
       flex: 1;
       padding: 5px 8px;
-      border: 1px solid #cbd5e0;
+      border: 1px solid #c7d2fe;
       border-radius: 14px;
-      background: #fff;
+      background: #e0e7ff;
       cursor: pointer;
       font-size: 11px;
-      color: #64748b;
+      color: #3730a3;
       text-align: center;
       touch-action: manipulation;
     }
 
     .fb-type-btn.active {
-      background: #64748b;
+      background: #4338ca;
       color: #fff;
-      border-color: #64748b;
+      border-color: #4338ca;
     }
 
     .feedback-note {
@@ -369,6 +371,10 @@
       .action-bar {
         flex-direction: column;
       }
+      button.btn-feedback-submit {
+        margin-left: 0;
+        width: 100%;
+      }
       .steps-list {
         flex-direction: column;
         gap: 6px;
@@ -385,7 +391,7 @@
       <h1>LegalGuard — Экспресс-анализ договоров</h1>
       <p class="app-description">Сервис автоматической проверки договоров для фрилансеров и специалистов. Находите неприемлемые пункты, скрытые штрафы и риски за пару секунд.</p>
       
-      <!-- Неяркие значки 1, 2, 3 -->
+      <!-- Цветные значки 1, 2, 3 -->
       <div class="steps-list">
         <div class="step-item"><span class="step-badge">1</span> Загрузите файл или текст</div>
         <div class="step-item"><span class="step-badge">2</span> Нажмите «Анализировать»</div>
@@ -430,7 +436,7 @@
       </div>
     </div>
 
-    <!-- КНОПКИ УПРАВЛЕНИЯ (ВСЕ 3 В ОДИН РЯД) -->
+    <!-- КНОПКИ УПРАВЛЕНИЯ (Кнопка отзыва сдвинута вправо) -->
     <div class="action-bar">
       <button type="button" class="btn-submit" id="submit-btn">Анализировать</button>
       <button type="button" class="btn-reset" id="reset-btn">Новый анализ</button>
