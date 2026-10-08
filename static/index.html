@@ -74,20 +74,22 @@
       font-weight: 500;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
     }
 
+    /* Приглушенные кружки с цифрами */
     .step-badge {
-      background: #3182ce;
+      background: #64748b;
       color: #fff;
       border-radius: 50%;
-      width: 16px;
-      height: 16px;
+      width: 18px;
+      height: 18px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       font-size: 10px;
       font-weight: bold;
+      flex-shrink: 0;
     }
 
     .form-fields {
@@ -123,16 +125,16 @@
       font-size: 14px;
     }
 
-    /* Яркие, заметные поля ввода */
     .prominent-label {
       color: #1a202c;
       font-size: 14px;
       font-weight: 700;
     }
 
+    /* Блок загрузки файла без пунктира */
     .file-input-wrapper {
-      background: #f0f7ff;
-      border: 2px dashed #3182ce;
+      background: #f8fafc;
+      border: 1px solid #cbd5e0;
       padding: 12px;
       border-radius: 8px;
       text-align: center;
@@ -163,7 +165,6 @@
       border-color: #3182ce;
     }
 
-    /* Приглушенные кнопки переключателей */
     .button-selector {
       display: flex;
       flex-wrap: wrap;
@@ -194,7 +195,7 @@
       border-color: #475569;
     }
 
-    /* Блок кнопок на одной линии */
+    /* Панель основных кнопок управления */
     .action-bar {
       display: flex;
       gap: 10px;
@@ -237,18 +238,20 @@
       background-color: #cbd5e0;
     }
 
+    /* Кнопка отправки отзыва в боковой панели */
     button.btn-feedback-submit {
-      flex: 1.2;
+      width: 100%;
       background-color: #38a169;
       color: #fff;
       border: none;
-      padding: 12px;
+      padding: 10px;
       font-size: 14px;
       border-radius: 8px;
       cursor: pointer;
       font-weight: 600;
       transition: background-color 0.2s;
       touch-action: manipulation;
+      margin-top: 4px;
     }
 
     button.btn-feedback-submit:hover {
@@ -366,7 +369,7 @@
       }
       .steps-list {
         flex-direction: column;
-        gap: 4px;
+        gap: 6px;
       }
     }
   </style>
@@ -378,8 +381,10 @@
   <div class="main-card">
     <div class="app-header">
       <h1>LegalGuard — Экспресс-анализ договоров</h1>
-      <p class="app-description">Сервис автоматической проверки договоров для фрилансеров и специалистов. Находите кабальные пункты, скрытые штрафы и риски за пару секунд.</p>
+      <!-- Заменено "кабальные" на "неприемлемые" -->
+      <p class="app-description">Сервис автоматической проверки договоров для фрилансеров и специалистов. Находите неприемлемые пункты, скрытые штрафы и риски за пару секунд.</p>
       
+      <!-- Приглушенные кнопки 1, 2, 3 -->
       <div class="steps-list">
         <div class="step-item"><span class="step-badge">1</span> Загрузите файл или текст</div>
         <div class="step-item"><span class="step-badge">2</span> Нажмите «Анализировать»</div>
@@ -388,7 +393,6 @@
     </div>
 
     <div class="form-fields">
-      <!-- Приглушённые параметры -->
       <div class="form-group">
         <label>Тип договора / Занятость:</label>
         <div class="button-selector" id="category-selector">
@@ -401,17 +405,18 @@
         <input type="hidden" id="selected-category" value="general">
       </div>
 
+      <!-- Расширенное название для кнопки РФ -->
       <div class="form-group">
         <label>Юрисдикция:</label>
         <div class="button-selector" id="jurisdiction-selector">
-          <button type="button" class="option-btn jur-btn active" data-value="RU">РФ</button>
+          <button type="button" class="option-btn jur-btn active" data-value="RU">Россия (РФ)</button>
           <button type="button" class="option-btn jur-btn" data-value="KZ">Казахстан (РК)</button>
           <button type="button" class="option-btn jur-btn" data-value="BY">Беларусь (РБ)</button>
         </div>
         <input type="hidden" id="selected-jurisdiction" value="RU">
       </div>
 
-      <!-- Яркие, контрастные поля ввода -->
+      <!-- Загрузка файла без пунктира -->
       <div class="form-group">
         <label class="prominent-label">📁 Загрузить файл (PDF, DOCX, ODT, TXT):</label>
         <div class="file-input-wrapper">
@@ -425,14 +430,13 @@
       </div>
     </div>
 
-    <!-- КНОПКИ В ОДИН РЯД -->
+    <!-- КНОПКИ УПРАВЛЕНИЯ -->
     <div class="action-bar">
       <button type="button" class="btn-submit" id="submit-btn">Анализировать</button>
       <button type="button" class="btn-reset" id="reset-btn">Новый анализ</button>
-      <button type="button" class="btn-feedback-submit" id="send-feedback-btn">Отправить отзыв</button>
     </div>
 
-    <!-- РЕЗУЛЬТАТ В САМОМ НИЗУ (не сдвигает фидбек) -->
+    <!-- РЕЗУЛЬТАТ АНАЛИЗА -->
     <div id="result-section">
       <h2 id="doc-title" style="margin-bottom: 10px;">Результат анализа</h2>
       <div id="summary-container"></div>
@@ -471,6 +475,9 @@
     <div class="form-group">
       <textarea id="feedback-comment" style="height: 80px;" placeholder="Ваш отзыв или описание проблемы..."></textarea>
     </div>
+
+    <!-- Кнопка перенесена в поле отзывов -->
+    <button type="button" class="btn-feedback-submit" id="send-feedback-btn">Отправить отзыв</button>
 
     <p class="feedback-note">Ваш отзыв помогает нам улучшать качество проверки документов.</p>
     <p id="feedback-status" style="font-weight: 600; font-size: 13px; display: none; text-align: center; color: #276749;"></p>
