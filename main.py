@@ -128,7 +128,7 @@ async def analyze_contract(
 
     try:
         response = ai_client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-3.8-flash",
             contents=prompt,
         )
         return {"status": "ok", "result": response.text}
