@@ -175,11 +175,8 @@
                 <div id="results-card" class="hidden tg-card bg-white p-5 rounded-2xl border shadow-sm space-y-4">
                     <div class="flex items-center justify-between border-b pb-3">
                         <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-clipboard-check text-green-600"></i> Результаты анализа
+                            <i class="fa-solid fa-clipboard-check text-green-600"></i> Результаты анализа Gemini AI
                         </h2>
-                        <span id="risk-badge" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
-                            Средний риск
-                        </span>
                     </div>
                     <div id="analysis-output" class="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
                         <!-- Dynamic Results Output -->
@@ -384,28 +381,57 @@
             });
         });
 
-        function startAnalysis() {
+        async function startAnalysis() {
             if (!selectedFile && !contractText.value.trim()) {
                 alert('Пожалуйста, загрузите файл или вставьте текст договора.');
                 return;
             }
 
-            analyzeBtn.disabled = true;
-            analyzeBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Анализируем...</span>`;
-            
-            if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            const docType = document.querySelector('#doc-type-group .chip-btn.active')?.dataset.value || 'Общий';
+            const jurisdiction = document.querySelector('#jurisdiction-group .chip-btn.active')?.dataset.value || 'Россия (РФ)';
 
-            setTimeout(() => {
+            analyzeBtn.disabled = true;
+            analyzeBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Анализируем через Gemini AI...</span>`;
+
+            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+
+            const formData = new FormData();
+            formData.append('doc_type', docType);
+            formData.append('jurisdiction', jurisdiction);
+
+            if (selectedFile) {
+                formData.append('file', selectedFile);
+            } else {
+                formData.append('text', contractText.value.trim());
+            }
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.result) {
+                    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                    
+                    const resultsCard = document.getElementById('results-card');
+                    const output = document.getElementById('analysis-output');
+                    
+                    output.textContent = data.result;
+                    resultsCard.classList.remove('hidden');
+                    resultsCard.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    alert('Ошибка анализа: ' + (data.detail || 'Не удалось получить ответ от нейросети.'));
+                }
+            } catch (err) {
+                console.error('Analysis error:', err);
+                alert('Ошибка сети при отправке на анализ.');
+            } finally {
                 analyzeBtn.disabled = false;
                 analyzeBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> <span>Анализировать</span>`;
-                
-                const resultsCard = document.getElementById('results-card');
-                const output = document.getElementById('analysis-output');
-                
-                output.textContent = "1. Высокий риск: Отсутствует чёткое определение сроков оплаты.\n2. Средний риск: Неограниченная неустойка за просрочку сдачи работ.\n3. Рекомендация: Добавить пункт о форс-мажорных обстоятельствах.";
-                resultsCard.classList.remove('hidden');
-                resultsCard.scrollIntoView({ behavior: 'smooth' });
-            }, 1500);
+            }
         }
 
         function resetForm() {
