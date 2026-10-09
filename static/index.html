@@ -30,7 +30,6 @@
             border-color: var(--tg-theme-hint-color, var(--border-color));
         }
 
-        /* Solid Dropzone Styling */
         .dropzone-solid {
             border: 1px solid #e2e8f0;
             transition: all 0.2s ease-in-out;
@@ -157,7 +156,7 @@
                             class="w-full p-3.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all resize-y"></textarea>
                     </div>
 
-                    <!-- Action Buttons inside the Card -->
+                    <!-- Action Buttons -->
                     <div class="flex flex-col sm:flex-row gap-3 pt-2">
                         <button id="analyze-btn" onclick="startAnalysis()" class="flex-1 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-3.5 px-6 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-base">
                             <i class="fa-solid fa-wand-magic-sparkles"></i>
@@ -200,7 +199,7 @@
                     <!-- Type of Feedback -->
                     <div>
                         <label class="block text-xs font-medium text-slate-500 mb-1.5">Тип обращения:</label>
-                        <div class="grid grid-cols-2 gap-2">
+                        <div class="grid grid-cols-2 gap-2" id="fb-type-group">
                             <button type="button" class="fb-type-btn active text-xs font-medium py-2 rounded-lg border bg-blue-600 text-white border-blue-600 text-center">Оценка анализа</button>
                             <button type="button" class="fb-type-btn text-xs font-medium py-2 rounded-lg border bg-slate-50 text-slate-600 border-slate-200 text-center">Баг / Ошибка</button>
                         </div>
@@ -219,22 +218,22 @@
                     </div>
 
                     <!-- Helpful / Remarks Buttons -->
-                    <div class="grid grid-cols-2 gap-2">
-                        <button type="button" class="text-xs py-2 px-3 border rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium flex items-center justify-center gap-1">
+                    <div class="grid grid-cols-2 gap-2" id="sentiment-group">
+                        <button type="button" class="sentiment-btn text-xs py-2 px-3 border rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium flex items-center justify-center gap-1" data-value="Полезно">
                             <i class="fa-regular fa-thumbs-up text-green-600"></i> Полезно
                         </button>
-                        <button type="button" class="text-xs py-2 px-3 border rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium flex items-center justify-center gap-1">
+                        <button type="button" class="sentiment-btn text-xs py-2 px-3 border rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium flex items-center justify-center gap-1" data-value="Замечания">
                             <i class="fa-regular fa-thumbs-down text-amber-600"></i> Замечания
                         </button>
                     </div>
 
                     <!-- Feedback Text -->
                     <div>
-                        <textarea rows="3" placeholder="Ваш отзыв или описание проблемы..." class="w-full p-3 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                        <textarea id="feedback-text" rows="3" placeholder="Ваш отзыв или описание проблемы..." class="w-full p-3 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
                     </div>
 
                     <!-- Send Feedback Button -->
-                    <button type="button" onclick="sendFeedback()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl transition-all text-xs flex items-center justify-center gap-1.5 shadow-sm">
+                    <button type="button" id="send-fb-btn" onclick="sendFeedback()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl transition-all text-xs flex items-center justify-center gap-1.5 shadow-sm">
                         <i class="fa-regular fa-paper-plane"></i>
                         <span>Отправить отзыв</span>
                     </button>
@@ -246,14 +245,12 @@
 
     <!-- JavaScript logic -->
     <script>
-        // Init Telegram WebApp API
         const tg = window.Telegram?.WebApp;
         if (tg) {
             tg.ready();
             tg.expand();
         }
 
-        // DOM elements
         const dropzone = document.getElementById('dropzone');
         const fileInput = document.getElementById('file-input');
         const dropzonePrompt = document.getElementById('dropzone-prompt');
@@ -265,16 +262,12 @@
         const analyzeBtn = document.getElementById('analyze-btn');
 
         let selectedFile = null;
+        let selectedRating = 0;
+        let selectedSentiment = '';
 
-        // Setup Dropzone Drag & Drop
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropzone.addEventListener(eventName, preventDefaults, false);
+            dropzone.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false);
         });
-
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
 
         ['dragenter', 'dragover'].forEach(eventName => {
             dropzone.addEventListener(eventName, () => dropzone.classList.add('drag-over'), false);
@@ -285,8 +278,7 @@
         });
 
         dropzone.addEventListener('drop', (e) => {
-            const dt = e.dataTransfer;
-            const files = dt.files;
+            const files = e.dataTransfer.files;
             if (files.length) handleFileSelect(files[0]);
         });
 
@@ -306,7 +298,6 @@
             dropzonePrompt.classList.add('hidden');
             fileSelectedInfo.classList.remove('hidden');
 
-            // Lock Text Area when file is uploaded
             contractText.value = '';
             contractText.disabled = true;
             contractText.classList.add('bg-slate-100', 'opacity-60', 'cursor-not-allowed');
@@ -322,13 +313,11 @@
             fileSelectedInfo.classList.add('hidden');
             dropzonePrompt.classList.remove('hidden');
 
-            // Unlock Text Area
             contractText.disabled = false;
             contractText.classList.remove('bg-slate-100', 'opacity-60', 'cursor-not-allowed');
             textLockNotice.classList.add('hidden');
         });
 
-        // Chip selection helper
         function setupChipGroup(groupId) {
             const container = document.getElementById(groupId);
             if (!container) return;
@@ -349,13 +338,41 @@
         setupChipGroup('doc-type-group');
         setupChipGroup('jurisdiction-group');
 
+        // Feedback Type Buttons Toggle
+        const fbTypeBtns = document.querySelectorAll('.fb-type-btn');
+        fbTypeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                fbTypeBtns.forEach(b => {
+                    b.classList.remove('active', 'bg-blue-600', 'text-white', 'border-blue-600');
+                    b.classList.add('bg-slate-50', 'text-slate-600', 'border-slate-200');
+                });
+                btn.classList.add('active', 'bg-blue-600', 'text-white', 'border-blue-600');
+                btn.classList.remove('bg-slate-50', 'text-slate-600', 'border-slate-200');
+            });
+        });
+
+        // Sentiment Buttons Toggle
+        const sentimentBtns = document.querySelectorAll('.sentiment-btn');
+        sentimentBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (btn.classList.contains('border-blue-500')) {
+                    btn.classList.remove('border-blue-500', 'bg-blue-50');
+                    selectedSentiment = '';
+                } else {
+                    sentimentBtns.forEach(b => b.classList.remove('border-blue-500', 'bg-blue-50'));
+                    btn.classList.add('border-blue-500', 'bg-blue-50');
+                    selectedSentiment = btn.dataset.value;
+                }
+            });
+        });
+
         // Star Rating logic
         const stars = document.querySelectorAll('#star-rating i');
         stars.forEach(star => {
             star.addEventListener('click', () => {
-                const rating = parseInt(star.getAttribute('data-rating'));
+                selectedRating = parseInt(star.getAttribute('data-rating'));
                 stars.forEach((s, idx) => {
-                    if (idx < rating) {
+                    if (idx < selectedRating) {
                         s.classList.add('text-amber-400');
                         s.classList.remove('text-slate-300');
                     } else {
@@ -367,7 +384,6 @@
             });
         });
 
-        // Trigger Analysis State
         function startAnalysis() {
             if (!selectedFile && !contractText.value.trim()) {
                 alert('Пожалуйста, загрузите файл или вставьте текст договора.');
@@ -379,7 +395,6 @@
             
             if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
 
-            // Simulated Backend Response Call
             setTimeout(() => {
                 analyzeBtn.disabled = false;
                 analyzeBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> <span>Анализировать</span>`;
@@ -399,8 +414,56 @@
             document.getElementById('results-card').classList.add('hidden');
         }
 
-        function sendFeedback() {
-            alert('Спасибо за ваш отзыв!');
+        async function sendFeedback() {
+            const activeTypeBtn = document.querySelector('.fb-type-btn.active');
+            const feedbackType = activeTypeBtn ? activeTypeBtn.textContent.trim() : 'Оценка анализа';
+            const feedbackText = document.getElementById('feedback-text').value.trim();
+            const docType = document.querySelector('#doc-type-group .chip-btn.active')?.dataset.value || 'Общий';
+            const jurisdiction = document.querySelector('#jurisdiction-group .chip-btn.active')?.dataset.value || 'Россия (РФ)';
+
+            if (selectedRating === 0 && !feedbackText) {
+                alert('Пожалуйста, поставьте оценку или напишите текст отзыва.');
+                return;
+            }
+
+            const sendBtn = document.getElementById('send-fb-btn');
+            const originalHTML = sendBtn.innerHTML;
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Отправка...</span>`;
+
+            try {
+                const response = await fetch('/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: feedbackType,
+                        rating: selectedRating,
+                        sentiment: selectedSentiment,
+                        feedback: feedbackText,
+                        doc_type: docType,
+                        jurisdiction: jurisdiction
+                    })
+                });
+
+                if (response.ok) {
+                    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                    alert('Спасибо! Ваш отзыв успешно отправлен.');
+                    
+                    document.getElementById('feedback-text').value = '';
+                    selectedRating = 0;
+                    selectedSentiment = '';
+                    stars.forEach(s => { s.classList.remove('text-amber-400'); s.classList.add('text-slate-300'); });
+                    sentimentBtns.forEach(b => b.classList.remove('border-blue-500', 'bg-blue-50'));
+                } else {
+                    alert('Не удалось отправить отзыв. Попробуйте позже.');
+                }
+            } catch (err) {
+                console.error('Feedback error:', err);
+                alert('Ошибка сети при отправке отзыва.');
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = originalHTML;
+            }
         }
     </script>
 </body>
