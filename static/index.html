@@ -30,21 +30,24 @@
             border-color: #cbd5e1;
         }
 
-        /* Абсолютно одинаковый стиль для обоих блоков ввода */
-        .uniform-input-box {
+        /* Абсолютно идентичный класс для обоих блоков ввода, чтобы они были один в один */
+        .identical-input-box {
             border: 1px solid #cbd5e1;
             background-color: #ffffff;
             border-radius: 0.75rem;
-            padding: 1rem 1.125rem;
+            padding: 0.875rem 1rem;
             font-size: 0.875rem;
             font-weight: 500;
             color: #334155;
             width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 0.5rem;
             transition: all 0.2s ease-in-out;
         }
 
-        .uniform-input-box:focus {
-            outline: none;
+        .identical-input-box:focus-within {
             border-color: #2563eb;
             box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
         }
@@ -113,13 +116,13 @@
                         </div>
                     </div>
 
-                    <!-- Input Area: Strict identical font, size, weight and stacked layout -->
+                    <!-- Input Area: Two identical boxes stacked strictly one under another -->
                     <div class="space-y-3">
                         <!-- Dropzone / File selection -->
                         <div>
-                            <div id="dropzone" class="uniform-input-box text-center cursor-pointer hover:bg-slate-50 flex items-center justify-center">
+                            <div id="dropzone" class="identical-input-box cursor-pointer hover:bg-slate-50 justify-center">
                                 <input type="file" id="file-input" accept=".pdf,.docx,.odt,.txt" class="hidden">
-                                <div id="dropzone-prompt" class="flex items-center justify-center gap-2 w-full">
+                                <div id="dropzone-prompt" class="flex items-center justify-center gap-2">
                                     <i class="fa-solid fa-cloud-arrow-up text-blue-600 text-base"></i>
                                     <span>Перетащите файл</span>
                                 </div>
@@ -136,11 +139,14 @@
                             </div>
                         </div>
 
-                        <!-- Textarea -->
+                        <!-- Text input box with identical styling and icon -->
                         <div>
-                            <textarea id="contract-text" rows="4" 
-                                placeholder="Вставить текст" 
-                                class="uniform-input-box resize-y placeholder:text-slate-400 placeholder:font-medium"></textarea>
+                            <div class="identical-input-box relative">
+                                <i class="fa-solid fa-align-left text-blue-600 text-base"></i>
+                                <input type="text" id="contract-text" 
+                                    placeholder="Вставить текст" 
+                                    class="w-full bg-transparent border-none focus:outline-none font-medium text-slate-700 placeholder:text-slate-400 placeholder:font-medium">
+                            </div>
                         </div>
                     </div>
 
