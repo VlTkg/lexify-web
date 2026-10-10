@@ -31,7 +31,7 @@
         }
 
         .dropzone-solid {
-            border: 1px solid #e2e8f0;
+            border: 1px dashed #cbd5e1;
             transition: all 0.2s ease-in-out;
         }
 
@@ -53,194 +53,182 @@
 </head>
 <body class="bg-slate-50 min-h-screen pb-12">
 
-    <div class="max-w-6xl mx-auto px-4 py-4 md:py-6">
+    <div class="max-w-7xl mx-auto px-4 py-4 md:py-6">
         
         <!-- Header -->
-        <header class="mb-6">
-            <div class="flex items-center gap-2">
-                <span class="bg-blue-600 text-white p-2 rounded-lg font-bold text-lg leading-none">Lx</span>
-                <h1 class="text-2xl font-bold tracking-tight">Lexify</h1>
-                <span class="text-xs bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full font-medium ml-1">Express AI</span>
+        <header class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-200 pb-4">
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="bg-blue-600 text-white p-2 rounded-lg font-bold text-lg leading-none">Lx</span>
+                    <h1 class="text-2xl font-bold tracking-tight text-slate-900">Lexify</h1>
+                    <span class="text-xs bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full font-medium ml-1">Express AI</span>
+                </div>
+                <p class="text-sm text-slate-500 mt-1">Сервис автоматической проверки договоров для фрилансеров и специалистов</p>
             </div>
-            <p class="text-sm text-slate-500 mt-1">Сервис автоматической проверки договоров для фрилансеров и специалистов.</p>
         </header>
 
         <!-- Main Grid Layout -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
 
-            <!-- LEFT COLUMN: Analysis Form -->
-            <main class="lg:col-span-8 space-y-5">
+            <!-- LEFT COLUMN: Instructions, Form & Feedback -->
+            <main class="lg:col-span-7 space-y-5 flex flex-col justify-between">
 
-                <!-- Steps indicator -->
-                <div class="tg-card bg-white p-3.5 rounded-2xl border shadow-sm flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600">
-                    <div class="flex items-center gap-2">
-                        <span class="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs">1</span>
-                        <span>Загрузите файл или текст</span>
+                <div class="space-y-5">
+                    
+                    <!-- How it works -->
+                    <div class="tg-card bg-white p-4 rounded-2xl border shadow-sm">
+                        <h2 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Как это работает:</h2>
+                        <ol class="text-xs text-slate-600 space-y-1 pl-4 list-decimal leading-relaxed">
+                            <li>Выберите тип договора и юрисдикцию</li>
+                            <li>Загрузите файл или вставьте текст</li>
+                            <li>Нажмите кнопку «Анализировать»</li>
+                        </ol>
                     </div>
-                    <i class="fa-solid fa-angle-right text-slate-300 hidden sm:inline"></i>
-                    <div class="flex items-center gap-2">
-                        <span class="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs">2</span>
-                        <span>Нажмите «Анализировать»</span>
-                    </div>
-                    <i class="fa-solid fa-angle-right text-slate-300 hidden sm:inline"></i>
-                    <div class="flex items-center gap-2">
-                        <span class="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs">3</span>
-                        <span>Получите риски</span>
+
+                    <!-- Main Form Card -->
+                    <div class="tg-card bg-white p-5 rounded-2xl border shadow-sm space-y-5">
+                        
+                        <!-- Contract Type -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Тип договора:</label>
+                            <div class="flex flex-wrap gap-2" id="doc-type-group">
+                                <button type="button" class="chip-btn active px-3.5 py-1.5 rounded-xl border text-sm font-medium" data-value="Общий">Общий</button>
+                                <button type="button" class="chip-btn px-3.5 py-1.5 rounded-xl border text-sm font-medium bg-slate-50 text-slate-700" data-value="Трудовой">Трудовой</button>
+                                <button type="button" class="chip-btn px-3.5 py-1.5 rounded-xl border text-sm font-medium bg-slate-50 text-slate-700" data-value="ГПХ / Услуги">ГПХ / Услуги</button>
+                                <button type="button" class="chip-btn px-3.5 py-1.5 rounded-xl border text-sm font-medium bg-slate-50 text-slate-700" data-value="Аренда">Аренда</button>
+                                <button type="button" class="chip-btn px-3.5 py-1.5 rounded-xl border text-sm font-medium bg-slate-50 text-slate-700" data-value="Поставка">Поставка</button>
+                            </div>
+                        </div>
+
+                        <!-- Jurisdiction -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Юрисдикция:</label>
+                            <div class="flex flex-wrap gap-2" id="jurisdiction-group">
+                                <button type="button" class="chip-btn active px-3.5 py-1.5 rounded-xl border text-sm font-medium" data-value="Россия (РФ)">Россия (РФ)</button>
+                                <button type="button" class="chip-btn px-3.5 py-1.5 rounded-xl border text-sm font-medium bg-slate-50 text-slate-700" data-value="Казахстан (РК)">Казахстан (РК)</button>
+                                <button type="button" class="chip-btn px-3.5 py-1.5 rounded-xl border text-sm font-medium bg-slate-50 text-slate-700" data-value="Беларусь (РБ)">Беларусь (РБ)</button>
+                            </div>
+                        </div>
+
+                        <!-- Inputs Container (Identical typography and alignment) -->
+                        <div class="space-y-3">
+                            
+                            <!-- Dropzone / File selection -->
+                            <div>
+                                <div id="dropzone" class="dropzone-solid bg-slate-50 hover:bg-slate-100 rounded-xl p-3.5 text-center cursor-pointer transition-all">
+                                    <input type="file" id="file-input" accept=".pdf,.docx,.odt,.txt" class="hidden">
+                                    <div id="dropzone-prompt" class="flex items-center justify-center gap-2 text-sm font-semibold text-slate-700">
+                                        <i class="fa-solid fa-cloud-arrow-up text-blue-600"></i>
+                                        <span>Перетащите файл</span>
+                                    </div>
+
+                                    <div id="file-selected-info" class="hidden flex items-center justify-between bg-white p-2 rounded-lg border border-slate-200">
+                                        <div class="flex items-center gap-2 overflow-hidden">
+                                            <i class="fa-solid fa-file-contract text-blue-600 text-sm"></i>
+                                            <span id="file-name" class="text-xs font-medium text-slate-800 truncate">document.docx</span>
+                                        </div>
+                                        <button type="button" id="remove-file-btn" class="text-slate-400 hover:text-red-500 p-1">
+                                            <i class="fa-solid fa-xmark text-xs"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Textarea for manual text input -->
+                            <div>
+                                <textarea id="contract-text" rows="5" 
+                                    placeholder="Вставить текст" 
+                                    class="w-full p-3.5 text-sm font-semibold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all resize-y placeholder:font-semibold placeholder:text-slate-700"></textarea>
+                            </div>
+
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex flex-col sm:flex-row gap-3 pt-1">
+                            <button id="analyze-btn" onclick="startAnalysis()" class="flex-1 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-3.5 px-6 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-base">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                <span>Анализировать</span>
+                            </button>
+
+                            <button id="reset-btn" onclick="resetForm()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-3.5 px-5 rounded-xl transition-all flex items-center justify-center gap-2 text-sm">
+                                <i class="fa-solid fa-rotate-left"></i>
+                                <span>Новый анализ</span>
+                            </button>
+                        </div>
+
                     </div>
                 </div>
 
-                <!-- Form Card -->
-                <div class="tg-card bg-white p-5 rounded-2xl border shadow-sm space-y-5">
-                    
-                    <!-- Contract Type -->
+                <!-- Feedback Panel (Positioned at bottom of left column) -->
+                <div class="tg-card bg-white p-5 rounded-2xl border shadow-sm space-y-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Тип договора / Занятость:</label>
-                        <div class="flex flex-wrap gap-2" id="doc-type-group">
-                            <button type="button" class="chip-btn active px-3.5 py-1.5 rounded-xl border text-sm font-medium" data-value="Общий">Общий</button>
-                            <button type="button" class="chip-btn px-3.5 py-1.5 rounded-xl border text-sm font-medium bg-slate-50 text-slate-700" data-value="Трудовой">Трудовой</button>
-                            <button type="button" class="chip-btn px-3.5 py-1.5 rounded-xl border text-sm font-medium bg-slate-50 text-slate-700" data-value="ГПХ / Услуги">ГПХ / Услуги</button>
-                            <button type="button" class="chip-btn px-3.5 py-1.5 rounded-xl border text-sm font-medium bg-slate-50 text-slate-700" data-value="Аренда">Аренда</button>
-                            <button type="button" class="chip-btn px-3.5 py-1.5 rounded-xl border text-sm font-medium bg-slate-50 text-slate-700" data-value="Поставка">Поставка</button>
-                        </div>
+                        <h2 class="font-bold text-slate-800 text-sm">Обратная связь</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Помогите нам улучшить сервис проверки документов.</p>
                     </div>
 
-                    <!-- Jurisdiction -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Юрисдикция:</label>
-                        <div class="flex flex-wrap gap-2" id="jurisdiction-group">
-                            <button type="button" class="chip-btn active px-3.5 py-1.5 rounded-xl border text-sm font-medium" data-value="Россия (РФ)">Россия (РФ)</button>
-                            <button type="button" class="chip-btn px-3.5 py-1.5 rounded-xl border text-sm font-medium bg-slate-50 text-slate-700" data-value="Казахстан (РК)">Казахстан (РК)</button>
-                            <button type="button" class="chip-btn px-3.5 py-1.5 rounded-xl border text-sm font-medium bg-slate-50 text-slate-700" data-value="Беларусь (РБ)">Беларусь (РБ)</button>
-                        </div>
-                    </div>
-
-                    <!-- File Dropzone -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                            <i class="fa-regular fa-folder-open mr-1"></i> Загрузить файл (PDF, DOCX, ODT, TXT):
-                        </label>
-                        <div id="dropzone" class="dropzone-solid bg-slate-50 hover:bg-slate-100 rounded-xl p-5 text-center cursor-pointer relative transition-all">
-                            <input type="file" id="file-input" accept=".pdf,.docx,.odt,.txt" class="hidden">
-                            <div id="dropzone-prompt" class="space-y-1.5">
-                                <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-1">
-                                    <i class="fa-solid fa-cloud-arrow-up text-lg"></i>
-                                </div>
-                                <p class="text-sm font-medium text-slate-700">Нажмите для выбора файла или перетащите его сюда</p>
-                                <p class="text-xs text-slate-400">Поддерживаются: .pdf, .docx, .odt, .txt (до 10 МБ)</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1">Тип обращения:</label>
+                            <div class="grid grid-cols-2 gap-1.5" id="fb-type-group">
+                                <button type="button" class="fb-type-btn active text-xs font-medium py-1.5 rounded-lg border bg-blue-600 text-white border-blue-600 text-center">Оценка</button>
+                                <button type="button" class="fb-type-btn text-xs font-medium py-1.5 rounded-lg border bg-slate-50 text-slate-600 border-slate-200 text-center">Ошибка</button>
                             </div>
+                        </div>
 
-                            <div id="file-selected-info" class="hidden flex items-center justify-between bg-white p-3 rounded-lg border border-slate-200">
-                                <div class="flex items-center gap-2 overflow-hidden">
-                                    <i class="fa-solid fa-file-contract text-blue-600 text-lg"></i>
-                                    <span id="file-name" class="text-sm font-medium text-slate-800 truncate">document.docx</span>
-                                </div>
-                                <button type="button" id="remove-file-btn" class="text-slate-400 hover:text-red-500 p-1">
-                                    <i class="fa-solid fa-xmark text-base"></i>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1">Оценка сервиса:</label>
+                            <div class="flex items-center gap-1 text-slate-300 text-lg cursor-pointer" id="star-rating">
+                                <i class="fa-solid fa-star hover:text-amber-400 transition-colors" data-rating="1"></i>
+                                <i class="fa-solid fa-star hover:text-amber-400 transition-colors" data-rating="2"></i>
+                                <i class="fa-solid fa-star hover:text-amber-400 transition-colors" data-rating="3"></i>
+                                <i class="fa-solid fa-star hover:text-amber-400 transition-colors" data-rating="4"></i>
+                                <i class="fa-solid fa-star hover:text-amber-400 transition-colors" data-rating="5"></i>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1">Мнение:</label>
+                            <div class="grid grid-cols-2 gap-1.5" id="sentiment-group">
+                                <button type="button" class="sentiment-btn text-xs py-1.5 px-2 border rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium flex items-center justify-center gap-1" data-value="Полезно">
+                                    <i class="fa-regular fa-thumbs-up text-green-600"></i> Полезно
+                                </button>
+                                <button type="button" class="sentiment-btn text-xs py-1.5 px-2 border rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium flex items-center justify-center gap-1" data-value="Замечания">
+                                    <i class="fa-regular fa-thumbs-down text-amber-600"></i> Замечания
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Text Area Input -->
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                                <i class="fa-regular fa-pen-to-square mr-1"></i> Или вставьте текст договора:
-                            </label>
-                            <span id="text-lock-notice" class="text-xs text-amber-600 hidden">
-                                <i class="fa-solid fa-lock text-xs mr-0.5"></i> Выбран файл
-                            </span>
-                        </div>
-                        <textarea id="contract-text" rows="5" 
-                            placeholder="Вставьте текст договора здесь..." 
-                            class="w-full p-3.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all resize-y"></textarea>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="flex flex-col sm:flex-row gap-3 pt-2">
-                        <button id="analyze-btn" onclick="startAnalysis()" class="flex-1 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-3.5 px-6 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-base">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i>
-                            <span>Анализировать</span>
+                    <div class="space-y-2 pt-1">
+                        <textarea id="feedback-text" rows="2" placeholder="Ваш отзыв или описание проблемы..." class="w-full p-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                        
+                        <button type="button" id="send-fb-btn" onclick="sendFeedback()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-5 rounded-xl transition-all text-xs flex items-center justify-center gap-1.5 shadow-sm">
+                            <i class="fa-regular fa-paper-plane"></i>
+                            <span>Отправить отзыв</span>
                         </button>
-
-                        <button id="reset-btn" onclick="resetForm()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-3.5 px-5 rounded-xl transition-all flex items-center justify-center gap-2 text-sm">
-                            <i class="fa-solid fa-rotate-left"></i>
-                            <span>Новый анализ</span>
-                        </button>
-                    </div>
-
-                </div>
-
-                <!-- Analysis Results Section -->
-                <div id="results-card" class="hidden tg-card bg-white p-5 rounded-2xl border shadow-sm space-y-4">
-                    <div class="flex items-center justify-between border-b pb-3">
-                        <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-clipboard-check text-green-600"></i> Результаты анализа Gemini AI
-                        </h2>
-                    </div>
-                    <div id="analysis-output" class="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
-                        <!-- Dynamic Results Output -->
                     </div>
                 </div>
 
             </main>
 
-            <!-- RIGHT COLUMN / BOTTOM ON MOBILE: Feedback Panel -->
-            <aside class="lg:col-span-4 space-y-5">
-                <div class="tg-card bg-white p-5 rounded-2xl border shadow-sm space-y-4 sticky top-6">
-                    <div>
-                        <h2 class="font-bold text-slate-800 text-base">Обратная связь</h2>
-                        <p class="text-xs text-slate-400 mt-0.5">Помогите нам улучшить сервис проверки документов.</p>
+            <!-- RIGHT COLUMN: Analysis Results -->
+            <aside class="lg:col-span-5 flex flex-col">
+                <div id="results-card" class="tg-card bg-white p-5 rounded-2xl border shadow-sm space-y-4 flex-1 flex flex-col min-h-[500px]">
+                    <div class="flex items-center justify-between border-b pb-3">
+                        <h2 class="font-bold text-base text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-clipboard-check text-green-600"></i> Результаты анализа
+                        </h2>
                     </div>
-
-                    <!-- Type of Feedback -->
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-1.5">Тип обращения:</label>
-                        <div class="grid grid-cols-2 gap-2" id="fb-type-group">
-                            <button type="button" class="fb-type-btn active text-xs font-medium py-2 rounded-lg border bg-blue-600 text-white border-blue-600 text-center">Оценка анализа</button>
-                            <button type="button" class="fb-type-btn text-xs font-medium py-2 rounded-lg border bg-slate-50 text-slate-600 border-slate-200 text-center">Баг / Ошибка</button>
-                        </div>
+                    <div id="analysis-output" class="text-sm text-slate-700 leading-relaxed whitespace-pre-line flex-1 flex items-center justify-center text-slate-400 text-center">
+                        Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».
                     </div>
-
-                    <!-- Star Rating -->
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-1.5">Оценка сервиса:</label>
-                        <div class="flex items-center gap-1 text-slate-300 text-xl cursor-pointer" id="star-rating">
-                            <i class="fa-solid fa-star hover:text-amber-400 transition-colors" data-rating="1"></i>
-                            <i class="fa-solid fa-star hover:text-amber-400 transition-colors" data-rating="2"></i>
-                            <i class="fa-solid fa-star hover:text-amber-400 transition-colors" data-rating="3"></i>
-                            <i class="fa-solid fa-star hover:text-amber-400 transition-colors" data-rating="4"></i>
-                            <i class="fa-solid fa-star hover:text-amber-400 transition-colors" data-rating="5"></i>
-                        </div>
-                    </div>
-
-                    <!-- Helpful / Remarks Buttons -->
-                    <div class="grid grid-cols-2 gap-2" id="sentiment-group">
-                        <button type="button" class="sentiment-btn text-xs py-2 px-3 border rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium flex items-center justify-center gap-1" data-value="Полезно">
-                            <i class="fa-regular fa-thumbs-up text-green-600"></i> Полезно
-                        </button>
-                        <button type="button" class="sentiment-btn text-xs py-2 px-3 border rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium flex items-center justify-center gap-1" data-value="Замечания">
-                            <i class="fa-regular fa-thumbs-down text-amber-600"></i> Замечания
-                        </button>
-                    </div>
-
-                    <!-- Feedback Text -->
-                    <div>
-                        <textarea id="feedback-text" rows="3" placeholder="Ваш отзыв или описание проблемы..." class="w-full p-3 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
-                    </div>
-
-                    <!-- Send Feedback Button -->
-                    <button type="button" id="send-fb-btn" onclick="sendFeedback()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl transition-all text-xs flex items-center justify-center gap-1.5 shadow-sm">
-                        <i class="fa-regular fa-paper-plane"></i>
-                        <span>Отправить отзыв</span>
-                    </button>
                 </div>
             </aside>
 
         </div>
     </div>
 
-    <!-- JavaScript logic -->
+    <!-- Application Logic -->
     <script>
         const tg = window.Telegram?.WebApp;
         if (tg) {
@@ -255,7 +243,6 @@
         const fileName = document.getElementById('file-name');
         const removeFileBtn = document.getElementById('remove-file-btn');
         const contractText = document.getElementById('contract-text');
-        const textLockNotice = document.getElementById('text-lock-notice');
         const analyzeBtn = document.getElementById('analyze-btn');
 
         let selectedFile = null;
@@ -295,11 +282,6 @@
             dropzonePrompt.classList.add('hidden');
             fileSelectedInfo.classList.remove('hidden');
 
-            contractText.value = '';
-            contractText.disabled = true;
-            contractText.classList.add('bg-slate-100', 'opacity-60', 'cursor-not-allowed');
-            textLockNotice.classList.remove('hidden');
-
             if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
         }
 
@@ -309,10 +291,6 @@
             fileInput.value = '';
             fileSelectedInfo.classList.add('hidden');
             dropzonePrompt.classList.remove('hidden');
-
-            contractText.disabled = false;
-            contractText.classList.remove('bg-slate-100', 'opacity-60', 'cursor-not-allowed');
-            textLockNotice.classList.add('hidden');
         });
 
         function setupChipGroup(groupId) {
@@ -416,12 +394,10 @@
                 if (response.ok && data.result) {
                     if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
                     
-                    const resultsCard = document.getElementById('results-card');
                     const output = document.getElementById('analysis-output');
-                    
+                    output.classList.remove('flex', 'items-center', 'justify-center', 'text-slate-400', 'text-center');
                     output.textContent = data.result;
-                    resultsCard.classList.remove('hidden');
-                    resultsCard.scrollIntoView({ behavior: 'smooth' });
+                    document.getElementById('results-card').scrollIntoView({ behavior: 'smooth' });
                 } else {
                     alert('Ошибка анализа: ' + (data.detail || 'Не удалось получить ответ от нейросети.'));
                 }
@@ -437,12 +413,14 @@
         function resetForm() {
             if (removeFileBtn) removeFileBtn.click();
             contractText.value = '';
-            document.getElementById('results-card').classList.add('hidden');
+            const output = document.getElementById('analysis-output');
+            output.classList.add('flex', 'items-center', 'justify-center', 'text-slate-400', 'text-center');
+            output.textContent = 'Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».';
         }
 
         async function sendFeedback() {
             const activeTypeBtn = document.querySelector('.fb-type-btn.active');
-            const feedbackType = activeTypeBtn ? activeTypeBtn.textContent.trim() : 'Оценка анализа';
+            const feedbackType = activeTypeBtn ? activeTypeBtn.textContent.trim() : 'Оценка';
             const feedbackText = document.getElementById('feedback-text').value.trim();
             const docType = document.querySelector('#doc-type-group .chip-btn.active')?.dataset.value || 'Общий';
             const jurisdiction = document.querySelector('#jurisdiction-group .chip-btn.active')?.dataset.value || 'Россия (РФ)';
