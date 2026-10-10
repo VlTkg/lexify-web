@@ -30,18 +30,28 @@
             border-color: #cbd5e1;
         }
 
-        .input-box-style {
+        /* Абсолютно одинаковый стиль для обоих блоков ввода */
+        .uniform-input-box {
             border: 1px solid #cbd5e1;
             background-color: #ffffff;
-            font-size: 14px;
+            border-radius: 0.75rem;
+            padding: 1rem 1.125rem;
+            font-size: 0.875rem;
             font-weight: 500;
             color: #334155;
+            width: 100%;
             transition: all 0.2s ease-in-out;
+        }
+
+        .uniform-input-box:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
         }
 
         .chip-btn {
             transition: all 0.15s ease;
-            font-size: 14px;
+            font-size: 0.875rem;
             font-weight: 500;
         }
 
@@ -58,7 +68,7 @@
         
         <!-- Header -->
         <header class="mb-2">
-            <h1 class="text-3xl font-bold tracking-tight text-slate-900">Lexify</h1>
+            <h1 class="text-3xl font-bold tracking-tight text-white">Lexify</h1>
             <p class="text-sm text-slate-200 mt-0.5">Сервис автоматической проверки договоров для фрилансеров и специалистов</p>
         </header>
 
@@ -103,18 +113,18 @@
                         </div>
                     </div>
 
-                    <!-- Input Area (Identical font, weight, and stacked layout) -->
+                    <!-- Input Area: Strict identical font, size, weight and stacked layout -->
                     <div class="space-y-3">
                         <!-- Dropzone / File selection -->
                         <div>
-                            <div id="dropzone" class="input-box-style rounded-xl p-3.5 text-center cursor-pointer hover:bg-slate-50">
+                            <div id="dropzone" class="uniform-input-box text-center cursor-pointer hover:bg-slate-50 flex items-center justify-center">
                                 <input type="file" id="file-input" accept=".pdf,.docx,.odt,.txt" class="hidden">
-                                <div id="dropzone-prompt" class="flex items-center justify-center gap-2">
+                                <div id="dropzone-prompt" class="flex items-center justify-center gap-2 w-full">
                                     <i class="fa-solid fa-cloud-arrow-up text-blue-600 text-base"></i>
                                     <span>Перетащите файл</span>
                                 </div>
 
-                                <div id="file-selected-info" class="hidden flex items-center justify-between bg-white p-1">
+                                <div id="file-selected-info" class="hidden flex items-center justify-between bg-white w-full">
                                     <div class="flex items-center gap-2 overflow-hidden">
                                         <i class="fa-solid fa-file-contract text-blue-600"></i>
                                         <span id="file-name" class="truncate">document.docx</span>
@@ -130,7 +140,7 @@
                         <div>
                             <textarea id="contract-text" rows="4" 
                                 placeholder="Вставить текст" 
-                                class="w-full input-box-style rounded-xl p-3.5 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y placeholder:text-slate-500 placeholder:font-medium"></textarea>
+                                class="uniform-input-box resize-y placeholder:text-slate-400 placeholder:font-medium"></textarea>
                         </div>
                     </div>
 
@@ -194,7 +204,7 @@
             <aside class="lg:col-span-5">
                 <div id="results-card" class="tg-card bg-white p-6 rounded-2xl border shadow-sm space-y-4 min-h-[600px] flex flex-col">
                     <div class="border-b border-slate-100 pb-3">
-                        <h2 class="font-bold text-base text-slate-900">**Результаты анализа**</h2>
+                        <h2 class="font-bold text-base text-slate-900">Результаты анализа</h2>
                     </div>
                     <div id="analysis-output" class="text-xs text-slate-700 leading-relaxed whitespace-pre-line flex-1 flex items-center justify-center text-center">
                         Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».
