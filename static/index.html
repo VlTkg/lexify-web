@@ -30,20 +30,18 @@
             border-color: #cbd5e1;
         }
 
-        /* Прозрачный блок для формы без белого фона карточки */
         .transparent-card {
             background-color: transparent !important;
             border: none !important;
             box-shadow: none !important;
         }
 
-        /* Идентичный класс для обоих полей ввода с белым фоном внутри */
         .identical-input-box {
             border: 1px solid #cbd5e1;
             background-color: #ffffff;
             border-radius: 0.75rem;
             padding: 0.65rem 0.875rem;
-            font-size: 0.875rem;
+            font-size: 0.75rem;
             font-weight: 500;
             color: #334155;
             width: 100%;
@@ -82,14 +80,14 @@
             <p class="text-xs text-slate-200">Сервис автоматической проверки договоров для фрилансеров и специалистов</p>
         </header>
 
-        <!-- Main Grid Layout (Left and Right Columns strictly aligned in height) -->
+        <!-- Main Grid Layout -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
 
-            <!-- LEFT COLUMN: Unified container combining blocks 1, 2, and 3 -->
+            <!-- LEFT COLUMN -->
             <main class="lg:col-span-7 flex flex-col justify-between space-y-3">
 
                 <div class="space-y-3">
-                    <!-- Block 1: How it works (без белого фона, компактно) -->
+                    <!-- Block 1: How it works -->
                     <div class="transparent-card p-2.5">
                         <h2 class="text-xs font-bold text-white mb-1">Как это работает</h2>
                         <ol class="text-xs text-slate-100 space-y-0.5 pl-4 list-decimal leading-snug">
@@ -99,7 +97,7 @@
                         </ol>
                     </div>
 
-                    <!-- Block 2: Main Form Card (без белого фона контейнера, компактные отступы) -->
+                    <!-- Block 2: Main Form Card -->
                     <div class="transparent-card p-0 space-y-3">
                         
                         <!-- Contract Type -->
@@ -124,21 +122,22 @@
                             </div>
                         </div>
 
-                        <!-- Input Area: Two identical white-backed blocks stacked strictly one under another -->
+                        <!-- Input Area: Perfectly identical layout and styling for both blocks -->
                         <div class="space-y-2">
                             <!-- Dropzone / File selection -->
                             <div>
                                 <div id="dropzone" class="identical-input-box cursor-pointer hover:bg-slate-50">
                                     <input type="file" id="file-input" accept=".pdf,.docx,.odt,.txt" class="hidden">
-                                    <div id="dropzone-prompt" class="flex items-center justify-center gap-2 w-full">
-                                        <i class="fa-solid fa-circle-plus text-blue-600 text-sm"></i>
-                                        <span class="font-medium text-slate-700 text-xs">Перетащите файл</span>
+                                    
+                                    <div id="dropzone-prompt" class="flex items-center justify-center gap-2 w-full text-xs font-medium text-slate-700">
+                                        <i class="fa-solid fa-circle-plus text-blue-600 text-xs"></i>
+                                        <span>Перетащите файл</span>
                                     </div>
 
                                     <div id="file-selected-info" class="hidden flex items-center justify-between bg-white w-full">
-                                        <div class="flex items-center gap-2 overflow-hidden">
+                                        <div class="flex items-center gap-2 overflow-hidden text-xs font-medium text-slate-700">
                                             <i class="fa-solid fa-file-contract text-blue-600 text-xs"></i>
-                                            <span id="file-name" class="truncate text-xs font-medium">document.docx</span>
+                                            <span id="file-name" class="truncate">document.docx</span>
                                         </div>
                                         <button type="button" id="remove-file-btn" class="text-slate-400 hover:text-red-500 p-1">
                                             <i class="fa-solid fa-xmark text-xs"></i>
@@ -147,10 +146,10 @@
                                 </div>
                             </div>
 
-                            <!-- Text input box with identical styling and exact matching font/weight -->
+                            <!-- Text input box (strictly identical structure, font size, weight and alignment) -->
                             <div>
                                 <div class="identical-input-box relative">
-                                    <i class="fa-solid fa-file-lines text-blue-600 text-sm"></i>
+                                    <i class="fa-solid fa-file-lines text-blue-600 text-xs"></i>
                                     <input type="text" id="contract-text" 
                                         placeholder="Вставьте текст" 
                                         class="w-full bg-transparent border-none focus:outline-none font-medium text-slate-700 text-xs placeholder:text-slate-400 placeholder:font-medium">
@@ -172,7 +171,7 @@
                     </div>
                 </div>
 
-                <!-- Block 3: Feedback Panel (компактный блок) -->
+                <!-- Block 3: Feedback Panel -->
                 <div class="tg-card bg-white p-3.5 rounded-2xl border shadow-sm space-y-2">
                     <div class="flex items-center justify-between">
                         <h2 class="font-bold text-slate-800 text-xs">Обратная связь</h2>
@@ -215,14 +214,17 @@
 
             </main>
 
-            <!-- RIGHT COLUMN (Block 4): Analysis Results -->
+            <!-- RIGHT COLUMN: Analysis Results (Strictly centered content vertically and horizontally) -->
             <aside class="lg:col-span-5 flex flex-col">
-                <div id="results-card" class="tg-card bg-white p-4 rounded-2xl border shadow-sm space-y-3 flex-1 flex flex-col min-h-[420px]">
+                <div id="results-card" class="tg-card bg-white p-4 rounded-2xl border shadow-sm flex-1 flex flex-col min-h-[460px]">
                     <div class="border-b border-slate-100 pb-2">
                         <h2 class="font-bold text-sm text-slate-900">Результаты анализа</h2>
                     </div>
-                    <div id="analysis-output" class="text-xs text-slate-700 leading-relaxed whitespace-pre-line flex-1 flex items-center justify-center text-center">
-                        Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».
+                    <!-- Perfect vertical and horizontal alignment container -->
+                    <div class="flex-1 flex items-center justify-center p-4">
+                        <div id="analysis-output" class="text-xs text-slate-700 leading-relaxed text-center">
+                            Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».
+                        </div>
                     </div>
                 </div>
             </aside>
@@ -359,7 +361,9 @@
 
                 if (response.ok && data.result) {
                     const output = document.getElementById('analysis-output');
-                    output.classList.remove('flex', 'items-center', 'justify-center', 'text-center');
+                    output.parentElement.classList.remove('items-center', 'justify-center', 'p-4');
+                    output.parentElement.classList.add('block', 'p-2');
+                    output.classList.remove('text-center');
                     output.classList.add('text-left');
                     output.textContent = data.result;
                 } else {
@@ -378,7 +382,9 @@
             if (removeFileBtn) removeFileBtn.click();
             contractText.value = '';
             const output = document.getElementById('analysis-output');
-            output.classList.add('flex', 'items-center', 'justify-center', 'text-center');
+            output.parentElement.classList.add('items-center', 'justify-center', 'p-4');
+            output.parentElement.classList.remove('block', 'p-2');
+            output.classList.add('text-center');
             output.classList.remove('text-left');
             output.textContent = 'Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».';
         }
