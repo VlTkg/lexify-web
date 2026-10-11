@@ -107,10 +107,10 @@
                             <label class="block text-xs font-bold text-white mb-1.5">Тип договора</label>
                             <div class="flex flex-wrap gap-1.5" id="doc-type-group">
                                 <button type="button" class="chip-btn active px-3 py-1.5 rounded-xl border border-slate-300" data-value="Общий">Общий</button>
-                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-700" data-value="Трудовой">Трудовой</button>
-                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-700" data-value="ГПХ/Услуги">ГПХ/Услуги</button>
-                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-700" data-value="Аренда">Аренда</button>
-                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-700" data-value="Поставка">Поставка</button>
+                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-300 text-slate-800" data-value="Трудовой">Трудовой</button>
+                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-300 text-slate-800" data-value="ГПХ/Услуги">ГПХ/Услуги</button>
+                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-300 text-slate-800" data-value="Аренда">Аренда</button>
+                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-300 text-slate-800" data-value="Поставка">Поставка</button>
                             </div>
                         </div>
 
@@ -119,8 +119,8 @@
                             <label class="block text-xs font-bold text-white mb-1.5">Юрисдикция</label>
                             <div class="flex flex-wrap gap-1.5" id="jurisdiction-group">
                                 <button type="button" class="chip-btn active px-3 py-1.5 rounded-xl border border-slate-300" data-value="Россия (РФ)">Россия (РФ)</button>
-                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-700" data-value="Казахстан">Казахстан</button>
-                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-700" data-value="Беларусь">Беларусь</button>
+                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-300 text-slate-800" data-value="Казахстан">Казахстан</button>
+                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-300 text-slate-800" data-value="Беларусь">Беларусь</button>
                             </div>
                         </div>
 
@@ -294,10 +294,10 @@
                 btn.addEventListener('click', () => {
                     buttons.forEach(b => {
                         b.classList.remove('active', 'bg-blue-600', 'text-white');
-                        b.classList.add('bg-slate-200', 'text-slate-700');
+                        b.classList.add('bg-slate-300', 'text-slate-800');
                     });
                     btn.classList.add('active', 'bg-blue-600', 'text-white');
-                    btn.classList.remove('bg-slate-200', 'text-slate-700');
+                    btn.classList.remove('bg-slate-300', 'text-slate-800');
                     if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
                 });
             });
