@@ -42,7 +42,7 @@
             border: 1px solid #cbd5e1;
             background-color: #ffffff;
             border-radius: 0.75rem;
-            padding: 0.875rem 1rem;
+            padding: 0.65rem 0.875rem;
             font-size: 0.875rem;
             font-weight: 500;
             color: #334155;
@@ -61,7 +61,7 @@
 
         .chip-btn {
             transition: all 0.15s ease;
-            font-size: 0.875rem;
+            font-size: 0.8rem;
             font-weight: 500;
         }
 
@@ -72,76 +72,76 @@
         }
     </style>
 </head>
-<body class="min-h-screen pb-12 pt-4 px-4 md:px-8">
+<body class="min-h-screen pb-6 pt-2 px-3 md:px-6">
 
-    <div class="max-w-7xl mx-auto space-y-6">
+    <div class="max-w-7xl mx-auto space-y-3">
         
         <!-- Header -->
-        <header class="mb-2">
-            <h1 class="text-3xl font-bold tracking-tight text-white">Lexify</h1>
-            <p class="text-sm text-slate-200 mt-0.5">Сервис автоматической проверки договоров для фрилансеров и специалистов</p>
+        <header class="mb-1">
+            <h1 class="text-2xl font-bold tracking-tight text-white">Lexify</h1>
+            <p class="text-xs text-slate-200">Сервис автоматической проверки договоров для фрилансеров и специалистов</p>
         </header>
 
         <!-- Main Grid Layout (Left and Right Columns strictly aligned in height) -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
 
             <!-- LEFT COLUMN: Unified container combining blocks 1, 2, and 3 -->
-            <main class="lg:col-span-7 flex flex-col justify-between space-y-5">
+            <main class="lg:col-span-7 flex flex-col justify-between space-y-3">
 
-                <div class="space-y-5">
-                    <!-- Block 1: How it works (без белого фона) -->
-                    <div class="transparent-card p-5">
-                        <h2 class="text-xs font-bold text-white mb-2">Как это работает</h2>
-                        <ol class="text-xs text-slate-100 space-y-1 pl-4 list-decimal leading-relaxed">
+                <div class="space-y-3">
+                    <!-- Block 1: How it works (без белого фона, компактно) -->
+                    <div class="transparent-card p-2.5">
+                        <h2 class="text-xs font-bold text-white mb-1">Как это работает</h2>
+                        <ol class="text-xs text-slate-100 space-y-0.5 pl-4 list-decimal leading-snug">
                             <li>Выберите тип договора и юрисдикцию</li>
                             <li>Загрузите файл или вставьте текст</li>
                             <li>Нажмите кнопку «Анализировать»</li>
                         </ol>
                     </div>
 
-                    <!-- Block 2: Main Form Card (без белого фона контейнера) -->
-                    <div class="transparent-card p-0 space-y-5">
+                    <!-- Block 2: Main Form Card (без белого фона контейнера, компактные отступы) -->
+                    <div class="transparent-card p-0 space-y-3">
                         
                         <!-- Contract Type -->
                         <div>
-                            <label class="block text-xs font-bold text-white mb-2">Тип договора</label>
-                            <div class="flex flex-wrap gap-2" id="doc-type-group">
-                                <button type="button" class="chip-btn active px-4 py-2 rounded-xl border border-slate-300" data-value="Общий">Общий</button>
-                                <button type="button" class="chip-btn px-4 py-2 rounded-xl border border-slate-300 bg-slate-100 text-slate-700" data-value="Трудовой">Трудовой</button>
-                                <button type="button" class="chip-btn px-4 py-2 rounded-xl border border-slate-300 bg-slate-100 text-slate-700" data-value="ГПХ/Услуги">ГПХ/Услуги</button>
-                                <button type="button" class="chip-btn px-4 py-2 rounded-xl border border-slate-300 bg-slate-100 text-slate-700" data-value="Аренда">Аренда</button>
-                                <button type="button" class="chip-btn px-4 py-2 rounded-xl border border-slate-300 bg-slate-100 text-slate-700" data-value="Поставка">Поставка</button>
+                            <label class="block text-xs font-bold text-white mb-1.5">Тип договора</label>
+                            <div class="flex flex-wrap gap-1.5" id="doc-type-group">
+                                <button type="button" class="chip-btn active px-3 py-1.5 rounded-xl border border-slate-300" data-value="Общий">Общий</button>
+                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-700" data-value="Трудовой">Трудовой</button>
+                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-700" data-value="ГПХ/Услуги">ГПХ/Услуги</button>
+                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-700" data-value="Аренда">Аренда</button>
+                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-700" data-value="Поставка">Поставка</button>
                             </div>
                         </div>
 
                         <!-- Jurisdiction -->
                         <div>
-                            <label class="block text-xs font-bold text-white mb-2">Юрисдикция</label>
-                            <div class="flex flex-wrap gap-2" id="jurisdiction-group">
-                                <button type="button" class="chip-btn active px-4 py-2 rounded-xl border border-slate-300" data-value="Россия (РФ)">Россия (РФ)</button>
-                                <button type="button" class="chip-btn px-4 py-2 rounded-xl border border-slate-300 bg-slate-100 text-slate-700" data-value="Казахстан">Казахстан</button>
-                                <button type="button" class="chip-btn px-4 py-2 rounded-xl border border-slate-300 bg-slate-100 text-slate-700" data-value="Беларусь">Беларусь</button>
+                            <label class="block text-xs font-bold text-white mb-1.5">Юрисдикция</label>
+                            <div class="flex flex-wrap gap-1.5" id="jurisdiction-group">
+                                <button type="button" class="chip-btn active px-3 py-1.5 rounded-xl border border-slate-300" data-value="Россия (РФ)">Россия (РФ)</button>
+                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-700" data-value="Казахстан">Казахстан</button>
+                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-700" data-value="Беларусь">Беларусь</button>
                             </div>
                         </div>
 
                         <!-- Input Area: Two identical white-backed blocks stacked strictly one under another -->
-                        <div class="space-y-3">
+                        <div class="space-y-2">
                             <!-- Dropzone / File selection -->
                             <div>
                                 <div id="dropzone" class="identical-input-box cursor-pointer hover:bg-slate-50">
                                     <input type="file" id="file-input" accept=".pdf,.docx,.odt,.txt" class="hidden">
                                     <div id="dropzone-prompt" class="flex items-center justify-center gap-2 w-full">
-                                        <i class="fa-solid fa-circle-plus text-blue-600 text-base"></i>
-                                        <span class="font-medium text-slate-700 text-sm">Перетащите файл</span>
+                                        <i class="fa-solid fa-circle-plus text-blue-600 text-sm"></i>
+                                        <span class="font-medium text-slate-700 text-xs">Перетащите файл</span>
                                     </div>
 
                                     <div id="file-selected-info" class="hidden flex items-center justify-between bg-white w-full">
                                         <div class="flex items-center gap-2 overflow-hidden">
-                                            <i class="fa-solid fa-file-contract text-blue-600"></i>
-                                            <span id="file-name" class="truncate text-sm font-medium">document.docx</span>
+                                            <i class="fa-solid fa-file-contract text-blue-600 text-xs"></i>
+                                            <span id="file-name" class="truncate text-xs font-medium">document.docx</span>
                                         </div>
                                         <button type="button" id="remove-file-btn" class="text-slate-400 hover:text-red-500 p-1">
-                                            <i class="fa-solid fa-xmark"></i>
+                                            <i class="fa-solid fa-xmark text-xs"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -150,21 +150,21 @@
                             <!-- Text input box with identical styling and exact matching font/weight -->
                             <div>
                                 <div class="identical-input-box relative">
-                                    <i class="fa-solid fa-file-lines text-blue-600 text-base"></i>
+                                    <i class="fa-solid fa-file-lines text-blue-600 text-sm"></i>
                                     <input type="text" id="contract-text" 
                                         placeholder="Вставьте текст" 
-                                        class="w-full bg-transparent border-none focus:outline-none font-medium text-slate-700 text-sm placeholder:text-slate-400 placeholder:font-medium">
+                                        class="w-full bg-transparent border-none focus:outline-none font-medium text-slate-700 text-xs placeholder:text-slate-400 placeholder:font-medium">
                                 </div>
                             </div>
                         </div>
 
                         <!-- Action Buttons -->
-                        <div class="flex flex-col sm:flex-row gap-3 pt-1">
-                            <button id="analyze-btn" onclick="startAnalysis()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 px-6 rounded-xl shadow transition-all flex items-center justify-center gap-2 text-sm">
+                        <div class="flex flex-col sm:flex-row gap-2 pt-1">
+                            <button id="analyze-btn" onclick="startAnalysis()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow transition-all flex items-center justify-center gap-2 text-xs">
                                 <span>Анализировать</span>
                             </button>
 
-                            <button id="reset-btn" onclick="resetForm()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-3.5 px-5 rounded-xl transition-all flex items-center justify-center gap-2 text-sm">
+                            <button id="reset-btn" onclick="resetForm()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 text-xs">
                                 <span>Новый анализ</span>
                             </button>
                         </div>
@@ -172,11 +172,11 @@
                     </div>
                 </div>
 
-                <!-- Block 3: Feedback Panel -->
-                <div class="tg-card bg-white p-5 rounded-2xl border shadow-sm space-y-3">
+                <!-- Block 3: Feedback Panel (компактный блок) -->
+                <div class="tg-card bg-white p-3.5 rounded-2xl border shadow-sm space-y-2">
                     <div class="flex items-center justify-between">
-                        <h2 class="font-bold text-slate-800 text-sm">Обратная связь</h2>
-                        <div class="flex items-center gap-1 text-amber-400 text-base cursor-pointer" id="star-rating">
+                        <h2 class="font-bold text-slate-800 text-xs">Обратная связь</h2>
+                        <div class="flex items-center gap-1 text-amber-400 text-sm cursor-pointer" id="star-rating">
                             <i class="fa-solid fa-star" data-rating="1"></i>
                             <i class="fa-solid fa-star" data-rating="2"></i>
                             <i class="fa-solid fa-star" data-rating="3"></i>
@@ -195,19 +195,19 @@
                     </div>
 
                     <div class="flex items-center gap-2 text-xs font-medium">
-                        <button type="button" class="sentiment-btn py-1.5 px-3 border rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 flex items-center gap-1" data-value="Полезно">
-                            <i class="fa-regular fa-thumbs-up text-green-600"></i> Полезно
+                        <button type="button" class="sentiment-btn py-1 px-2.5 border rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1" data-value="Полезно">
+                            <i class="fa-regular fa-thumbs-up text-green-600 text-xs"></i> Полезно
                         </button>
-                        <button type="button" class="sentiment-btn py-1.5 px-3 border rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 flex items-center gap-1" data-value="Замечания">
-                            <i class="fa-regular fa-thumbs-down text-amber-600"></i> Замечания
+                        <button type="button" class="sentiment-btn py-1 px-2.5 border rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1" data-value="Замечания">
+                            <i class="fa-regular fa-thumbs-down text-amber-600 text-xs"></i> Замечания
                         </button>
                     </div>
 
-                    <div class="space-y-2">
-                        <textarea id="feedback-text" rows="2" placeholder="Ваш отзыв или описание проблемы..." class="w-full p-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                    <div class="space-y-1.5">
+                        <textarea id="feedback-text" rows="1" placeholder="Ваш отзыв или описание проблемы..." class="w-full p-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
                         
-                        <button type="button" id="send-fb-btn" onclick="sendFeedback()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 px-5 rounded-xl transition-all text-xs flex items-center justify-center gap-1.5 shadow-sm">
-                            <i class="fa-regular fa-paper-plane"></i>
+                        <button type="button" id="send-fb-btn" onclick="sendFeedback()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-xl transition-all text-xs flex items-center justify-center gap-1.5 shadow-sm">
+                            <i class="fa-regular fa-paper-plane text-xs"></i>
                             <span>Отправить отзыв</span>
                         </button>
                     </div>
@@ -217,9 +217,9 @@
 
             <!-- RIGHT COLUMN (Block 4): Analysis Results -->
             <aside class="lg:col-span-5 flex flex-col">
-                <div id="results-card" class="tg-card bg-white p-6 rounded-2xl border shadow-sm space-y-4 flex-1 flex flex-col">
-                    <div class="border-b border-slate-100 pb-3">
-                        <h2 class="font-bold text-base text-slate-900">Результаты анализа</h2>
+                <div id="results-card" class="tg-card bg-white p-4 rounded-2xl border shadow-sm space-y-3 flex-1 flex flex-col min-h-[420px]">
+                    <div class="border-b border-slate-100 pb-2">
+                        <h2 class="font-bold text-sm text-slate-900">Результаты анализа</h2>
                     </div>
                     <div id="analysis-output" class="text-xs text-slate-700 leading-relaxed whitespace-pre-line flex-1 flex items-center justify-center text-center">
                         Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».
@@ -294,10 +294,10 @@
                 btn.addEventListener('click', () => {
                     buttons.forEach(b => {
                         b.classList.remove('active', 'bg-blue-600', 'text-white');
-                        b.classList.add('bg-slate-100', 'text-slate-700');
+                        b.classList.add('bg-slate-200', 'text-slate-700');
                     });
                     btn.classList.add('active', 'bg-blue-600', 'text-white');
-                    btn.classList.remove('bg-slate-100', 'text-slate-700');
+                    btn.classList.remove('bg-slate-200', 'text-slate-700');
                     if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
                 });
             });
@@ -309,8 +309,8 @@
         const sentimentBtns = document.querySelectorAll('.sentiment-btn');
         sentimentBtns.forEach(btn => {
             btn.addEventListener('click', () => {
-                sentimentBtns.forEach(b => b.classList.remove('border-blue-500', 'bg-blue-50'));
-                btn.classList.add('border-blue-500', 'bg-blue-50');
+                sentimentBtns.forEach(b => b.classList.remove('border-blue-500', 'bg-blue-100'));
+                btn.classList.add('border-blue-500', 'bg-blue-100');
                 selectedSentiment = btn.dataset.value;
             });
         });
