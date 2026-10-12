@@ -146,13 +146,18 @@
                                 </div>
                             </div>
 
-                            <!-- Text input box (strictly identical structure, font size, weight and centered alignment) -->
+                            <!-- Text input box (strictly identical structure, font size, weight and centered alignment with correct icon positioning) -->
                             <div>
-                                <div id="text-input-container" class="identical-input-box cursor-pointer relative hover:bg-slate-50" onclick="document.getElementById('contract-text').focus()">
-                                    <i class="fa-solid fa-file-lines text-blue-600 text-xs flex-shrink-0"></i>
+                                <div id="text-input-container" class="identical-input-box cursor-pointer relative hover:bg-slate-50" onclick="if(event.target === this || event.target.tagName === 'DIV') document.getElementById('contract-text').focus()">
+                                    <div class="flex items-center justify-center gap-2 w-full pointer-events-none">
+                                        <i class="fa-solid fa-file-lines text-blue-600 text-xs"></i>
+                                        <span id="placeholder-text" class="text-xs font-medium text-slate-700">Вставьте текст</span>
+                                    </div>
                                     <input type="text" id="contract-text" 
-                                        placeholder="Вставьте текст" 
-                                        class="w-full bg-transparent border-none focus:outline-none font-medium text-slate-700 text-xs placeholder:text-slate-400 placeholder:font-medium placeholder:text-center text-center cursor-text">
+                                        class="absolute inset-0 w-full h-full opacity-0 cursor-text bg-transparent border-none focus:outline-none text-xs text-slate-700 font-medium"
+                                        oninput="document.getElementById('placeholder-text').textContent = this.value ? (this.value.length > 25 ? this.value.substring(0, 25) + '...' : this.value) : 'Вставьте текст'; document.getElementById('placeholder-text').className = this.value ? 'text-xs font-medium text-slate-900 truncate px-2' : 'text-xs font-medium text-slate-700';"
+                                        onfocus="document.getElementById('text-input-container').style.borderColor='#2563eb'; document.getElementById('text-input-container').style.boxShadow='0 0 0 2px rgba(37, 99, 235, 0.15)';"
+                                        onblur="document.getElementById('text-input-container').style.borderColor='#cbd5e1'; document.getElementById('text-input-container').style.boxShadow='none';">
                                 </div>
                             </div>
                         </div>
@@ -381,6 +386,8 @@
         function resetForm() {
             if (removeFileBtn) removeFileBtn.click();
             contractText.value = '';
+            document.getElementById('placeholder-text').textContent = 'Вставьте текст';
+            document.getElementById('placeholder-text').className = 'text-xs font-medium text-slate-700';
             const output = document.getElementById('analysis-output');
             output.parentElement.classList.add('items-center', 'justify-center', 'p-4');
             output.parentElement.classList.remove('block', 'p-2');
