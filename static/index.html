@@ -231,7 +231,8 @@
                     </div>
 
                     <div class="space-y-1.5">
-                        <textarea id="feedback-text" rows="1" placeholder="Ваш отзыв или описание проблемы..." class="w-full p-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                        <!-- Добавлен класс text-slate-900 для видимости вводимого текста отзыва -->
+                        <textarea id="feedback-text" rows="1" placeholder="Ваш отзыв или описание проблемы..." class="w-full p-2 text-xs text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
                         
                         <button type="button" id="send-fb-btn" onclick="sendFeedback()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-xl transition-all text-xs flex items-center justify-center gap-1.5 shadow-sm">
                             <i class="fa-regular fa-paper-plane text-xs"></i>
