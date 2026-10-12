@@ -171,13 +171,13 @@
                             <!-- Text input box -->
                             <div>
                                 <div id="text-input-container" class="identical-input-box cursor-pointer relative hover:bg-slate-50" onclick="if(event.target === this || event.target.tagName === 'DIV') document.getElementById('contract-text').focus()">
-                                    <div class="flex items-center justify-center gap-2 w-full pointer-events-none">
-                                        <i class="fa-solid fa-file-lines text-blue-600 text-xs"></i>
+                                    <div id="text-placeholder-wrapper" class="flex items-center justify-center gap-2 w-full pointer-events-none">
+                                        <i id="text-input-icon" class="fa-solid fa-file-lines text-blue-600 text-xs"></i>
                                         <span id="placeholder-text" class="text-xs font-medium text-slate-700">Вставьте текст</span>
                                     </div>
                                     <input type="text" id="contract-text" 
                                         class="absolute inset-0 w-full h-full opacity-0 cursor-text bg-transparent border-none focus:outline-none text-xs text-slate-700 font-medium"
-                                        oninput="document.getElementById('placeholder-text').textContent = this.value ? (this.value.length > 25 ? this.value.substring(0, 25) + '...' : this.value) : 'Вставьте текст'; document.getElementById('placeholder-text').className = this.value ? 'text-xs font-medium text-slate-900 truncate px-2' : 'text-xs font-medium text-slate-700';"
+                                        oninput="const val = this.value; const p = document.getElementById('placeholder-text'); const icon = document.getElementById('text-input-icon'); const wrapper = document.getElementById('text-placeholder-wrapper'); if(val) { p.textContent = val.length > 25 ? val.substring(0, 25) + '...' : val; p.className = 'text-xs font-medium text-slate-900 truncate px-2'; wrapper.className = 'flex items-center justify-start gap-2 w-full pointer-events-none px-2'; icon.className = 'fa-solid fa-file-lines text-blue-600 text-xs flex-shrink-0'; } else { p.textContent = 'Вставьте текст'; p.className = 'text-xs font-medium text-slate-700'; wrapper.className = 'flex items-center justify-center gap-2 w-full pointer-events-none'; icon.className = 'fa-solid fa-file-lines text-blue-600 text-xs'; }"
                                         onfocus="document.getElementById('text-input-container').style.borderColor='#2563eb'; document.getElementById('text-input-container').style.boxShadow='0 0 0 2px rgba(37, 99, 235, 0.15)';"
                                         onblur="document.getElementById('text-input-container').style.borderColor='#cbd5e1'; document.getElementById('text-input-container').style.boxShadow='none';">
                                 </div>
@@ -410,6 +410,8 @@
             contractText.value = '';
             document.getElementById('placeholder-text').textContent = 'Вставьте текст';
             document.getElementById('placeholder-text').className = 'text-xs font-medium text-slate-700';
+            document.getElementById('text-placeholder-wrapper').className = 'flex items-center justify-center gap-2 w-full pointer-events-none';
+            document.getElementById('text-input-icon').className = 'fa-solid fa-file-lines text-blue-600 text-xs';
             const output = document.getElementById('analysis-output');
             output.parentElement.classList.add('items-center', 'justify-center', 'p-4');
             output.parentElement.classList.remove('block', 'p-2', 'overflow-y-auto', 'max-h-[500px]');
