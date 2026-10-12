@@ -170,14 +170,14 @@
 
                             <!-- Text input box (Textarea) -->
                             <div>
-                                <div id="text-input-container" class="identical-input-box !items-start bg-white cursor-text transition-all" onclick="document.getElementById('contract-text').focus()">
-                                    <div id="text-icon-wrapper" class="flex items-center justify-center pt-0.5 text-blue-600 text-xs flex-shrink-0">
+                                <div id="text-input-container" class="identical-input-box justify-start bg-white cursor-text transition-all" onclick="document.getElementById('contract-text').focus()">
+                                    <div id="text-icon-wrapper" class="flex items-center justify-center text-blue-600 text-xs flex-shrink-0">
                                         <i class="fa-solid fa-file-lines"></i>
                                     </div>
                                     <div class="flex-1 relative">
                                         <textarea id="contract-text" rows="1" placeholder="Вставьте текст"
-                                            class="w-full bg-transparent border-none focus:outline-none text-xs text-slate-900 font-medium resize-none overflow-hidden placeholder:text-slate-700 placeholder:font-medium placeholder:text-center"
-                                            oninput="this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; if(this.value.trim()){ this.classList.remove('placeholder:text-center'); } else { this.classList.add('placeholder:text-center'); }"
+                                            class="w-full bg-transparent border-none focus:outline-none text-xs text-slate-900 font-medium resize-none overflow-hidden placeholder:text-slate-700 placeholder:font-medium text-left"
+                                            oninput="this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';"
                                             onfocus="document.getElementById('text-input-container').style.borderColor='#2563eb'; document.getElementById('text-input-container').style.boxShadow='0 0 0 2px rgba(37, 99, 235, 0.15)';"
                                             onblur="document.getElementById('text-input-container').style.borderColor='#cbd5e1'; document.getElementById('text-input-container').style.boxShadow='none';"></textarea>
                                     </div>
@@ -410,7 +410,6 @@
             if (removeFileBtn) removeFileBtn.click();
             contractText.value = '';
             contractText.style.height = 'auto';
-            contractText.classList.add('placeholder:text-center');
             const output = document.getElementById('analysis-output');
             output.parentElement.classList.add('items-center', 'justify-center', 'p-4');
             output.parentElement.classList.remove('block', 'p-2', 'overflow-y-auto', 'max-h-[500px]');
