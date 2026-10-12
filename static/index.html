@@ -168,18 +168,19 @@
                                 </div>
                             </div>
 
-                            <!-- Text input box -->
+                            <!-- Text input box (Textarea) -->
                             <div>
-                                <div id="text-input-container" class="identical-input-box cursor-pointer relative hover:bg-slate-50" onclick="if(event.target === this || event.target.tagName === 'DIV') document.getElementById('contract-text').focus()">
-                                    <div id="text-placeholder-wrapper" class="flex items-center justify-center gap-2 w-full pointer-events-none">
-                                        <i id="text-input-icon" class="fa-solid fa-file-lines text-blue-600 text-xs"></i>
-                                        <span id="placeholder-text" class="text-xs font-medium text-slate-700">Вставьте текст</span>
+                                <div id="text-input-container" class="identical-input-box !items-start bg-white cursor-text transition-all" onclick="document.getElementById('contract-text').focus()">
+                                    <div id="text-icon-wrapper" class="flex items-center justify-center pt-0.5 text-blue-600 text-xs flex-shrink-0">
+                                        <i class="fa-solid fa-file-lines"></i>
                                     </div>
-                                    <input type="text" id="contract-text" 
-                                        class="absolute inset-0 w-full h-full opacity-0 cursor-text bg-transparent border-none focus:outline-none text-xs text-slate-700 font-medium"
-                                        oninput="const val = this.value; const p = document.getElementById('placeholder-text'); const icon = document.getElementById('text-input-icon'); const wrapper = document.getElementById('text-placeholder-wrapper'); if(val) { p.textContent = val.length > 25 ? val.substring(0, 25) + '...' : val; p.className = 'text-xs font-medium text-slate-900 truncate px-2'; wrapper.className = 'flex items-center justify-start gap-2 w-full pointer-events-none px-2'; icon.className = 'fa-solid fa-file-lines text-blue-600 text-xs flex-shrink-0'; } else { p.textContent = 'Вставьте текст'; p.className = 'text-xs font-medium text-slate-700'; wrapper.className = 'flex items-center justify-center gap-2 w-full pointer-events-none'; icon.className = 'fa-solid fa-file-lines text-blue-600 text-xs'; }"
-                                        onfocus="document.getElementById('text-input-container').style.borderColor='#2563eb'; document.getElementById('text-input-container').style.boxShadow='0 0 0 2px rgba(37, 99, 235, 0.15)';"
-                                        onblur="document.getElementById('text-input-container').style.borderColor='#cbd5e1'; document.getElementById('text-input-container').style.boxShadow='none';">
+                                    <div class="flex-1 relative">
+                                        <textarea id="contract-text" rows="1" placeholder="Вставьте текст"
+                                            class="w-full bg-transparent border-none focus:outline-none text-xs text-slate-900 font-medium resize-none overflow-hidden placeholder:text-slate-700 placeholder:font-medium placeholder:text-center"
+                                            oninput="this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; if(this.value.trim()){ this.classList.remove('placeholder:text-center'); } else { this.classList.add('placeholder:text-center'); }"
+                                            onfocus="document.getElementById('text-input-container').style.borderColor='#2563eb'; document.getElementById('text-input-container').style.boxShadow='0 0 0 2px rgba(37, 99, 235, 0.15)';"
+                                            onblur="document.getElementById('text-input-container').style.borderColor='#cbd5e1'; document.getElementById('text-input-container').style.boxShadow='none';"></textarea>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -408,10 +409,8 @@
         function resetForm() {
             if (removeFileBtn) removeFileBtn.click();
             contractText.value = '';
-            document.getElementById('placeholder-text').textContent = 'Вставьте текст';
-            document.getElementById('placeholder-text').className = 'text-xs font-medium text-slate-700';
-            document.getElementById('text-placeholder-wrapper').className = 'flex items-center justify-center gap-2 w-full pointer-events-none';
-            document.getElementById('text-input-icon').className = 'fa-solid fa-file-lines text-blue-600 text-xs';
+            contractText.style.height = 'auto';
+            contractText.classList.add('placeholder:text-center');
             const output = document.getElementById('analysis-output');
             output.parentElement.classList.add('items-center', 'justify-center', 'p-4');
             output.parentElement.classList.remove('block', 'p-2', 'overflow-y-auto', 'max-h-[500px]');
