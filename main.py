@@ -10,6 +10,12 @@ from google import genai
 from pypdf import PdfReader
 import docx
 
+# Импорты для работы с SQLAlchemy и PostgreSQL
+from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from datetime import datetime
+
 app = FastAPI()
 
 # Монтируем статические файлы
@@ -18,6 +24,36 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # Переменные окружения
 FEEDBACK_WEBHOOK_URL = os.environ.get("GOOGLE_SHEET_WEBHOOK_URL", "")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+DATABASE_URL = os.environ.get("DATABASE_URL", "")
+
+# Настройка подключения к PostgreSQL через SQLAlchemy
+# Исправляем префикс postgres:// на postgresql:// (Render часто выдает postgres://)
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+engine = None
+SessionLocal = None
+Base = declarative_base()
+
+# Описание модели таблицы для хранения истории анализа или обратной связи
+class AnalysisLogDB(Base):
+    __tablename__ = "analysis_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    doc_type = Column(String, default="")
+    jurisdiction = Column(String, default="")
+    risk_level = Column(String, default="")
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+if DATABASE_URL:
+    try:
+        engine = create_engine(DATABASE_URL)
+        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        # Автоматическое создание таблиц при старте приложения
+        Base.metadata.create_all(bind=engine)
+        print("База данных подключена, таблицы успешно инициализированы.")
+    except Exception as e:
+        print(f"Ошибка подключения к базе данных: {e}")
 
 # Инициализация клиента Gemini
 ai_client = None
@@ -131,6 +167,22 @@ async def analyze_contract(
             model="gemini-3.8-flash",
             contents=prompt,
         )
+        
+        # Сохранение лога анализа в базу данных PostgreSQL (если подключена)
+        if SessionLocal:
+            try:
+                db = SessionLocal()
+                db_log = AnalysisLogDB(
+                    doc_type=doc_type,
+                    jurisdiction=jurisdiction,
+                    risk_level="Анализ выполнен"
+                )
+                db.add(db_log)
+                db.commit()
+                db.close()
+            except Exception as db_err:
+                print(f"Ошибка сохранения в БД: {db_err}")
+
         return {"status": "ok", "result": response.text}
     except Exception as e:
         print(f"Gemini API error: {e}")
