@@ -148,10 +148,10 @@
                         <div class="space-y-2">
                             <!-- Dropzone / File selection -->
                             <div>
-                                <div id="dropzone" class="identical-input-box cursor-pointer hover:bg-slate-50">
+                                <div id="dropzone" class="identical-input-box justify-start cursor-pointer hover:bg-slate-50">
                                     <input type="file" id="file-input" accept=".pdf,.docx,.odt,.txt" class="hidden">
                                     
-                                    <div id="dropzone-prompt" class="flex items-center justify-center gap-2 w-full text-xs font-medium text-slate-700">
+                                    <div id="dropzone-prompt" class="flex items-center justify-start gap-2 w-full text-xs font-medium text-slate-700">
                                         <i class="fa-solid fa-circle-plus text-blue-600 text-xs"></i>
                                         <span>Перетащите файл</span>
                                     </div>
@@ -361,95 +361,4 @@
         });
 
         async function startAnalysis() {
-            if (!selectedFile && !contractText.value.trim()) {
-                alert('Пожалуйста, загрузите файл или вставьте текст договора.');
-                return;
-            }
-
-            const docType = document.querySelector('#doc-type-group .chip-btn.active')?.dataset.value || 'Общий';
-            const jurisdiction = document.querySelector('#jurisdiction-group .chip-btn.active')?.dataset.value || 'Россия (РФ)';
-
-            analyzeBtn.disabled = true;
-            analyzeBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Анализируем...</span>`;
-
-            const formData = new FormData();
-            formData.append('doc_type', docType);
-            formData.append('jurisdiction', jurisdiction);
-
-            if (selectedFile) {
-                formData.append('file', selectedFile);
-            } else {
-                formData.append('text', contractText.value.trim());
-            }
-
-            try {
-                const response = await fetch('/analyze', { method: 'POST', body: formData });
-                const data = await response.json();
-
-                if (response.ok && data.result) {
-                    const output = document.getElementById('analysis-output');
-                    output.parentElement.classList.remove('items-center', 'justify-center', 'p-4');
-                    output.parentElement.classList.add('block', 'p-2', 'overflow-y-auto', 'max-h-[500px]');
-                    output.classList.remove('text-center');
-                    output.classList.add('text-left');
-                    // Render markdown nicely
-                    output.innerHTML = marked.parse(data.result);
-                } else {
-                    alert('Ошибка анализа: ' + (data.detail || 'Не удалось получить ответ.'));
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Ошибка сети при отправке.');
-            } finally {
-                analyzeBtn.disabled = false;
-                analyzeBtn.innerHTML = `<span>Анализировать</span>`;
-            }
-        }
-
-        function resetForm() {
-            if (removeFileBtn) removeFileBtn.click();
-            contractText.value = '';
-            contractText.style.height = 'auto';
-            const output = document.getElementById('analysis-output');
-            output.parentElement.classList.add('items-center', 'justify-center', 'p-4');
-            output.parentElement.classList.remove('block', 'p-2', 'overflow-y-auto', 'max-h-[500px]');
-            output.classList.add('text-center');
-            output.classList.remove('text-left');
-            output.textContent = 'Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».';
-        }
-
-        async function sendFeedback() {
-            const feedbackText = document.getElementById('feedback-text').value.trim();
-            if (!feedbackText && selectedRating === 0) {
-                alert('Пожалуйста, оставьте текст отзыва или оценку.');
-                return;
-            }
-
-            try {
-                const response = await fetch('/feedback', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        type: 'Оценка анализа',
-                        rating: selectedRating,
-                        sentiment: selectedSentiment,
-                        feedback: feedbackText,
-                        doc_type: document.querySelector('#doc-type-group .chip-btn.active')?.dataset.value || 'Общий',
-                        jurisdiction: document.querySelector('#jurisdiction-group .chip-btn.active')?.dataset.value || 'Россия (РФ)'
-                    })
-                });
-
-                if (response.ok) {
-                    alert('Спасибо! Ваш отзыв успешно отправлен.');
-                    document.getElementById('feedback-text').value = '';
-                } else {
-                    alert('Не удалось отправить отзыв.');
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Ошибка сети.');
-            }
-        }
-    </script>
-</body>
-</html>
+            if (!
