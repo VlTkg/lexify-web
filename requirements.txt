@@ -5,3 +5,5 @@ python-multipart
 google-genai
 pypdf
 python-docx
+sqlalchemy
+psycopg2-binary
