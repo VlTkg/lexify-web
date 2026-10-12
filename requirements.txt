@@ -6,4 +6,4 @@ google-genai
 pypdf
 python-docx
 sqlalchemy
-psycopg2-binary
+psycopg[binary]
