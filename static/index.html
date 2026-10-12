@@ -8,6 +8,8 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Marked.js for Markdown formatting -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <!-- FontAwesome icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -67,6 +69,26 @@
             background-color: #2563eb;
             color: #ffffff;
             border-color: #2563eb;
+        }
+
+        /* Markdown formatting inside analysis output */
+        #analysis-output h3 {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #0f172a;
+            margin-top: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+        #analysis-output strong {
+            font-weight: bold;
+            color: #0f172a;
+        }
+        #analysis-output ul, #analysis-output ol {
+            padding-left: 1rem;
+            margin: 0.25rem 0;
+        }
+        #analysis-output li {
+            margin-bottom: 0.2rem;
         }
     </style>
 </head>
@@ -366,10 +388,11 @@
                 if (response.ok && data.result) {
                     const output = document.getElementById('analysis-output');
                     output.parentElement.classList.remove('items-center', 'justify-center', 'p-4');
-                    output.parentElement.classList.add('block', 'p-2');
+                    output.parentElement.classList.add('block', 'p-2', 'overflow-y-auto', 'max-h-[500px]');
                     output.classList.remove('text-center');
                     output.classList.add('text-left');
-                    output.textContent = data.result;
+                    // Render markdown nicely
+                    output.innerHTML = marked.parse(data.result);
                 } else {
                     alert('Ошибка анализа: ' + (data.detail || 'Не удалось получить ответ.'));
                 }
@@ -389,7 +412,7 @@
             document.getElementById('placeholder-text').className = 'text-xs font-medium text-slate-700';
             const output = document.getElementById('analysis-output');
             output.parentElement.classList.add('items-center', 'justify-center', 'p-4');
-            output.parentElement.classList.remove('block', 'p-2');
+            output.parentElement.classList.remove('block', 'p-2', 'overflow-y-auto', 'max-h-[500px]');
             output.classList.add('text-center');
             output.classList.remove('text-left');
             output.textContent = 'Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».';
