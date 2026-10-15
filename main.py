@@ -27,7 +27,6 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
 
 # Настройка подключения к PostgreSQL через SQLAlchemy
-# Исправляем префикс postgres:// на postgresql:// (Render часто выдает postgres://)
 if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
@@ -49,7 +48,6 @@ if DATABASE_URL:
     try:
         engine = create_engine(DATABASE_URL)
         SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-        # Автоматическое создание таблиц при старте приложения
         Base.metadata.create_all(bind=engine)
         print("База данных подключена, таблицы успешно инициализированы.")
     except Exception as e:
@@ -67,6 +65,11 @@ class FeedbackSchema(BaseModel):
     feedback: str = ""
     doc_type: str = ""
     jurisdiction: str = ""
+
+class AnalyzeSchema(BaseModel):
+    text: str
+    doc_type: str = "Общий"
+    jurisdiction: str = "Россия (РФ)"
 
 @app.get("/")
 async def serve_index():
@@ -93,52 +96,15 @@ async def receive_feedback(data: FeedbackSchema):
         print(f"Error sending feedback: {e}")
         return {"status": "error", "detail": str(e)}
 
-def extract_text_from_file(file_bytes: bytes, filename: str) -> str:
-    """Извлечение текста из файлов PDF, DOCX, TXT, ODT"""
-    ext = filename.split(".")[-1].lower() if "." in filename else ""
-    text = ""
-
-    try:
-        if ext == "pdf":
-            reader = PdfReader(io.BytesIO(file_bytes))
-            for page in reader.pages:
-                extracted = page.extract_text()
-                if extracted:
-                    text += extracted + "\n"
-        elif ext == "docx":
-            doc = docx.Document(io.BytesIO(file_bytes))
-            for para in doc.paragraphs:
-                text += para.text + "\n"
-        elif ext in ["txt", "odt"]:
-            text = file_bytes.decode("utf-8", errors="ignore")
-        else:
-            text = file_bytes.decode("utf-8", errors="ignore")
-    except Exception as e:
-        print(f"File parsing error: {e}")
-
-    return text.strip()
-
 @app.post("/analyze")
-async def analyze_contract(
-    text: Optional[str] = Form(None),
-    doc_type: str = Form("Общий"),
-    jurisdiction: str = Form("Россия (РФ)"),
-    file: Optional[UploadFile] = File(None)
-):
+async def analyze_contract(data: AnalyzeSchema):
     if not ai_client:
         raise HTTPException(status_code=500, detail="GEMINI_API_KEY не настроен на сервере.")
 
-    contract_content = ""
-
-    # Извлекаем текст из файла или берем из поля ввода
-    if file:
-        file_bytes = await file.read()
-        contract_content = extract_text_from_file(file_bytes, file.filename)
-    elif text:
-        contract_content = text.strip()
+    contract_content = data.text.strip()
 
     if not contract_content:
-        raise HTTPException(status_code=400, detail="Текст договора или файл не предоставлен, либо файл пуст.")
+        raise HTTPException(status_code=400, detail="Текст договора пуст.")
 
     # Формируем промпт для юриста-эксперта
     prompt = f"""
@@ -146,8 +112,8 @@ async def analyze_contract(
 Проведи экспресс-анализ представленного договора и выяви потенциальные риски для пользователя.
 
 Контекст анализа:
-- Тип договора / Занятость: {doc_type}
-- Юрисдикция: {jurisdiction}
+- Тип договора / Занятость: {data.doc_type}
+- Юрисдикция: {data.jurisdiction}
 
 Текст договора:
 ---
@@ -173,8 +139,8 @@ async def analyze_contract(
             try:
                 db = SessionLocal()
                 db_log = AnalysisLogDB(
-                    doc_type=doc_type,
-                    jurisdiction=jurisdiction,
+                    doc_type=data.doc_type,
+                    jurisdiction=data.jurisdiction,
                     risk_level="Анализ выполнен"
                 )
                 db.add(db_log)
