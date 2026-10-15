@@ -10,6 +10,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Marked.js for Markdown formatting -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- pdf.js for client-side PDF parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- mammoth.js for client-side DOCX parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     <!-- FontAwesome icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -360,8 +364,58 @@
             });
         });
 
+        // Функция чтения файлов прямо на клиенте (в браузере)
+        async function extractTextFromFile(file) {
+            const ext = file.name.split('.').pop().toLowerCase();
+            const arrayBuffer = await file.arrayBuffer();
+
+            if (ext === 'txt' || ext === 'odt') {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.readAsText(file, 'UTF-8');
+                });
+            } else if (ext === 'docx') {
+                const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+                return result.value;
+            } else if (ext === 'pdf') {
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                let fullText = '';
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(' ');
+                    fullText += pageText + '\n';
+                }
+                return fullText;
+            } else {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.readAsText(file, 'UTF-8');
+                });
+            }
+        }
+
         async function startAnalysis() {
-            if (!selectedFile && !contractText.value.trim()) {
+            let textToSend = contractText.value.trim();
+
+            if (selectedFile) {
+                analyzeBtn.disabled = true;
+                analyzeBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Чтение файла...</span>`;
+                try {
+                    textToSend = await extractTextFromFile(selectedFile);
+                } catch (err) {
+                    console.error(err);
+                    alert('Не удалось прочитать файл на устройстве.');
+                    analyzeBtn.disabled = false;
+                    analyzeBtn.innerHTML = `<span>Анализировать</span>`;
+                    return;
+                }
+            }
+
+            if (!textToSend.trim()) {
                 alert('Пожалуйста, загрузите файл или вставьте текст договора.');
                 return;
             }
@@ -372,18 +426,16 @@
             analyzeBtn.disabled = true;
             analyzeBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Анализируем...</span>`;
 
-            const formData = new FormData();
-            formData.append('doc_type', docType);
-            formData.append('jurisdiction', jurisdiction);
-
-            if (selectedFile) {
-                formData.append('file', selectedFile);
-            } else {
-                formData.append('text', contractText.value.trim());
-            }
-
             try {
-                const response = await fetch('/analyze', { method: 'POST', body: formData });
+                const response = await fetch('/analyze', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: textToSend,
+                        doc_type: docType,
+                        jurisdiction: jurisdiction
+                    })
+                });
                 const data = await response.json();
 
                 if (response.ok && data.result) {
@@ -392,10 +444,8 @@
                     output.parentElement.classList.add('block', 'p-2', 'overflow-y-auto', 'max-h-[500px]');
                     output.classList.remove('text-center');
                     output.classList.add('text-left');
-                    // Render markdown nicely
                     output.innerHTML = marked.parse(data.result);
 
-                    // Плавный автоскролл к результатам анализа
                     const resultsCard = document.getElementById('results-card');
                     if (resultsCard) {
                         resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
