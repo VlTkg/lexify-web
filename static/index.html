@@ -465,7 +465,7 @@
 
             let html = `
                 <div class="space-y-3">
-                    <!-- Общий статус -->
+                    <!-- Общий статус (светофор) -->
                     <div class="p-3 rounded-xl border ${riskBg} flex items-center justify-between shadow-xs">
                         <div class="flex items-center gap-2">
                             <i class="fa-solid ${riskIcon} text-sm"></i>
@@ -488,16 +488,13 @@
             if (res.risks && res.risks.length > 0) {
                 res.risks.forEach((risk, index) => {
                     let borderColor = 'border-l-green-500';
-                    let badgeColor = 'bg-green-50 text-green-700 border-green-200';
                     let iconName = 'fa-check text-green-600';
 
                     if (risk.category === 'red') {
                         borderColor = 'border-l-red-500';
-                        badgeColor = 'bg-red-50 text-red-700 border-red-200';
                         iconName = 'fa-xmark text-red-600';
                     } else if (risk.category === 'yellow') {
                         borderColor = 'border-l-amber-500';
-                        badgeColor = 'bg-amber-50 text-amber-700 border-amber-200';
                         iconName = 'fa-triangle-exclamation text-amber-600';
                     }
 
@@ -588,22 +585,4 @@
                         rating: selectedRating,
                         sentiment: selectedSentiment,
                         feedback: feedbackText,
-                        doc_type: document.querySelector('#doc-type-group .chip-btn.active')?.dataset.value || 'Общий',
-                        jurisdiction: document.querySelector('#jurisdiction-group .chip-btn.active')?.dataset.value || 'Россия (РФ)'
-                    })
-                });
-
-                if (response.ok) {
-                    alert('Спасибо! Ваш отзыв успешно отправлен.');
-                    document.getElementById('feedback-text').value = '';
-                } else {
-                    alert('Не удалось отправить отзыв.');
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Ошибка сети.');
-            }
-        }
-    </script>
-</body>
-</html>
+                        doc
