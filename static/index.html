@@ -132,20 +132,20 @@
                         <div class="space-y-2">
                             <!-- Dropzone / File selection -->
                             <div>
-                                <div id="dropzone" class="identical-input-box justify-start cursor-pointer hover:bg-slate-50">
+                                <div id="dropzone" class="identical-input-box justify-start cursor-pointer hover:bg-slate-50 transition-colors">
                                     <input type="file" id="file-input" accept=".pdf,.docx,.odt,.txt" class="hidden">
                                     
-                                    <div id="dropzone-prompt" class="flex items-center justify-start gap-2 w-full text-xs font-medium text-slate-700">
+                                    <div id="dropzone-prompt" class="flex items-center justify-start gap-2 w-full text-xs font-medium text-slate-700 pointer-events-none">
                                         <i class="fa-solid fa-circle-plus text-blue-600 text-xs"></i>
                                         <span>Перетащите файл</span>
                                     </div>
 
                                     <div id="file-selected-info" class="hidden flex items-center justify-between bg-white w-full">
-                                        <div class="flex items-center gap-2 overflow-hidden text-xs font-medium text-slate-700">
+                                        <div class="flex items-center gap-2 overflow-hidden text-xs font-medium text-slate-700 pointer-events-none">
                                             <i class="fa-solid fa-file-contract text-blue-600 text-xs"></i>
                                             <span id="file-name" class="truncate">document.docx</span>
                                         </div>
-                                        <button type="button" id="remove-file-btn" class="text-slate-400 hover:text-red-500 p-1">
+                                        <button type="button" id="remove-file-btn" class="text-slate-400 hover:text-red-500 p-1 z-10">
                                             <i class="fa-solid fa-xmark text-xs"></i>
                                         </button>
                                     </div>
@@ -274,9 +274,8 @@
         });
 
         dropzone.addEventListener('click', (e) => {
-            if (e.target !== removeFileBtn && !removeFileBtn.contains(e.target)) {
-                fileInput.click();
-            }
+            if (removeFileBtn.contains(e.target)) return;
+            fileInput.click();
         });
 
         fileInput.addEventListener('change', (e) => {
@@ -438,7 +437,6 @@
             try {
                 res = JSON.parse(jsonString);
             } catch (e) {
-                // Фоллбек, если вдруг пришел чистый текст
                 const output = document.getElementById('analysis-output');
                 output.parentElement.classList.remove('items-center', 'justify-center', 'p-4');
                 output.parentElement.classList.add('block', 'p-2', 'overflow-y-auto', 'max-h-[500px]');
@@ -452,7 +450,6 @@
             wrapper.classList.remove('items-center', 'justify-center', 'p-4');
             wrapper.classList.add('block', 'p-2', 'overflow-y-auto', 'max-h-[520px]');
 
-            // Цветовой бедж общего риска
             let riskBg = 'bg-green-100 text-green-800 border-green-300';
             let riskIcon = 'fa-shield-check text-green-600';
             if (res.overall_risk_level === 'Высокий') {
@@ -585,4 +582,22 @@
                         rating: selectedRating,
                         sentiment: selectedSentiment,
                         feedback: feedbackText,
-                        doc
+                        doc_type: document.querySelector('#doc-type-group .chip-btn.active')?.dataset.value || 'Общий',
+                        jurisdiction: document.querySelector('#jurisdiction-group .chip-btn.active')?.dataset.value || 'Россия (РФ)'
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Спасибо! Ваш отзыв успешно отправлен.');
+                    document.getElementById('feedback-text').value = '';
+                } else {
+                    alert('Не удалось отправить отзыв.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Ошибка сети.');
+            }
+        }
+    </script>
+</body>
+</html>
