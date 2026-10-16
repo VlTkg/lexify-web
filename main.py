@@ -3,7 +3,7 @@ import io
 import httpx
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 from typing import Optional, List
 from google import genai
@@ -114,6 +114,18 @@ class AnalysisResponse(BaseModel):
     summary: str  # Краткое общее резюме (1-2 предложения)
     risks: List[RiskItem]
 
+# Модели для генерации Протокола разногласий в docx
+class ProtocolItem(BaseModel):
+    title: str
+    quote: str
+    explanation: str
+    recommendation: str
+
+class ProtocolRequest(BaseModel):
+    doc_type: str = "Общий"
+    jurisdiction: str = "Россия (РФ)"
+    risks: List[ProtocolItem]
+
 @app.get("/")
 async def serve_index():
     return FileResponse("static/index.html")
@@ -189,7 +201,6 @@ async def telegram_webhook(request: Request):
                 if SessionLocal:
                     db = SessionLocal()
                     try:
-                        # Проверяем, не обрабатывали ли мы этот платеж ранее
                         existing_payment = db.query(PaymentLogDB).filter(PaymentLogDB.charge_id == charge_id).first()
                         if existing_payment:
                             print(f"Платеж {charge_id} уже был обработан ранее.")
@@ -199,7 +210,6 @@ async def telegram_webhook(request: Request):
                         if user:
                             user.free_checks_left += checks_to_add
                             
-                            # Логируем успешную транзакцию
                             new_payment_log = PaymentLogDB(
                                 telegram_id=user_id,
                                 charge_id=charge_id,
@@ -215,6 +225,42 @@ async def telegram_webhook(request: Request):
                         db.close()
                         
     return {"status": "ok"}
+
+# Эндпоинт генерации Протокола разногласий в .docx
+@app.post("/generate-protocol")
+async def generate_protocol(data: ProtocolRequest):
+    doc = docx.Document()
+    
+    doc.add_heading('ПРОТОКОЛ РАЗНОГАСИЙ', level=0)
+    doc.add_paragraph(f'к проекту договора ({data.doc_type}), юрисдикция: {data.jurisdiction}')
+    doc.add_paragraph(f'Дата формирования: {datetime.now().strftime("%d.%m.%Y")}')
+    doc.add_paragraph()
+    
+    table = doc.add_table(rows=1, cols=4)
+    table.style = 'Table Grid'
+    
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = "Пункт договора"
+    hdr_cells[1].text = "Редакция Заказчика"
+    hdr_cells[2].text = "Предлагаемая редакция Исполнителя"
+    hdr_cells[3].text = "Обоснование"
+    
+    for risk in data.risks:
+        row_cells = table.add_row().cells
+        row_cells[0].text = risk.title or "Пункт договора"
+        row_cells[1].text = risk.quote or "Условия редакции заказчика"
+        row_cells[2].text = risk.recommendation or "Предлагаемая безопасная редакция"
+        row_cells[3].text = risk.explanation or "Защита интересов исполнителя"
+        
+    file_stream = io.BytesIO()
+    doc.save(file_stream)
+    file_stream.seek(0)
+    
+    return StreamingResponse(
+        file_stream,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": "attachment; filename=Protocol_Raznogasiy.docx"}
+    )
 
 @app.post("/feedback")
 async def receive_feedback(data: FeedbackSchema):
