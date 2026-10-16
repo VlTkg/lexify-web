@@ -107,7 +107,7 @@ async def serve_index():
 @app.get("/user-info/{telegram_id}")
 async def get_user_info(telegram_id: int):
     if not SessionLocal:
-        return {"telegram_id": telegram_id, "free_checks_left": 3, "is_pro": True} # Fallback если БД отключена
+        return {"telegram_id": telegram_id, "free_checks_left": 3, "is_pro": False}
     
     db = SessionLocal()
     try:
@@ -156,7 +156,7 @@ async def analyze_contract(data: AnalyzeSchema):
         raise HTTPException(status_code=400, detail="Текст договора пуст.")
 
     # Проверка и списание бесплатных лимитов при наличии telegram_id
-    checks_left = 999
+    checks_left = 3
     if data.telegram_id and SessionLocal:
         db = SessionLocal()
         try:
@@ -184,7 +184,6 @@ async def analyze_contract(data: AnalyzeSchema):
             
             checks_left = user.free_checks_left
         except HTTPException as he:
-            db.close()
             raise he
         except Exception as db_err:
             print(f"Ошибка работы с БД пользователей: {db_err}")
