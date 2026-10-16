@@ -74,26 +74,6 @@
             color: #ffffff;
             border-color: #2563eb;
         }
-
-        /* Markdown formatting inside analysis output */
-        #analysis-output h3 {
-            font-size: 0.85rem;
-            font-weight: bold;
-            color: #0f172a;
-            margin-top: 0.5rem;
-            margin-bottom: 0.25rem;
-        }
-        #analysis-output strong {
-            font-weight: bold;
-            color: #0f172a;
-        }
-        #analysis-output ul, #analysis-output ol {
-            padding-left: 1rem;
-            margin: 0.25rem 0;
-        }
-        #analysis-output li {
-            margin-bottom: 0.2rem;
-        }
     </style>
 </head>
 <body class="min-h-screen pb-6 pt-2 px-3 md:px-6">
@@ -252,8 +232,8 @@
                     <div class="border-b border-slate-100 pb-2">
                         <h2 class="font-bold text-sm text-slate-900">Результаты анализа</h2>
                     </div>
-                    <div class="flex-1 flex items-center justify-center p-4">
-                        <div id="analysis-output" class="text-xs text-slate-700 leading-relaxed text-center">
+                    <div class="flex-1 flex items-center justify-center p-4" id="results-container-wrapper">
+                        <div id="analysis-output" class="text-xs text-slate-700 leading-relaxed text-center w-full">
                             Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».
                         </div>
                     </div>
@@ -364,7 +344,7 @@
             });
         });
 
-        // Функция чтения файлов прямо на клиенте (в браузере)
+        // Чтение файла на клиенте
         async function extractTextFromFile(file) {
             const ext = file.name.split('.').pop().toLowerCase();
             const arrayBuffer = await file.arrayBuffer();
@@ -439,17 +419,7 @@
                 const data = await response.json();
 
                 if (response.ok && data.result) {
-                    const output = document.getElementById('analysis-output');
-                    output.parentElement.classList.remove('items-center', 'justify-center', 'p-4');
-                    output.parentElement.classList.add('block', 'p-2', 'overflow-y-auto', 'max-h-[500px]');
-                    output.classList.remove('text-center');
-                    output.classList.add('text-left');
-                    output.innerHTML = marked.parse(data.result);
-
-                    const resultsCard = document.getElementById('results-card');
-                    if (resultsCard) {
-                        resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
+                    renderDashboard(data.result);
                 } else {
                     alert('Ошибка анализа: ' + (data.detail || 'Не удалось получить ответ.'));
                 }
@@ -462,16 +432,144 @@
             }
         }
 
+        // Рендеринг структурированного JSON-ответа
+        function renderDashboard(jsonString) {
+            let res;
+            try {
+                res = JSON.parse(jsonString);
+            } catch (e) {
+                // Фоллбек, если вдруг пришел чистый текст
+                const output = document.getElementById('analysis-output');
+                output.parentElement.classList.remove('items-center', 'justify-center', 'p-4');
+                output.parentElement.classList.add('block', 'p-2', 'overflow-y-auto', 'max-h-[500px]');
+                output.classList.remove('text-center');
+                output.classList.add('text-left');
+                output.innerHTML = marked.parse(jsonString);
+                return;
+            }
+
+            const wrapper = document.getElementById('results-container-wrapper');
+            wrapper.classList.remove('items-center', 'justify-center', 'p-4');
+            wrapper.classList.add('block', 'p-2', 'overflow-y-auto', 'max-h-[520px]');
+
+            // Цветовой бедж общего риска
+            let riskBg = 'bg-green-100 text-green-800 border-green-300';
+            let riskIcon = 'fa-shield-check text-green-600';
+            if (res.overall_risk_level === 'Высокий') {
+                riskBg = 'bg-red-100 text-red-800 border-red-300';
+                riskIcon = 'fa-triangle-exclamation text-red-600';
+            } else if (res.overall_risk_level === 'Средний') {
+                riskBg = 'bg-amber-100 text-amber-800 border-amber-300';
+                riskIcon = 'fa-circle-exclamation text-amber-600';
+            }
+
+            let html = `
+                <div class="space-y-3">
+                    <!-- Общий статус -->
+                    <div class="p-3 rounded-xl border ${riskBg} flex items-center justify-between shadow-xs">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid ${riskIcon} text-sm"></i>
+                            <div>
+                                <div class="text-[10px] uppercase font-bold tracking-wider opacity-75">Общий риск</div>
+                                <div class="text-xs font-bold">${res.overall_risk_level}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Резюме -->
+                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-xs text-slate-700 leading-snug">
+                        <strong>Резюме:</strong> ${res.summary}
+                    </div>
+
+                    <!-- Карточки рисков -->
+                    <div class="space-y-2.5">
+            `;
+
+            if (res.risks && res.risks.length > 0) {
+                res.risks.forEach((risk, index) => {
+                    let borderColor = 'border-l-green-500';
+                    let badgeColor = 'bg-green-50 text-green-700 border-green-200';
+                    let iconName = 'fa-check text-green-600';
+
+                    if (risk.category === 'red') {
+                        borderColor = 'border-l-red-500';
+                        badgeColor = 'bg-red-50 text-red-700 border-red-200';
+                        iconName = 'fa-xmark text-red-600';
+                    } else if (risk.category === 'yellow') {
+                        borderColor = 'border-l-amber-500';
+                        badgeColor = 'bg-amber-50 text-amber-700 border-amber-200';
+                        iconName = 'fa-triangle-exclamation text-amber-600';
+                    }
+
+                    html += `
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 border-l-4 ${borderColor} shadow-xs space-y-2 text-xs">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-slate-900 flex items-center gap-1.5">
+                                    <i class="fa-solid ${iconName}"></i> ${risk.title}
+                                </span>
+                            </div>
+
+                            ${risk.quote ? `<div class="bg-slate-50 p-1.5 rounded text-[11px] text-slate-600 italic border border-slate-100">«${risk.quote}»</div>` : ''}
+                            
+                            <div class="text-slate-700 leading-tight">
+                                <strong class="text-slate-900">В чем риск:</strong> ${risk.explanation}
+                            </div>
+
+                            ${risk.recommendation ? `
+                                <div class="pt-1 border-t border-slate-100 space-y-1">
+                                    <div class="text-[10px] uppercase font-bold text-blue-600">Готовый ответ / Правка:</div>
+                                    <div class="bg-blue-50/50 p-2 rounded-lg text-slate-800 font-medium border border-blue-100 select-all" id="rec-text-${index}">
+                                        ${risk.recommendation}
+                                    </div>
+                                    <button type="button" onclick="copyRecommendation(${index})" class="mt-1 text-[11px] bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-2.5 rounded-lg transition-all flex items-center gap-1 shadow-xs">
+                                        <i class="fa-regular fa-copy"></i> <span id="copy-btn-text-${index}">Скопировать правку</span>
+                                    </button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+            }
+
+            html += `</div></div>`;
+
+            document.getElementById('analysis-output').innerHTML = html;
+
+            const resultsCard = document.getElementById('results-card');
+            if (resultsCard) {
+                resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // Копирование текста правки в буфер обмена
+        function copyRecommendation(index) {
+            const textElement = document.getElementById(`rec-text-${index}`);
+            const btnText = document.getElementById(`copy-btn-text-${index}`);
+            
+            if (textElement) {
+                navigator.clipboard.writeText(textElement.innerText).then(() => {
+                    btnText.textContent = 'Скопировано!';
+                    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                    setTimeout(() => {
+                        btnText.textContent = 'Скопировать правку';
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Ошибка копирования:', err);
+                    alert('Не удалось скопировать текст.');
+                });
+            }
+        }
+
         function resetForm() {
             if (removeFileBtn) removeFileBtn.click();
             contractText.value = '';
             contractText.style.height = 'auto';
+            const wrapper = document.getElementById('results-container-wrapper');
+            wrapper.classList.add('items-center', 'justify-center', 'p-4');
+            wrapper.classList.remove('block', 'p-2', 'overflow-y-auto', 'max-h-[520px]');
+            
             const output = document.getElementById('analysis-output');
-            output.parentElement.classList.add('items-center', 'justify-center', 'p-4');
-            output.parentElement.classList.remove('block', 'p-2', 'overflow-y-auto', 'max-h-[500px]');
-            output.classList.add('text-center');
-            output.classList.remove('text-left');
-            output.textContent = 'Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».';
+            output.innerHTML = 'Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».';
         }
 
         async function sendFeedback() {
