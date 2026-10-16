@@ -10,8 +10,8 @@ from google import genai
 from pypdf import PdfReader
 import docx
 
-# Импорты для работы с SQLAlchemy и PostgreSQL
-from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, Boolean
+# Импорты для работы с SQLAlchemy и PostgreSQL (добавлен BigInteger)
+from sqlalchemy import create_engine, Column, BigInteger, Integer, String, Text, DateTime, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
@@ -34,11 +34,11 @@ engine = None
 SessionLocal = None
 Base = declarative_base()
 
-# Модель пользователя в базе данных
+# Модель пользователя в базе данных (telegram_id теперь BigInteger)
 class UserDB(Base):
     __tablename__ = "users"
 
-    telegram_id = Column(Integer, primary_key=True, index=True)
+    telegram_id = Column(BigInteger, primary_key=True, index=True)
     first_name = Column(String, default="")
     username = Column(String, default="")
     free_checks_left = Column(Integer, default=3)
@@ -50,7 +50,7 @@ class AnalysisLogDB(Base):
     __tablename__ = "analysis_logs"
 
     id = Column(Integer, primary_key=True, index=True)
-    telegram_id = Column(Integer, nullable=True)
+    telegram_id = Column(BigInteger, nullable=True)
     doc_type = Column(String, default="")
     jurisdiction = Column(String, default="")
     risk_level = Column(String, default="")
@@ -155,15 +155,15 @@ async def analyze_contract(data: AnalyzeSchema):
     if not contract_content:
         raise HTTPException(status_code=400, detail="Текст договора пуст.")
 
-    # Проверка и списание бесплатных лимитов при наличии telegram_id
+    # Проверка и списание бесплатных лимитов с учетом BigInteger
     checks_left = 3
     if data.telegram_id and SessionLocal:
         db = SessionLocal()
         try:
-            user = db.query(UserDB).filter(UserDB.telegram_id == data.telegram_id).first()
+            user = db.query(UserDB).filter(UserDB.telegram_id == int(data.telegram_id)).first()
             if not user:
                 user = UserDB(
-                    telegram_id=data.telegram_id,
+                    telegram_id=int(data.telegram_id),
                     first_name=data.first_name or "",
                     username=data.username or "",
                     free_checks_left=3
@@ -181,6 +181,7 @@ async def analyze_contract(data: AnalyzeSchema):
                     )
                 user.free_checks_left -= 1
                 db.commit()
+                db.refresh(user)
             
             checks_left = user.free_checks_left
         except HTTPException as he:
@@ -231,7 +232,7 @@ async def analyze_contract(data: AnalyzeSchema):
             try:
                 db = SessionLocal()
                 db_log = AnalysisLogDB(
-                    telegram_id=data.telegram_id,
+                    telegram_id=int(data.telegram_id) if data.telegram_id else None,
                     doc_type=data.doc_type,
                     jurisdiction=data.jurisdiction,
                     risk_level="Анализ выполнен"
