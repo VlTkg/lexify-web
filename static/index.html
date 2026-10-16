@@ -448,8 +448,12 @@
 
                 if (response.ok && data.result) {
                     renderDashboard(data.result);
-                    if (data.checks_left !== undefined) {
+                    
+                    // Обновляем счетчик сразу из ответа сервера
+                    if (data.checks_left !== undefined && data.checks_left !== null) {
                         document.getElementById('checks-count').textContent = data.checks_left;
+                    } else if (initDataUser) {
+                        fetchUserBalance(initDataUser.id);
                     }
                 } else {
                     alert('Ошибка анализа: ' + (data.detail || 'Не удалось получить ответ.'));
