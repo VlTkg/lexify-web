@@ -11,7 +11,7 @@ from pypdf import PdfReader
 import docx
 
 # Импорты для работы с SQLAlchemy и PostgreSQL
-from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime
+from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
@@ -34,11 +34,23 @@ engine = None
 SessionLocal = None
 Base = declarative_base()
 
-# Описание модели таблицы для хранения истории анализа или обратной связи
+# Модель пользователя в базе данных
+class UserDB(Base):
+    __tablename__ = "users"
+
+    telegram_id = Column(Integer, primary_key=True, index=True)
+    first_name = Column(String, default="")
+    username = Column(String, default="")
+    free_checks_left = Column(Integer, default=3)
+    is_pro = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+# Модель логов анализа
 class AnalysisLogDB(Base):
     __tablename__ = "analysis_logs"
 
     id = Column(Integer, primary_key=True, index=True)
+    telegram_id = Column(Integer, nullable=True)
     doc_type = Column(String, default="")
     jurisdiction = Column(String, default="")
     risk_level = Column(String, default="")
@@ -70,6 +82,9 @@ class AnalyzeSchema(BaseModel):
     text: str
     doc_type: str = "Общий"
     jurisdiction: str = "Россия (РФ)"
+    telegram_id: Optional[int] = None
+    first_name: Optional[str] = ""
+    username: Optional[str] = ""
 
 # Модели для структурированного ответа анализа рисков
 class RiskItem(BaseModel):
@@ -87,6 +102,28 @@ class AnalysisResponse(BaseModel):
 @app.get("/")
 async def serve_index():
     return FileResponse("static/index.html")
+
+# Эндпоинт для получения информации о пользователе и остатке лимита
+@app.get("/user-info/{telegram_id}")
+async def get_user_info(telegram_id: int):
+    if not SessionLocal:
+        return {"telegram_id": telegram_id, "free_checks_left": 3, "is_pro": True} # Fallback если БД отключена
+    
+    db = SessionLocal()
+    try:
+        user = db.query(UserDB).filter(UserDB.telegram_id == telegram_id).first()
+        if not user:
+            user = UserDB(telegram_id=telegram_id, free_checks_left=3, is_pro=False)
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+        return {
+            "telegram_id": user.telegram_id,
+            "free_checks_left": user.free_checks_left,
+            "is_pro": user.is_pro
+        }
+    finally:
+        db.close()
 
 @app.post("/feedback")
 async def receive_feedback(data: FeedbackSchema):
@@ -115,9 +152,44 @@ async def analyze_contract(data: AnalyzeSchema):
         raise HTTPException(status_code=500, detail="GEMINI_API_KEY не настроен на сервере.")
 
     contract_content = data.text.strip()
-
     if not contract_content:
         raise HTTPException(status_code=400, detail="Текст договора пуст.")
+
+    # Проверка и списание бесплатных лимитов при наличии telegram_id
+    checks_left = 999
+    if data.telegram_id and SessionLocal:
+        db = SessionLocal()
+        try:
+            user = db.query(UserDB).filter(UserDB.telegram_id == data.telegram_id).first()
+            if not user:
+                user = UserDB(
+                    telegram_id=data.telegram_id,
+                    first_name=data.first_name or "",
+                    username=data.username or "",
+                    free_checks_left=3
+                )
+                db.add(user)
+                db.commit()
+                db.refresh(user)
+            
+            # Если не Pro и проверки кончились
+            if not user.is_pro:
+                if user.free_checks_left <= 0:
+                    raise HTTPException(
+                        status_code=403, 
+                        detail="У вас закончились бесплатные проверки (доступно: 0). Оформите подписку или пополните баланс!"
+                    )
+                user.free_checks_left -= 1
+                db.commit()
+            
+            checks_left = user.free_checks_left
+        except HTTPException as he:
+            db.close()
+            raise he
+        except Exception as db_err:
+            print(f"Ошибка работы с БД пользователей: {db_err}")
+        finally:
+            db.close()
 
     # Промпт для юриста-эксперта с фокусом на интересы исполнителя
     prompt = f"""
@@ -147,7 +219,7 @@ async def analyze_contract(data: AnalyzeSchema):
 
     try:
         response = ai_client.models.generate_content(
-            model="gemini-3.8-flash",
+            model="gemini-2.5-flash",
             contents=prompt,
             config={
                 "response_mime_type": "application/json",
@@ -155,11 +227,12 @@ async def analyze_contract(data: AnalyzeSchema):
             }
         )
         
-        # Сохранение лога анализа в базу данных PostgreSQL
+        # Сохранение лога анализа в базу данных
         if SessionLocal:
             try:
                 db = SessionLocal()
                 db_log = AnalysisLogDB(
+                    telegram_id=data.telegram_id,
                     doc_type=data.doc_type,
                     jurisdiction=data.jurisdiction,
                     risk_level="Анализ выполнен"
@@ -168,10 +241,16 @@ async def analyze_contract(data: AnalyzeSchema):
                 db.commit()
                 db.close()
             except Exception as db_err:
-                print(f"Ошибка сохранения в БД: {db_err}")
+                print(f"Ошибка сохранения лога в БД: {db_err}")
 
-        # Возвращаем распарсенный JSON напрямую
-        return {"status": "ok", "result": response.text}
+        # Возвращаем результат анализа и остаток бесплатных проверок
+        return {
+            "status": "ok", 
+            "result": response.text,
+            "checks_left": checks_left
+        }
+    except HTTPException as he:
+        raise he
     except Exception as e:
         print(f"Gemini API error: {e}")
         raise HTTPException(status_code=500, detail=f"Ошибка анализа через Gemini API: {str(e)}")
