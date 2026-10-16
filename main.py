@@ -57,6 +57,16 @@ class AnalysisLogDB(Base):
     risk_level = Column(String, default="")
     created_at = Column(DateTime, default=datetime.utcnow)
 
+# Модель для логирования успешных платежей (защита от повторных начислений)
+class PaymentLogDB(Base):
+    __tablename__ = "payment_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    telegram_id = Column(BigInteger, nullable=False)
+    charge_id = Column(String, unique=True, index=True, nullable=False)
+    payload = Column(String, default="")
+    created_at = Column(DateTime, default=datetime.utcnow)
+
 if DATABASE_URL:
     try:
         engine = create_engine(DATABASE_URL)
@@ -160,7 +170,7 @@ async def create_invoice(data: InvoiceRequest):
         else:
             raise HTTPException(status_code=500, detail=f"Ошибка создания счета Telegram: {res_data.get('description')}")
 
-# Webhook для получения обновлений от Telegram (обработка успешных платежей)
+# Webhook для получения обновлений от Telegram (обработка успешных платежей с защитой от дубликатов)
 @app.post("/telegram-webhook")
 async def telegram_webhook(request: Request):
     body = await request.json()
@@ -169,6 +179,7 @@ async def telegram_webhook(request: Request):
         payment = body["message"]["successful_payment"]
         payload = payment.get("invoice_payload", "")
         user_id = body["message"]["from"]["id"]
+        charge_id = payment.get("telegram_payment_charge_id", "")
         
         if payload.startswith("pack_"):
             parts = payload.split("_")
@@ -178,12 +189,27 @@ async def telegram_webhook(request: Request):
                 if SessionLocal:
                     db = SessionLocal()
                     try:
+                        # Проверяем, не обрабатывали ли мы этот платеж ранее
+                        existing_payment = db.query(PaymentLogDB).filter(PaymentLogDB.charge_id == charge_id).first()
+                        if existing_payment:
+                            print(f"Платеж {charge_id} уже был обработан ранее.")
+                            return {"status": "ok"}
+                        
                         user = db.query(UserDB).filter(UserDB.telegram_id == user_id).first()
                         if user:
                             user.free_checks_left += checks_to_add
+                            
+                            # Логируем успешную транзакцию
+                            new_payment_log = PaymentLogDB(
+                                telegram_id=user_id,
+                                charge_id=charge_id,
+                                payload=payload
+                            )
+                            db.add(new_payment_log)
                             db.commit()
-                            print(f"Пользователю {user_id} начислено {checks_to_add} проверок за Telegram Stars")
+                            print(f"Пользователю {user_id} успешно начислено {checks_to_add} проверок за Telegram Stars (Charge ID: {charge_id})")
                     except Exception as e:
+                        db.rollback()
                         print(f"Ошибка начисления проверок по платежу: {e}")
                     finally:
                         db.close()
