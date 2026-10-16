@@ -84,11 +84,14 @@
         <header class="mb-1 flex items-center justify-between">
             <div>
                 <h1 class="text-2xl font-bold tracking-tight text-white">Lexify</h1>
-                <p class="text-xs text-slate-200">Сервис автоматической проверки договоров для фрилансеров и специалистов</p>
+                <p class="text-xs text-slate-200">Сервис автоматической проверки договоров для фрилансеров</p>
             </div>
             <!-- Счетчик проверок для Telegram-пользователей -->
-            <div id="user-badge" class="bg-slate-700/80 px-3 py-1.5 rounded-xl border border-slate-500 text-xs text-slate-100 hidden shadow-sm">
-                Бесплатных проверок: <span id="checks-count" class="font-bold text-amber-400">3</span>
+            <div id="user-badge" class="bg-slate-700/90 px-3 py-1.5 rounded-xl border border-slate-500 text-xs text-slate-100 hidden shadow-sm flex items-center gap-2">
+                <span>Проверок: <span id="checks-count" class="font-bold text-amber-400">3</span></span>
+                <button type="button" onclick="openStarsModal()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-2 py-0.5 rounded-lg text-[11px] transition-all flex items-center gap-1 shadow-xs">
+                    <i class="fa-solid fa-star text-[10px]"></i> Купить
+                </button>
             </div>
         </header>
 
@@ -249,6 +252,44 @@
         </div>
     </div>
 
+    <!-- Модальное окно покупки проверок за Telegram Stars -->
+    <div id="stars-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 space-y-4 text-slate-900 shadow-xl border border-slate-100">
+            <div class="flex items-center justify-between">
+                <h3 class="font-bold text-base flex items-center gap-2 text-slate-900">
+                    <i class="fa-solid fa-star text-amber-500"></i> Пакеты проверок
+                </h3>
+                <button type="button" onclick="closeStarsModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+            <p class="text-xs text-slate-600 leading-snug">
+                Лимиты бесплатных проверок исчерпаны или заканчиваются. Выберите пакет и оплатите внутренними звёздами Telegram (Stars):
+            </p>
+            <div class="space-y-2.5">
+                <button type="button" onclick="buyPackage('5_checks')" class="w-full bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-400 p-3 rounded-xl transition-all flex items-center justify-between text-left group">
+                    <div>
+                        <div class="font-bold text-xs text-slate-900 group-hover:text-blue-600">5 проверок договора</div>
+                        <div class="text-[11px] text-slate-500">Для оперативных задач</div>
+                    </div>
+                    <div class="bg-amber-100 text-amber-800 font-bold px-2.5 py-1 rounded-lg text-xs flex items-center gap-1">
+                        <span>50</span> <i class="fa-solid fa-star text-[10px]"></i>
+                    </div>
+                </button>
+
+                <button type="button" onclick="buyPackage('15_checks')" class="w-full bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-400 p-3 rounded-xl transition-all flex items-center justify-between text-left group">
+                    <div>
+                        <div class="font-bold text-xs text-slate-900 group-hover:text-blue-600">15 проверок договора</div>
+                        <div class="text-[11px] text-slate-500">Выгодный пакет (скидка)</div>
+                    </div>
+                    <div class="bg-amber-100 text-amber-800 font-bold px-2.5 py-1 rounded-lg text-xs flex items-center gap-1">
+                        <span>120</span> <i class="fa-solid fa-star text-[10px]"></i>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Application Script -->
     <script>
         const tg = window.Telegram?.WebApp;
@@ -270,10 +311,71 @@
                 const response = await fetch(`/user-info/${telegramId}`);
                 if (response.ok) {
                     const data = await response.json();
-                    document.getElementById('checks-count').textContent = data.free_checks_left;
+                    const countEl = document.getElementById('checks-count');
+                    countEl.textContent = data.free_checks_left;
+                    
+                    // Если лимит закончился, подсветим красным
+                    if (data.free_checks_left <= 0) {
+                        countEl.classList.remove('text-amber-400');
+                        countEl.classList.add('text-red-400');
+                    } else {
+                        countEl.classList.remove('text-red-400');
+                        countEl.classList.add('text-amber-400');
+                    }
                 }
             } catch (err) {
                 console.error("Не удалось получить данные пользователя:", err);
+            }
+        }
+
+        function openStarsModal() {
+            document.getElementById('stars-modal').classList.remove('hidden');
+            document.getElementById('stars-modal').classList.add('flex');
+            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+        }
+
+        function closeStarsModal() {
+            document.getElementById('stars-modal').classList.remove('flex');
+            document.getElementById('stars-modal').classList.add('hidden');
+        }
+
+        async function buyPackage(packageType) {
+            if (!initDataUser) {
+                alert('Функция оплаты доступна только внутри Telegram Mini App.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/create-invoice', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        telegram_id: initDataUser.id,
+                        package_type: packageType
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok && data.invoice_link) {
+                    closeStarsModal();
+                    // Открываем нативный платежный инвойс Telegram Stars
+                    tg.openInvoice(data.invoice_link, async (status) => {
+                        if (status === 'paid') {
+                            if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                            alert('Оплата прошла успешно! Проверки добавлены на ваш баланс.');
+                            fetchUserBalance(initDataUser.id);
+                        } else if (status === 'cancelled') {
+                            console.log('Оплата отменена пользователем');
+                        } else {
+                            console.log('Статус оплаты:', status);
+                        }
+                    });
+                } else {
+                    alert('Не удалось создать счет на оплату: ' + (data.detail || 'Ошибка сервера'));
+                }
+            } catch (err) {
+                console.error('Ошибка запроса инвойса:', err);
+                alert('Ошибка сети при попытке оплаты.');
             }
         }
 
@@ -369,7 +471,6 @@
             });
         });
 
-        // Чтение файла на клиенте
         async function extractTextFromFile(file) {
             const ext = file.name.split('.').pop().toLowerCase();
             const arrayBuffer = await file.arrayBuffer();
@@ -449,13 +550,18 @@
                 if (response.ok && data.result) {
                     renderDashboard(data.result);
                     
-                    // Обновляем счетчик сразу из ответа сервера
                     if (data.checks_left !== undefined && data.checks_left !== null) {
                         document.getElementById('checks-count').textContent = data.checks_left;
+                        if (data.checks_left <= 0) {
+                            openStarsModal(); // Автоматически предлагаем докупить проверки, если лимит исчерпан
+                        }
                     } else if (initDataUser) {
                         fetchUserBalance(initDataUser.id);
                     }
                 } else {
+                    if (response.status === 403) {
+                        openStarsModal();
+                    }
                     alert('Ошибка анализа: ' + (data.detail || 'Не удалось получить ответ.'));
                 }
             } catch (err) {
@@ -467,7 +573,6 @@
             }
         }
 
-        // Рендеринг структурированного JSON-ответа
         function renderDashboard(jsonString) {
             let res;
             try {
@@ -498,7 +603,6 @@
 
             let html = `
                 <div class="space-y-3">
-                    <!-- Общий статус (светофор) -->
                     <div class="p-3 rounded-xl border ${riskBg} flex items-center justify-between shadow-xs">
                         <div class="flex items-center gap-2">
                             <i class="fa-solid ${riskIcon} text-sm"></i>
@@ -509,12 +613,10 @@
                         </div>
                     </div>
 
-                    <!-- Резюме -->
                     <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-xs text-slate-700 leading-snug">
                         <strong>Резюме:</strong> ${res.summary}
                     </div>
 
-                    <!-- Карточки рисков -->
                     <div class="space-y-2.5">
             `;
 
@@ -571,7 +673,6 @@
             }
         }
 
-        // Копирование текста правки в буфер обмена
         function copyRecommendation(index) {
             const textElement = document.getElementById(`rec-text-${index}`);
             const btnText = document.getElementById(`copy-btn-text-${index}`);
@@ -622,7 +723,6 @@
                         jurisdiction: document.querySelector('#jurisdiction-group .chip-btn.active')?.dataset.value || 'Россия (РФ)'
                     })
                 });
-
                 if (response.ok) {
                     alert('Спасибо! Ваш отзыв успешно отправлен.');
                     document.getElementById('feedback-text').value = '';
@@ -631,7 +731,7 @@
                 }
             } catch (err) {
                 console.error(err);
-                alert('Ошибка сети.');
+                alert('Ошибка сети при отправке отзыва.');
             }
         }
     </script>
