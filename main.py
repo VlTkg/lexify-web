@@ -1,7 +1,7 @@
 import os
 import io
 import httpx
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
@@ -10,7 +10,7 @@ from google import genai
 from pypdf import PdfReader
 import docx
 
-# Импорты для работы с SQLAlchemy и PostgreSQL (добавлен BigInteger)
+# Импорты для работы с SQLAlchemy и PostgreSQL
 from sqlalchemy import create_engine, Column, BigInteger, Integer, String, Text, DateTime, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -25,6 +25,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 FEEDBACK_WEBHOOK_URL = os.environ.get("GOOGLE_SHEET_WEBHOOK_URL", "")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "") # Токен вашего Telegram бота от BotFather (нужен для выставления инвойсов Stars)
 
 # Настройка подключения к PostgreSQL через SQLAlchemy
 if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
@@ -34,7 +35,7 @@ engine = None
 SessionLocal = None
 Base = declarative_base()
 
-# Модель пользователя в базе данных (telegram_id теперь BigInteger)
+# Модель пользователя в базе данных
 class UserDB(Base):
     __tablename__ = "users"
 
@@ -86,6 +87,10 @@ class AnalyzeSchema(BaseModel):
     first_name: Optional[str] = ""
     username: Optional[str] = ""
 
+class InvoiceRequest(BaseModel):
+    telegram_id: int
+    package_type: str = "5_checks" # Варианты: '5_checks' или '15_checks'
+
 # Модели для структурированного ответа анализа рисков
 class RiskItem(BaseModel):
     category: str  # 'red', 'yellow', 'green'
@@ -124,6 +129,70 @@ async def get_user_info(telegram_id: int):
         }
     finally:
         db.close()
+
+# Эндпоинт создания инвойса оплаты через Telegram Stars
+@app.post("/create-invoice")
+async def create_invoice(data: InvoiceRequest):
+    if not BOT_TOKEN:
+        raise HTTPException(status_code=500, detail="BOT_TOKEN не настроен на сервере.")
+    
+    # Настройка пакетов (цены в Telegram Stars XTR)
+    packages = {
+        "5_checks": {"title": "Пакет 5 проверок", "description": "5 дополнительных экспресс-анализов договоров", "amount": 50},
+        "15_checks": {"title": "Пакет 15 проверок", "description": "15 дополнительных экспресс-анализов договоров", "amount": 120}
+    }
+    
+    pkg = packages.get(data.package_type, packages["5_checks"])
+    
+    # Запрос к Telegram Bot API для создания ссылки на оплату (createInvoiceLink)
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/createInvoiceLink"
+    payload = {
+        "title": pkg["title"],
+        "description": pkg["description"],
+        "payload": f"pack_{data.package_type}_{data.telegram_id}",
+        "currency": "XTR", # Обялюта Telegram Stars
+        "prices": [{"label": pkg["title"], "amount": pkg["amount"]}]
+    }
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, json=payload)
+        res_data = response.json()
+        if res_data.get("ok"):
+            return {"invoice_link": res_data["result"]}
+        else:
+            raise HTTPException(status_code=500, detail=f"Ошибка создания счета Telegram: {res_data.get('description')}")
+
+# Webhook для получения обновлений от Telegram (обработка успешных платежей)
+@app.post("/telegram-webhook")
+async def telegram_webhook(request: Request):
+    body = await request.json()
+    
+    # Проверяем успешную оплату (successful_payment)
+    if "message" in body and "successful_payment" in body["message"]:
+        payment = body["message"]["successful_payment"]
+        payload = payment.get("invoice_payload", "")
+        user_id = body["message"]["from"]["id"]
+        
+        # Разбираем payload (например: pack_5_checks_12345678)
+        if payload.startswith("pack_"):
+            parts = payload.split("_")
+            if len(parts) >= 3:
+                checks_to_add = int(parts[1]) if parts[1].isdigit() else 5
+                
+                if SessionLocal:
+                    db = SessionLocal()
+                    try:
+                        user = db.query(UserDB).filter(UserDB.telegram_id == user_id).first()
+                        if user:
+                            user.free_checks_left += checks_to_add
+                            db.commit()
+                            print( пользователю {user_id} начислено {checks_to_add} проверок за Telegram Stars)
+                    except Exception as e:
+                        print(f"Ошибка начисления проверок по платежу: {e}")
+                    finally:
+                        db.close()
+                        
+    return {"status": "ok"}
 
 @app.post("/feedback")
 async def receive_feedback(data: FeedbackSchema):
@@ -177,7 +246,7 @@ async def analyze_contract(data: AnalyzeSchema):
                 if user.free_checks_left <= 0:
                     raise HTTPException(
                         status_code=403, 
-                        detail="У вас закончились бесплатные проверки (доступно: 0). Оформите подписку или пополните баланс!"
+                        detail="У вас закончились бесплатные проверки. Пополните баланс звездами Telegram!"
                     )
                 user.free_checks_left -= 1
                 db.commit()
