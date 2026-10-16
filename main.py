@@ -5,7 +5,7 @@ from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from google import genai
 from pypdf import PdfReader
 import docx
@@ -71,6 +71,19 @@ class AnalyzeSchema(BaseModel):
     doc_type: str = "Общий"
     jurisdiction: str = "Россия (РФ)"
 
+# Модели для структурированного ответа анализа рисков
+class RiskItem(BaseModel):
+    category: str  # 'red', 'yellow', 'green'
+    title: str     # Краткий заголовок риска
+    quote: str     # Цитата или упоминание пункта договора
+    explanation: str  # В чем заключается риск для фрилансера/исполнителя
+    recommendation: str  # Готовый текст правки или рекомендация для общения с заказчиком
+
+class AnalysisResponse(BaseModel):
+    overall_risk_level: str  # 'Низкий', 'Средний', 'Высокий'
+    summary: str  # Краткое общее резюме (1-2 предложения)
+    risks: List[RiskItem]
+
 @app.get("/")
 async def serve_index():
     return FileResponse("static/index.html")
@@ -106,10 +119,10 @@ async def analyze_contract(data: AnalyzeSchema):
     if not contract_content:
         raise HTTPException(status_code=400, detail="Текст договора пуст.")
 
-    # Формируем промпт для юриста-эксперта
+    # Промпт для юриста-эксперта с фокусом на интересы исполнителя
     prompt = f"""
-Ты — профессиональный юрист-аналитик, специализирующийся на проверке договоров.
-Проведи экспресс-анализ представленного договора и выяви потенциальные риски для пользователя.
+Ты — профессиональный юрист-аналитик, специализирующийся на защите интересов фрилансеров, подрядчиков и специалистов.
+Проведи экспресс-анализ представленного договора и выяви потенциальные риски для Исполнителя.
 
 Контекст анализа:
 - Тип договора / Занятость: {data.doc_type}
@@ -120,21 +133,28 @@ async def analyze_contract(data: AnalyzeSchema):
 {contract_content[:15000]}
 ---
 
-Сформируй четкий, структурированный ответ на русском языке по следующему плану:
-1. **Общий уровень риска**: (Низкий / Средний / Высокий) + краткое обоснование в 1 предложении.
-2. **Ключевые риски и «подводные камни»**: (3-5 главных рисков списком с пояснением, чем это грозит).
-3. **Рекомендации по изменению**: (что именно стоит переписать или добавить в договор).
-
-Пиши кратко, емко, доступным языком без лишней канцелярии.
+Сформируй разбор строго в формате JSON:
+1. `overall_risk_level`: Оцени общий уровень риска (строго одно из значений: 'Низкий', 'Средний', 'Высокий').
+2. `summary`: Краткий вывод по договору в 1-2 предложениях.
+3. `risks`: Список выявленных пунктов и рисков (3-6 пунктов). Для каждого укажи:
+   - `category`: Цветовой маркер риска ('red' — критический, 'yellow' — средний/внимание, 'green' — безопасное/выгодное условие).
+   - `title`: Четкое название риска (например, "Неограниченный штраф за задержку", "Передача прав до оплаты").
+   - `quote`: Цитата или фрагмент пункта договора (если применимо).
+   - `explanation`: Чем именно это условие грозит Исполнителю.
+   - `recommendation`: Готовая формулировка правки, которую фрилансер может скопировать и выслать заказчику для защиты своих интересов.
 """
 
     try:
         response = ai_client.models.generate_content(
             model="gemini-3.8-flash",
             contents=prompt,
+            config={
+                "response_mime_type": "application/json",
+                "response_schema": AnalysisResponse,
+            }
         )
         
-        # Сохранение лога анализа в базу данных PostgreSQL (если подключена)
+        # Сохранение лога анализа в базу данных PostgreSQL
         if SessionLocal:
             try:
                 db = SessionLocal()
@@ -149,6 +169,7 @@ async def analyze_contract(data: AnalyzeSchema):
             except Exception as db_err:
                 print(f"Ошибка сохранения в БД: {db_err}")
 
+        # Возвращаем распарсенный JSON напрямую
         return {"status": "ok", "result": response.text}
     except Exception as e:
         print(f"Gemini API error: {e}")
