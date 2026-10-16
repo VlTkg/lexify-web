@@ -25,7 +25,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 FEEDBACK_WEBHOOK_URL = os.environ.get("GOOGLE_SHEET_WEBHOOK_URL", "")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "") # Токен вашего Telegram бота от BotFather (нужен для выставления инвойсов Stars)
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "") # Токен вашего Telegram бота от BotFather
 
 # Настройка подключения к PostgreSQL через SQLAlchemy
 if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
@@ -136,7 +136,6 @@ async def create_invoice(data: InvoiceRequest):
     if not BOT_TOKEN:
         raise HTTPException(status_code=500, detail="BOT_TOKEN не настроен на сервере.")
     
-    # Настройка пакетов (цены в Telegram Stars XTR)
     packages = {
         "5_checks": {"title": "Пакет 5 проверок", "description": "5 дополнительных экспресс-анализов договоров", "amount": 50},
         "15_checks": {"title": "Пакет 15 проверок", "description": "15 дополнительных экспресс-анализов договоров", "amount": 120}
@@ -144,13 +143,12 @@ async def create_invoice(data: InvoiceRequest):
     
     pkg = packages.get(data.package_type, packages["5_checks"])
     
-    # Запрос к Telegram Bot API для создания ссылки на оплату (createInvoiceLink)
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/createInvoiceLink"
     payload = {
         "title": pkg["title"],
         "description": pkg["description"],
         "payload": f"pack_{data.package_type}_{data.telegram_id}",
-        "currency": "XTR", # Обялюта Telegram Stars
+        "currency": "XTR",
         "prices": [{"label": pkg["title"], "amount": pkg["amount"]}]
     }
     
@@ -167,13 +165,11 @@ async def create_invoice(data: InvoiceRequest):
 async def telegram_webhook(request: Request):
     body = await request.json()
     
-    # Проверяем успешную оплату (successful_payment)
     if "message" in body and "successful_payment" in body["message"]:
         payment = body["message"]["successful_payment"]
         payload = payment.get("invoice_payload", "")
         user_id = body["message"]["from"]["id"]
         
-        # Разбираем payload (например: pack_5_checks_12345678)
         if payload.startswith("pack_"):
             parts = payload.split("_")
             if len(parts) >= 3:
@@ -186,7 +182,7 @@ async def telegram_webhook(request: Request):
                         if user:
                             user.free_checks_left += checks_to_add
                             db.commit()
-                            print( пользователю {user_id} начислено {checks_to_add} проверок за Telegram Stars)
+                            print(f"Пользователю {user_id} начислено {checks_to_add} проверок за Telegram Stars")
                     except Exception as e:
                         print(f"Ошибка начисления проверок по платежу: {e}")
                     finally:
@@ -224,7 +220,6 @@ async def analyze_contract(data: AnalyzeSchema):
     if not contract_content:
         raise HTTPException(status_code=400, detail="Текст договора пуст.")
 
-    # Проверка и списание бесплатных лимитов с учетом BigInteger
     checks_left = 3
     if data.telegram_id and SessionLocal:
         db = SessionLocal()
@@ -241,7 +236,6 @@ async def analyze_contract(data: AnalyzeSchema):
                 db.commit()
                 db.refresh(user)
             
-            # Если не Pro и проверки кончились
             if not user.is_pro:
                 if user.free_checks_left <= 0:
                     raise HTTPException(
@@ -260,7 +254,6 @@ async def analyze_contract(data: AnalyzeSchema):
         finally:
             db.close()
 
-    # Промпт для юриста-эксперта с фокусом на интересы исполнителя
     prompt = f"""
 Ты — профессиональный юрист-аналитик, специализирующийся на защите интересов фрилансеров, подрядчиков и специалистов.
 Проведи экспресс-анализ представленного договора и выяви потенциальные риски для Исполнителя.
@@ -296,7 +289,6 @@ async def analyze_contract(data: AnalyzeSchema):
             }
         )
         
-        # Сохранение лога анализа в базу данных
         if SessionLocal:
             try:
                 db = SessionLocal()
@@ -312,7 +304,6 @@ async def analyze_contract(data: AnalyzeSchema):
             except Exception as db_err:
                 print(f"Ошибка сохранения лога в БД: {db_err}")
 
-        # Возвращаем результат анализа и остаток бесплатных проверок
         return {
             "status": "ok", 
             "result": response.text,
