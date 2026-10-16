@@ -144,4 +144,643 @@
                                 <div id="dropzone" class="identical-input-box justify-start cursor-pointer hover:bg-slate-50 transition-colors">
                                     <input type="file" id="file-input" accept=".pdf,.docx,.odt,.txt" class="hidden">
                                     
-                                    <div id="dropzone-prompt"
+                                    <div id="dropzone-prompt" class="flex items-center justify-start gap-2 w-full text-xs font-medium text-slate-700 pointer-events-none">
+                                        <i class="fa-solid fa-circle-plus text-blue-600 text-xs"></i>
+                                        <span>Перетащите файл</span>
+                                    </div>
+
+                                    <div id="file-selected-info" class="hidden flex items-center justify-between bg-white w-full">
+                                        <div class="flex items-center gap-2 overflow-hidden text-xs font-medium text-slate-700 pointer-events-none">
+                                            <i class="fa-solid fa-file-contract text-blue-600 text-xs"></i>
+                                            <span id="file-name" class="truncate">document.docx</span>
+                                        </div>
+                                        <button type="button" id="remove-file-btn" class="text-slate-400 hover:text-red-500 p-1 z-10">
+                                            <i class="fa-solid fa-xmark text-xs pointer-events-none"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Text input box (Textarea) -->
+                            <div>
+                                <div id="text-input-container" class="identical-input-box justify-start bg-white cursor-text transition-all" onclick="document.getElementById('contract-text').focus()">
+                                    <div id="text-icon-wrapper" class="flex items-center justify-center text-blue-600 text-xs flex-shrink-0">
+                                        <i class="fa-solid fa-file-lines"></i>
+                                    </div>
+                                    <div class="flex-1 relative">
+                                        <textarea id="contract-text" rows="1" placeholder="Вставьте текст"
+                                            class="w-full bg-transparent border-none focus:outline-none text-xs text-slate-900 font-medium resize-none overflow-hidden placeholder:text-slate-700 placeholder:font-medium text-left"
+                                            oninput="this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';"
+                                            onfocus="document.getElementById('text-input-container').style.borderColor='#2563eb'; document.getElementById('text-input-container').style.boxShadow='0 0 0 2px rgba(37, 99, 235, 0.15)';"
+                                            onblur="document.getElementById('text-input-container').style.borderColor='#cbd5e1'; document.getElementById('text-input-container').style.boxShadow='none';"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex flex-col sm:flex-row gap-2 pt-1">
+                            <button type="button" id="analyze-btn" onclick="startAnalysis()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow transition-all flex items-center justify-center gap-2 text-xs">
+                                <span>Анализировать</span>
+                            </button>
+
+                            <button type="button" id="reset-btn" onclick="resetForm()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 text-xs">
+                                <span>Новый анализ</span>
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Block 3: Feedback Panel -->
+                <div class="tg-card bg-white p-3.5 rounded-2xl border shadow-sm space-y-2">
+                    <div class="flex items-center justify-between">
+                        <h2 class="font-bold text-slate-800 text-xs">Обратная связь</h2>
+                        <div class="flex items-center gap-1 text-amber-400 text-sm cursor-pointer" id="star-rating">
+                            <i class="fa-solid fa-star" data-rating="1"></i>
+                            <i class="fa-solid fa-star" data-rating="2"></i>
+                            <i class="fa-solid fa-star" data-rating="3"></i>
+                            <i class="fa-solid fa-star" data-rating="4"></i>
+                            <i class="fa-solid fa-star text-slate-300" data-rating="5"></i>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4 text-xs text-slate-600">
+                        <label class="flex items-center gap-1.5 cursor-pointer">
+                            <input type="radio" name="fb-type" checked class="accent-blue-600"> Оценка анализа
+                        </label>
+                        <label class="flex items-center gap-1.5 cursor-pointer">
+                            <input type="radio" name="fb-type" class="accent-blue-600"> Баг / Ошибка
+                        </label>
+                    </div>
+
+                    <div class="flex items-center gap-2 text-xs font-medium">
+                        <button type="button" class="sentiment-btn py-1 px-2.5 border rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1" data-value="Полезно">
+                            <i class="fa-regular fa-thumbs-up text-green-600 text-xs"></i> Полезно
+                        </button>
+                        <button type="button" class="sentiment-btn py-1 px-2.5 border rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1" data-value="Замечания">
+                            <i class="fa-regular fa-thumbs-down text-amber-600 text-xs"></i> Замечания
+                        </button>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <textarea id="feedback-text" rows="1" placeholder="Ваш отзыв или описание проблемы..." class="w-full p-2 text-xs text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                        
+                        <button type="button" id="send-fb-btn" onclick="sendFeedback()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-xl transition-all text-xs flex items-center justify-center gap-1.5 shadow-sm">
+                            <i class="fa-regular fa-paper-plane text-xs"></i>
+                            <span>Отправить отзыв</span>
+                        </button>
+                    </div>
+                </div>
+
+            </main>
+
+            <!-- RIGHT COLUMN: Analysis Results -->
+            <aside class="lg:col-span-5 flex flex-col">
+                <div id="results-card" class="tg-card bg-white p-4 rounded-2xl border shadow-sm flex-1 flex flex-col min-h-[460px]">
+                    <div class="border-b border-slate-100 pb-2">
+                        <h2 class="font-bold text-sm text-slate-900">Результаты анализа</h2>
+                    </div>
+                    <div class="flex-1 flex items-center justify-center p-4" id="results-container-wrapper">
+                        <div id="analysis-output" class="text-xs text-slate-700 leading-relaxed text-center w-full">
+                            Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+        </div>
+    </div>
+
+    <!-- Модальное окно покупки проверок за Telegram Stars -->
+    <div id="stars-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 space-y-4 text-slate-900 shadow-xl border border-slate-100">
+            <div class="flex items-center justify-between">
+                <h3 class="font-bold text-base flex items-center gap-2 text-slate-900">
+                    <i class="fa-solid fa-star text-amber-500"></i> Пакеты проверок
+                </h3>
+                <button type="button" onclick="closeStarsModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+            <p class="text-xs text-slate-600 leading-snug">
+                Лимиты бесплатных проверок исчерпаны или заканчиваются. Выберите пакет и оплатите внутренними звёздами Telegram (Stars):
+            </p>
+            <div class="space-y-2.5">
+                <button type="button" onclick="buyPackage('5_checks')" class="w-full bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-400 p-3 rounded-xl transition-all flex items-center justify-between text-left group">
+                    <div>
+                        <div class="font-bold text-xs text-slate-900 group-hover:text-blue-600">5 проверок договора</div>
+                        <div class="text-[11px] text-slate-500">Для оперативных задач</div>
+                    </div>
+                    <div class="bg-amber-100 text-amber-800 font-bold px-2.5 py-1 rounded-lg text-xs flex items-center gap-1">
+                        <span>50</span> <i class="fa-solid fa-star text-[10px]"></i>
+                    </div>
+                </button>
+
+                <button type="button" onclick="buyPackage('15_checks')" class="w-full bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-400 p-3 rounded-xl transition-all flex items-center justify-between text-left group">
+                    <div>
+                        <div class="font-bold text-xs text-slate-900 group-hover:text-blue-600">15 проверок договора</div>
+                        <div class="text-[11px] text-slate-500">Выгодный пакет (скидка)</div>
+                    </div>
+                    <div class="bg-amber-100 text-amber-800 font-bold px-2.5 py-1 rounded-lg text-xs flex items-center gap-1">
+                        <span>120</span> <i class="fa-solid fa-star text-[10px]"></i>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        const tg = window.Telegram?.WebApp;
+        let initDataUser = null;
+        let lastAnalysisData = null; // Сохраняем результаты для генерации протокола
+
+        if (tg) {
+            tg.ready();
+            tg.expand();
+            initDataUser = tg.initDataUnsafe?.user;
+
+            if (initDataUser) {
+                document.getElementById('user-badge').classList.remove('hidden');
+                fetchUserBalance(initDataUser.id);
+            }
+        }
+
+        async function fetchUserBalance(telegramId) {
+            try {
+                const response = await fetch(`/user-info/${telegramId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const countEl = document.getElementById('checks-count');
+                    countEl.textContent = data.free_checks_left;
+                    
+                    if (data.free_checks_left <= 0) {
+                        countEl.classList.remove('text-amber-400');
+                        countEl.classList.add('text-red-400');
+                    } else {
+                        countEl.classList.remove('text-red-400');
+                        countEl.classList.add('text-amber-400');
+                    }
+                }
+            } catch (err) {
+                console.error("Не удалось получить данные пользователя:", err);
+            }
+        }
+
+        function openStarsModal() {
+            document.getElementById('stars-modal').classList.remove('hidden');
+            document.getElementById('stars-modal').classList.add('flex');
+            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+        }
+
+        function closeStarsModal() {
+            document.getElementById('stars-modal').classList.remove('flex');
+            document.getElementById('stars-modal').classList.add('hidden');
+        }
+
+        async function buyPackage(packageType) {
+            if (!initDataUser) {
+                alert('Функция оплаты доступна только внутри Telegram Mini App.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/create-invoice', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        telegram_id: initDataUser.id,
+                        package_type: packageType
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok && data.invoice_link) {
+                    closeStarsModal();
+                    tg.openInvoice(data.invoice_link, async (status) => {
+                        if (status === 'paid') {
+                            if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                            alert('Оплата прошла успешно! Проверки добавлены на ваш баланс.');
+                            fetchUserBalance(initDataUser.id);
+                        } else if (status === 'cancelled') {
+                            console.log('Оплата отменена пользователем');
+                        }
+                    });
+                } else {
+                    alert('Не удалось создать счет на оплату: ' + (data.detail || 'Ошибка сервера'));
+                }
+            } catch (err) {
+                console.error('Ошибка запроса инвойса:', err);
+                alert('Ошибка сети при попытке оплаты.');
+            }
+        }
+
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('file-input');
+        const dropzonePrompt = document.getElementById('dropzone-prompt');
+        const fileSelectedInfo = document.getElementById('file-selected-info');
+        const fileName = document.getElementById('file-name');
+        const removeFileBtn = document.getElementById('remove-file-btn');
+        const contractText = document.getElementById('contract-text');
+        const analyzeBtn = document.getElementById('analyze-btn');
+
+        let selectedFile = null;
+        let selectedRating = 4;
+        let selectedSentiment = '';
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false);
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
+            if (files.length) handleFileSelect(files[0]);
+        });
+
+        dropzone.addEventListener('click', (e) => {
+            if (removeFileBtn.contains(e.target)) return;
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) handleFileSelect(e.target.files[0]);
+        });
+
+        function handleFileSelect(file) {
+            selectedFile = file;
+            fileName.textContent = file.name;
+            dropzonePrompt.classList.add('hidden');
+            fileSelectedInfo.classList.remove('hidden');
+            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        }
+
+        removeFileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            selectedFile = null;
+            fileInput.value = '';
+            fileSelectedInfo.classList.add('hidden');
+            dropzonePrompt.classList.remove('hidden');
+        });
+
+        function setupChipGroup(groupId) {
+            const container = document.getElementById(groupId);
+            if (!container) return;
+            const buttons = container.querySelectorAll('.chip-btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    buttons.forEach(b => {
+                        b.classList.remove('active', 'bg-blue-600', 'text-white');
+                        b.classList.add('bg-slate-200', 'text-slate-800');
+                    });
+                    btn.classList.add('active', 'bg-blue-600', 'text-white');
+                    btn.classList.remove('bg-slate-200', 'text-slate-800');
+                    if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
+                });
+            });
+        }
+
+        setupChipGroup('doc-type-group');
+        setupChipGroup('jurisdiction-group');
+
+        const sentimentBtns = document.querySelectorAll('.sentiment-btn');
+        sentimentBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                sentimentBtns.forEach(b => b.classList.remove('border-blue-500', 'bg-blue-100'));
+                btn.classList.add('border-blue-500', 'bg-blue-100');
+                selectedSentiment = btn.dataset.value;
+            });
+        });
+
+        const stars = document.querySelectorAll('#star-rating i');
+        stars.forEach(star => {
+            star.addEventListener('click', () => {
+                selectedRating = parseInt(star.getAttribute('data-rating'));
+                stars.forEach((s, idx) => {
+                    if (idx < selectedRating) {
+                        s.classList.remove('text-slate-300');
+                        s.classList.add('text-amber-400');
+                    } else {
+                        s.classList.remove('text-amber-400');
+                        s.classList.add('text-slate-300');
+                    }
+                });
+            });
+        });
+
+        async function extractTextFromFile(file) {
+            const ext = file.name.split('.').pop().toLowerCase();
+            const arrayBuffer = await file.arrayBuffer();
+
+            if (ext === 'txt' || ext === 'odt') {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.readAsText(file, 'UTF-8');
+                });
+            } else if (ext === 'docx') {
+                const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+                return result.value;
+            } else if (ext === 'pdf') {
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                let fullText = '';
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(' ');
+                    fullText += pageText + '\n';
+                }
+                return fullText;
+            } else {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.readAsText(file, 'UTF-8');
+                });
+            }
+        }
+
+        async function startAnalysis() {
+            let textToSend = contractText.value.trim();
+
+            if (selectedFile) {
+                analyzeBtn.disabled = true;
+                analyzeBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Чтение файла...</span>`;
+                try {
+                    textToSend = await extractTextFromFile(selectedFile);
+                } catch (err) {
+                    console.error(err);
+                    alert('Не удалось прочитать файл на устройстве.');
+                    analyzeBtn.disabled = false;
+                    analyzeBtn.innerHTML = `<span>Анализировать</span>`;
+                    return;
+                }
+            }
+
+            if (!textToSend.trim()) {
+                alert('Пожалуйста, загрузите файл или вставьте текст договора.');
+                return;
+            }
+
+            const docType = document.querySelector('#doc-type-group .chip-btn.active')?.dataset.value || 'Общий';
+            const jurisdiction = document.querySelector('#jurisdiction-group .chip-btn.active')?.dataset.value || 'Россия (РФ)';
+
+            analyzeBtn.disabled = true;
+            analyzeBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Анализируем...</span>`;
+
+            try {
+                const response = await fetch('/analyze', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: textToSend,
+                        doc_type: docType,
+                        jurisdiction: jurisdiction,
+                        telegram_id: initDataUser ? initDataUser.id : null,
+                        first_name: initDataUser ? initDataUser.first_name : '',
+                        username: initDataUser ? initDataUser.username : ''
+                    })
+                });
+                const data = await response.json();
+
+                if (response.ok && data.result) {
+                    try {
+                        lastAnalysisData = JSON.parse(data.result);
+                    } catch (e) {
+                        lastAnalysisData = null;
+                    }
+                    
+                    renderDashboard(data.result);
+                    
+                    if (data.checks_left !== undefined && data.checks_left !== null) {
+                        document.getElementById('checks-count').textContent = data.checks_left;
+                        if (data.checks_left <= 0) {
+                            openStarsModal();
+                        }
+                    } else if (initDataUser) {
+                        fetchUserBalance(initDataUser.id);
+                    }
+                } else {
+                    if (response.status === 403) {
+                        openStarsModal();
+                    }
+                    alert('Ошибка анализа: ' + (data.detail || 'Не удалось получить ответ.'));
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Ошибка сети при отправке.');
+            } finally {
+                analyzeBtn.disabled = false;
+                analyzeBtn.innerHTML = `<span>Анализировать</span>`;
+            }
+        }
+
+        function renderDashboard(jsonString) {
+            let res;
+            try {
+                res = JSON.parse(jsonString);
+            } catch (e) {
+                const output = document.getElementById('analysis-output');
+                output.parentElement.classList.remove('items-center', 'justify-center', 'p-4');
+                output.parentElement.classList.add('block', 'p-2', 'overflow-y-auto', 'max-h-[500px]');
+                output.classList.remove('text-center');
+                output.classList.add('text-left');
+                output.innerHTML = marked.parse(jsonString);
+                return;
+            }
+
+            const wrapper = document.getElementById('results-container-wrapper');
+            wrapper.classList.remove('items-center', 'justify-center', 'p-4');
+            wrapper.classList.add('block', 'p-2', 'overflow-y-auto', 'max-h-[520px]');
+
+            let riskBg = 'bg-green-100 text-green-800 border-green-300';
+            let riskIcon = 'fa-shield-check text-green-600';
+            if (res.overall_risk_level === 'Высокий') {
+                riskBg = 'bg-red-100 text-red-800 border-red-300';
+                riskIcon = 'fa-triangle-exclamation text-red-600';
+            } else if (res.overall_risk_level === 'Средний') {
+                riskBg = 'bg-amber-100 text-amber-800 border-amber-300';
+                riskIcon = 'fa-circle-exclamation text-amber-600';
+            }
+
+            let html = `
+                <div class="space-y-3">
+                    <div class="p-3 rounded-xl border ${riskBg} flex items-center justify-between shadow-xs">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid ${riskIcon} text-sm"></i>
+                            <div>
+                                <div class="text-[10px] uppercase font-bold tracking-wider opacity-75">Общий риск</div>
+                                <div class="text-xs font-bold">${res.overall_risk_level}</div>
+                            </div>
+                        </div>
+                        <button type="button" onclick="downloadProtocol()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1.5 shadow-xs">
+                            <i class="fa-solid fa-file-word"></i> Скачать протокол (.docx)
+                        </button>
+                    </div>
+
+                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-xs text-slate-700 leading-snug">
+                        <strong>Резюме:</strong> ${res.summary}
+                    </div>
+
+                    <div class="space-y-2.5">
+            `;
+
+            if (res.risks && res.risks.length > 0) {
+                res.risks.forEach((risk, index) => {
+                    let borderColor = 'border-l-green-500';
+                    let iconName = 'fa-check text-green-600';
+
+                    if (risk.category === 'red') {
+                        borderColor = 'border-l-red-500';
+                        iconName = 'fa-xmark text-red-600';
+                    } else if (risk.category === 'yellow') {
+                        borderColor = 'border-l-amber-500';
+                        iconName = 'fa-triangle-exclamation text-amber-600';
+                    }
+
+                    html += `
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 border-l-4 ${borderColor} shadow-xs space-y-2 text-xs">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-slate-900 flex items-center gap-1.5">
+                                    <i class="fa-solid ${iconName}"></i> ${risk.title}
+                                </span>
+                            </div>
+
+                            ${risk.quote ? `<div class="bg-slate-50 p-1.5 rounded text-[11px] text-slate-600 italic border border-slate-100">«${risk.quote}»</div>` : ''}
+                            
+                            <div class="text-slate-700 leading-tight">
+                                <strong class="text-slate-900">В чем риск:</strong> ${risk.explanation}
+                            </div>
+
+                            ${risk.recommendation ? `
+                                <div class="pt-1 border-t border-slate-100 space-y-1">
+                                    <div class="text-[10px] uppercase font-bold text-blue-600">Готовый ответ / Правка:</div>
+                                    <div class="bg-blue-50/50 p-2 rounded-lg text-slate-800 font-medium border border-blue-100 select-all" id="rec-text-${index}">
+                                        ${risk.recommendation}
+                                    </div>
+                                    <button type="button" onclick="copyRecommendation(${index})" class="mt-1 text-[11px] bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-2.5 rounded-lg transition-all flex items-center gap-1 shadow-xs">
+                                        <i class="fa-regular fa-copy"></i> <span id="copy-btn-text-${index}">Скопировать правку</span>
+                                    </button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+            }
+
+            html += `</div></div>`;
+
+            document.getElementById('analysis-output').innerHTML = html;
+
+            const resultsCard = document.getElementById('results-card');
+            if (resultsCard) {
+                resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        async function downloadProtocol() {
+            if (!lastAnalysisData || !lastAnalysisData.risks) {
+                alert('Нет данных для формирования протокола разногласий.');
+                return;
+            }
+
+            const docType = document.querySelector('#doc-type-group .chip-btn.active')?.dataset.value || 'Общий';
+            const jurisdiction = document.querySelector('#jurisdiction-group .chip-btn.active')?.dataset.value || 'Россия (РФ)';
+
+            try {
+                const response = await fetch('/generate-protocol', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        doc_type: docType,
+                        jurisdiction: jurisdiction,
+                        risks: lastAnalysisData.risks
+                    })
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'Protocol_Raznogasiy.docx';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                } else {
+                    alert('Не удалось сгенерировать документ.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Ошибка сети при скачивании файла.');
+            }
+        }
+
+        function copyRecommendation(index) {
+            const textElement = document.getElementById(`rec-text-${index}`);
+            const btnText = document.getElementById(`copy-btn-text-${index}`);
+            
+            if (textElement) {
+                navigator.clipboard.writeText(textElement.innerText).then(() => {
+                    btnText.textContent = 'Скопировано!';
+                    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                    setTimeout(() => {
+                        btnText.textContent = 'Скопировать правку';
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Ошибка копирования:', err);
+                    alert('Не удалось скопировать текст.');
+                });
+            }
+        }
+
+        function resetForm() {
+            if (removeFileBtn) removeFileBtn.click();
+            contractText.value = '';
+            contractText.style.height = 'auto';
+            lastAnalysisData = null;
+            const wrapper = document.getElementById('results-container-wrapper');
+            wrapper.classList.add('items-center', 'justify-center', 'p-4');
+            wrapper.classList.remove('block', 'p-2', 'overflow-y-auto', 'max-h-[520px]');
+            
+            const output = document.getElementById('analysis-output');
+            output.innerHTML = 'Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».';
+        }
+
+        async function sendFeedback() {
+            const feedbackText = document.getElementById('feedback-text').value.trim();
+            if (!feedbackText && selectedRating === 0) {
+                alert('Пожалуйста, оставьте текст отзыва или оценку.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: 'Оценка анализа',
+                        rating: selectedRating,
+                        sentiment: selectedSentiment,
+                        feedback: feedbackText,
+                        doc_type: document.querySelector('#doc-type-group .chip-btn.active')?.dataset.value || 'Общий',
+                        jurisdiction: document.querySelector('#jurisdiction-group .chip-btn.active')?.dataset.value || 'Россия (РФ)'
+                    })
+                });
+                if (response.ok) {
+                    alert('Спасибо! Ваш отзыв успешно отправлен.');
+                    document.getElementById('feedback-text').value = '';
+                } else {
+                    alert('Не удалось отправить отзыв.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Ошибка сети при отправке отзыва.');
+            }
+        }
+    </script>
+</body>
+</html>
