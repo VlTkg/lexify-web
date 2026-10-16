@@ -81,9 +81,15 @@
     <div class="max-w-7xl mx-auto space-y-3">
         
         <!-- Header -->
-        <header class="mb-1">
-            <h1 class="text-2xl font-bold tracking-tight text-white">Lexify</h1>
-            <p class="text-xs text-slate-200">Сервис автоматической проверки договоров для фрилансеров и специалистов</p>
+        <header class="mb-1 flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight text-white">Lexify</h1>
+                <p class="text-xs text-slate-200">Сервис автоматической проверки договоров для фрилансеров и специалистов</p>
+            </div>
+            <!-- Счетчик проверок для Telegram-пользователей -->
+            <div id="user-badge" class="bg-slate-700/80 px-3 py-1.5 rounded-xl border border-slate-500 text-xs text-slate-100 hidden shadow-sm">
+                Бесплатных проверок: <span id="checks-count" class="font-bold text-amber-400">3</span>
+            </div>
         </header>
 
         <!-- Main Grid Layout -->
@@ -246,9 +252,29 @@
     <!-- Application Script -->
     <script>
         const tg = window.Telegram?.WebApp;
+        let initDataUser = null;
+
         if (tg) {
             tg.ready();
             tg.expand();
+            initDataUser = tg.initDataUnsafe?.user;
+
+            if (initDataUser) {
+                document.getElementById('user-badge').classList.remove('hidden');
+                fetchUserBalance(initDataUser.id);
+            }
+        }
+
+        async function fetchUserBalance(telegramId) {
+            try {
+                const response = await fetch(`/user-info/${telegramId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('checks-count').textContent = data.free_checks_left;
+                }
+            } catch (err) {
+                console.error("Не удалось получить данные пользователя:", err);
+            }
         }
 
         const dropzone = document.getElementById('dropzone');
@@ -412,13 +438,19 @@
                     body: JSON.stringify({
                         text: textToSend,
                         doc_type: docType,
-                        jurisdiction: jurisdiction
+                        jurisdiction: jurisdiction,
+                        telegram_id: initDataUser ? initDataUser.id : null,
+                        first_name: initDataUser ? initDataUser.first_name : '',
+                        username: initDataUser ? initDataUser.username : ''
                     })
                 });
                 const data = await response.json();
 
                 if (response.ok && data.result) {
                     renderDashboard(data.result);
+                    if (data.checks_left !== undefined) {
+                        document.getElementById('checks-count').textContent = data.checks_left;
+                    }
                 } else {
                     alert('Ошибка анализа: ' + (data.detail || 'Не удалось получить ответ.'));
                 }
