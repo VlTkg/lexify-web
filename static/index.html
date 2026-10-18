@@ -558,7 +558,6 @@
                     renderDashboard(data.result);
                     document.getElementById('protocol-btn').classList.remove('hidden');
                     
-                    // Автоматический плавный скролл к блоку результатов
                     const resultsCard = document.getElementById('results-card');
                     if (resultsCard) {
                         resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -678,7 +677,7 @@
             const btn = document.getElementById('protocol-btn');
             if (btn) {
                 btn.disabled = true;
-                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Отправка в чат...</span>`;
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Скачивание...</span>`;
             }
 
             try {
@@ -700,31 +699,21 @@
 
                 if (!response.ok) throw new Error('Ошибка генерации');
 
-                const data = await response.json().catch(() => null);
+                // Прямое скачивание файла через Blob
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'Protocol_Raznogasiy.docx';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
 
-                if (initDataUser) {
-                    if (tg?.showAlert) {
-                        tg.showAlert('📄 Протокол успешно отправлен в ваш чат с ботом!', () => {
-                            if (typeof tg.close === 'function') tg.close();
-                        });
-                    } else {
-                        alert('📄 Протокол успешно отправлен в ваш чат с ботом!');
-                        if (typeof tg.close === 'function') tg.close();
-                    }
-                } else {
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'Protocol_Raznogasiy.docx';
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    a.remove();
-                }
+                if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
 
             } catch (error) {
-                console.error('Ошибка отправки протокола:', error);
+                console.error('Ошибка скачивания протокола:', error);
                 alert('Не удалось сформировать протокол.');
             } finally {
                 if (btn) {
