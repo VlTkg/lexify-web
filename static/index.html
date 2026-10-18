@@ -558,7 +558,7 @@
                     renderDashboard(data.result);
                     document.getElementById('protocol-btn').classList.remove('hidden');
                     
-                    // Автоматический плавный скролл к блоку результатов
+                    # Автоматический плавный скролл к блоку результатов
                     const resultsCard = document.getElementById('results-card');
                     if (resultsCard) {
                         resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -676,7 +676,10 @@
 
         async function generateProtocol() {
             const btn = document.getElementById('protocol-btn');
-            if (btn) btn.disabled = true;
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Отправка в чат...</span>`;
+            }
 
             try {
                 const docType = document.querySelector('#doc-type-group .chip-btn.active')?.dataset.value || 'Общий';
@@ -695,11 +698,9 @@
                     body: JSON.stringify(payload)
                 });
 
-                if (!response.ok) {
-                    throw new Error('Ошибка генерации файла');
-                }
+                if (!response.ok) throw new Error('Ошибка генерации');
 
-                // Прямое скачивание файла в виде Blob для 100% совместимости с браузером и Telegram WebApp
+                // Прямое скачивание файла через Blob (для ПК / браузера)
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -711,14 +712,17 @@
                 a.remove();
 
                 if (initDataUser && tg?.showAlert) {
-                    tg.showAlert('📄 Протокол разногласий скачан и отправлен в чат!');
+                    tg.showAlert('📄 Протокол разногласий успешно сформирован и отправлен в чат!');
                 }
 
             } catch (error) {
-                console.error('Ошибка скачивания протокола:', error);
+                console.error('Ошибка отправки протокола:', error);
                 alert('Не удалось сформировать протокол.');
             } finally {
-                if (btn) btn.disabled = false;
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-solid fa-file-word text-blue-400"></i> <span>Скачать протокол</span>`;
+                }
             }
         }
 
