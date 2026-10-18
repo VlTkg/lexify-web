@@ -207,10 +207,10 @@
 
                     <div class="flex items-center gap-4 text-xs text-slate-600">
                         <label class="flex items-center gap-1.5 cursor-pointer">
-                            <input type="radio" name="fb-type" checked class="accent-blue-600"> Оценка анализа
+                            <input type="radio" name="fb-type" value="Оценка анализа" checked class="accent-blue-600"> Оценка анализа
                         </label>
                         <label class="flex items-center gap-1.5 cursor-pointer">
-                            <input type="radio" name="fb-type" class="accent-blue-600"> Баг / Ошибка
+                            <input type="radio" name="fb-type" value="Баг / Ошибка" class="accent-blue-600"> Баг / Ошибка
                         </label>
                     </div>
 
@@ -238,8 +238,12 @@
             <!-- RIGHT COLUMN: Analysis Results -->
             <aside class="lg:col-span-5 flex flex-col">
                 <div id="results-card" class="tg-card bg-white p-4 rounded-2xl border shadow-sm flex-1 flex flex-col min-h-[460px]">
-                    <div class="border-b border-slate-100 pb-2">
+                    <div class="border-b border-slate-100 pb-2 flex items-center justify-between">
                         <h2 class="font-bold text-sm text-slate-900">Результаты анализа</h2>
+                        <button type="button" id="protocol-btn" onclick="generateProtocol()" class="hidden bg-slate-800 hover:bg-slate-900 text-white font-medium px-3 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-xs">
+                            <i class="fa-solid fa-file-word text-blue-400"></i>
+                            <span>Скачать протокол</span>
+                        </button>
                     </div>
                     <div class="flex-1 flex items-center justify-center p-4" id="results-container-wrapper">
                         <div id="analysis-output" class="text-xs text-slate-700 leading-relaxed text-center w-full">
@@ -552,6 +556,7 @@
                     }
                     
                     renderDashboard(data.result);
+                    document.getElementById('protocol-btn').classList.remove('hidden');
                     
                     if (data.checks_left !== undefined && data.checks_left !== null) {
                         document.getElementById('checks-count').textContent = data.checks_left;
@@ -605,63 +610,53 @@
             }
 
             let html = `
-                <div class="space-y-3">
+                <div class="space-y-3 text-left">
                     <div class="p-3 rounded-xl border ${riskBg} flex items-center justify-between shadow-xs">
                         <div class="flex items-center gap-2">
                             <i class="fa-solid ${riskIcon} text-sm"></i>
                             <div>
-                                <div class="text-[10px] uppercase font-bold tracking-wider opacity-75">Общий риск</div>
-                                <div class="text-xs font-bold">${res.overall_risk_level}</div>
+                                <div class="text-[10px] uppercase font-bold opacity-80">Общий уровень риска</div>
+                                <div class="font-bold text-xs">${res.overall_risk_level || 'Не определен'}</div>
                             </div>
                         </div>
-                        <button type="button" onclick="downloadProtocol()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1.5 shadow-xs">
-                            <i class="fa-solid fa-file-word"></i> Скачать протокол (.docx)
-                        </button>
                     </div>
 
-                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-xs text-slate-700 leading-snug">
-                        <strong>Резюме:</strong> ${res.summary}
-                    </div>
+                    ${res.summary ? `
+                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 leading-relaxed">
+                            <div class="font-bold text-slate-900 mb-1">Резюме юриста:</div>
+                            ${res.summary}
+                        </div>
+                    ` : ''}
 
-                    <div class="space-y-2.5">
+                    <div class="space-y-2">
+                        <div class="font-bold text-xs text-slate-900">Выявленные риски и правки:</div>
             `;
 
-            if (res.risks && res.risks.length > 0) {
-                res.risks.forEach((risk, index) => {
-                    let borderColor = 'border-l-green-500';
-                    let iconName = 'fa-check text-green-600';
-
-                    if (risk.category === 'red') {
-                        borderColor = 'border-l-red-500';
-                        iconName = 'fa-xmark text-red-600';
-                    } else if (risk.category === 'yellow') {
-                        borderColor = 'border-l-amber-500';
-                        iconName = 'fa-triangle-exclamation text-amber-600';
+            if (res.risks && Array.isArray(res.risks)) {
+                res.risks.forEach(item => {
+                    let catColor = 'border-l-4 border-l-amber-500 bg-amber-50/50';
+                    let catBadge = 'bg-amber-100 text-amber-800';
+                    
+                    if (item.category === 'red') {
+                        catColor = 'border-l-4 border-l-red-500 bg-red-50/50';
+                        catBadge = 'bg-red-100 text-red-800';
+                    } else if (item.category === 'green') {
+                        catColor = 'border-l-4 border-l-emerald-500 bg-emerald-50/50';
+                        catBadge = 'bg-emerald-100 text-emerald-800';
                     }
 
                     html += `
-                        <div class="bg-white p-3 rounded-xl border border-slate-200 border-l-4 ${borderColor} shadow-xs space-y-2 text-xs">
-                            <div class="flex items-center justify-between">
-                                <span class="font-bold text-slate-900 flex items-center gap-1.5">
-                                    <i class="fa-solid ${iconName}"></i> ${risk.title}
-                                </span>
+                        <div class="p-3 rounded-xl border border-slate-200 ${catColor} space-y-1.5">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="font-bold text-xs text-slate-900">${item.title || 'Риск'}</span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold ${catBadge}">${item.category === 'red' ? 'Критично' : item.category === 'green' ? 'Выгодно' : 'Внимание'}</span>
                             </div>
-
-                            ${risk.quote ? `<div class="bg-slate-50 p-1.5 rounded text-[11px] text-slate-600 italic border border-slate-100">«${risk.quote}»</div>` : ''}
-                            
-                            <div class="text-slate-700 leading-tight">
-                                <strong class="text-slate-900">В чем риск:</strong> ${risk.explanation}
-                            </div>
-
-                            ${risk.recommendation ? `
-                                <div class="pt-1 border-t border-slate-100 space-y-1">
-                                    <div class="text-[10px] uppercase font-bold text-blue-600">Готовый ответ / Правка:</div>
-                                    <div class="bg-blue-50/50 p-2 rounded-lg text-slate-800 font-medium border border-blue-100 select-all" id="rec-text-${index}">
-                                        ${risk.recommendation}
-                                    </div>
-                                    <button type="button" onclick="copyRecommendation(${index})" class="mt-1 text-[11px] bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-2.5 rounded-lg transition-all flex items-center gap-1 shadow-xs">
-                                        <i class="fa-regular fa-copy"></i> <span id="copy-btn-text-${index}">Скопировать правку</span>
-                                    </button>
+                            ${item.quote ? `<div class="text-[11px] text-slate-600 italic bg-white p-2 rounded border border-slate-150">"${item.quote}"</div>` : ''}
+                            ${item.explanation ? `<div class="text-xs text-slate-700">${item.explanation}</div>` : ''}
+                            ${item.recommendation ? `
+                                <div class="mt-2 text-xs bg-blue-50 border border-blue-200 p-2 rounded-lg text-blue-900">
+                                    <div class="font-bold text-[10px] text-blue-700 uppercase mb-0.5">Предлагаемая правка:</div>
+                                    ${item.recommendation}
                                 </div>
                             ` : ''}
                         </div>
@@ -670,115 +665,130 @@
             }
 
             html += `</div></div>`;
-
             document.getElementById('analysis-output').innerHTML = html;
-
-            const resultsCard = document.getElementById('results-card');
-            if (resultsCard) {
-                resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
         }
 
-        async function downloadProtocol() {
-            if (!lastAnalysisData || !lastAnalysisData.risks) {
-                alert('Нет данных для формирования протокола разногласий.');
-                return;
-            }
-
-            const docType = document.querySelector('#doc-type-group .chip-btn.active')?.dataset.value || 'Общий';
-            const jurisdiction = document.querySelector('#jurisdiction-group .chip-btn.active')?.dataset.value || 'Россия (РФ)';
+        async function generateProtocol() {
+            const btn = document.getElementById('protocol-btn');
+            if (btn) btn.disabled = true;
 
             try {
+                const docType = document.querySelector('#doc-type-group .chip-btn.active')?.dataset.value || 'Общий';
+                const jurisdiction = document.querySelector('#jurisdiction-group .chip-btn.active')?.dataset.value || 'Россия (РФ)';
+
+                const payload = {
+                    doc_type: docType,
+                    jurisdiction: jurisdiction,
+                    telegram_id: initDataUser ? initDataUser.id : null,
+                    risks: lastAnalysisData && lastAnalysisData.risks ? lastAnalysisData.risks : []
+                };
+
                 const response = await fetch('/generate-protocol', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        doc_type: docType,
-                        jurisdiction: jurisdiction,
-                        risks: lastAnalysisData.risks
-                    })
+                    body: JSON.stringify(payload)
                 });
 
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'Protocol_Raznogasiy.docx';
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    window.URL.revokeObjectURL(url);
-                    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                } else {
-                    alert('Не удалось сгенерировать документ.');
+                if (!response.ok) {
+                    throw new Error('Ошибка генерации файла');
                 }
-            } catch (err) {
-                console.error(err);
-                alert('Ошибка сети при скачивании файла.');
-            }
-        }
 
-        function copyRecommendation(index) {
-            const textElement = document.getElementById(`rec-text-${index}`);
-            const btnText = document.getElementById(`copy-btn-text-${index}`);
-            
-            if (textElement) {
-                navigator.clipboard.writeText(textElement.innerText).then(() => {
-                    btnText.textContent = 'Скопировано!';
-                    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                    setTimeout(() => {
-                        btnText.textContent = 'Скопировать правку';
-                    }, 2000);
-                }).catch(err => {
-                    console.error('Ошибка копирования:', err);
-                    alert('Не удалось скопировать текст.');
-                });
+                // Внутри Telegram — получаем подтверждение и уведомляем пользователя
+                if (initDataUser) {
+                    const result = await response.json().catch(() => null);
+                    if (result && result.status === 'ok') {
+                        if (tg?.showAlert) {
+                            tg.showAlert('📄 Протокол разногласий отправлен вам прямо в чат с ботом!');
+                        } else {
+                            alert('📄 Протокол разногласий отправлен вам прямо в чат с ботом!');
+                        }
+                        return;
+                    }
+                }
+
+                // В обычном браузерах (вне Telegram)
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'Protocol_Raznogasiy.docx';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+
+            } catch (error) {
+                console.error('Ошибка скачивания протокола:', error);
+                alert('Не удалось сформировать протокол.');
+            } finally {
+                if (btn) btn.disabled = false;
             }
         }
 
         function resetForm() {
-            if (removeFileBtn) removeFileBtn.click();
+            selectedFile = null;
+            fileInput.value = '';
             contractText.value = '';
             contractText.style.height = 'auto';
-            lastAnalysisData = null;
+            fileSelectedInfo.classList.add('hidden');
+            dropzonePrompt.classList.remove('hidden');
+            document.getElementById('protocol-btn').classList.add('hidden');
+
             const wrapper = document.getElementById('results-container-wrapper');
-            wrapper.classList.add('items-center', 'justify-center', 'p-4');
-            wrapper.classList.remove('block', 'p-2', 'overflow-y-auto', 'max-h-[520px]');
-            
+            wrapper.classList.remove('block', 'p-2', 'overflow-y-auto');
+            wrapper.classList.add('flex', 'items-center', 'justify-center', 'p-4');
+
             const output = document.getElementById('analysis-output');
+            output.classList.remove('text-left');
+            output.classList.add('text-center');
             output.innerHTML = 'Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».';
+
+            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
         }
 
         async function sendFeedback() {
-            const feedbackText = document.getElementById('feedback-text').value.trim();
-            if (!feedbackText && selectedRating === 0) {
-                alert('Пожалуйста, оставьте текст отзыва или оценку.');
+            const text = document.getElementById('feedback-text').value.trim();
+            const fbTypeEl = document.querySelector('input[name="fb-type"]:checked');
+            const fbType = fbTypeEl ? fbTypeEl.value : 'Оценка анализа';
+            const docType = document.querySelector('#doc-type-group .chip-btn.active')?.dataset.value || 'Общий';
+            const jurisdiction = document.querySelector('#jurisdiction-group .chip-btn.active')?.dataset.value || 'Россия (РФ)';
+
+            if (!text && !selectedSentiment) {
+                alert('Пожалуйста, напишите сообщение или выберите кнопку оценки.');
                 return;
             }
+
+            const sendBtn = document.getElementById('send-fb-btn');
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Отправка...</span>`;
 
             try {
                 const response = await fetch('/feedback', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        type: 'Оценка анализа',
+                        type: fbType,
                         rating: selectedRating,
                         sentiment: selectedSentiment,
-                        feedback: feedbackText,
-                        doc_type: document.querySelector('#doc-type-group .chip-btn.active')?.dataset.value || 'Общий',
-                        jurisdiction: document.querySelector('#jurisdiction-group .chip-btn.active')?.dataset.value || 'Россия (РФ)'
+                        feedback: text,
+                        doc_type: docType,
+                        jurisdiction: jurisdiction
                     })
                 });
+
                 if (response.ok) {
-                    alert('Спасибо! Ваш отзыв успешно отправлен.');
+                    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                    alert('Спасибо за ваш отзыв! Он поможет нам сделать сервис лучше.');
                     document.getElementById('feedback-text').value = '';
                 } else {
-                    alert('Не удалось отправить отзыв.');
+                    alert('Не удалось отправить отзыв. Попробуйте еще раз.');
                 }
             } catch (err) {
                 console.error(err);
                 alert('Ошибка сети при отправке отзыва.');
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = `<i class="fa-regular fa-paper-plane text-xs"></i> <span>Отправить отзыв</span>`;
             }
         }
     </script>
