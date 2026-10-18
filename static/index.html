@@ -558,7 +558,7 @@
                     renderDashboard(data.result);
                     document.getElementById('protocol-btn').classList.remove('hidden');
                     
-                    # Автоматический плавный скролл к блоку результатов
+                    // Автоматический плавный скролл к блоку результатов
                     const resultsCard = document.getElementById('results-card');
                     if (resultsCard) {
                         resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -678,7 +678,7 @@
             const btn = document.getElementById('protocol-btn');
             if (btn) {
                 btn.disabled = true;
-                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Отправка в чат...</span>`;
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Формирование...</span>`;
             }
 
             try {
@@ -712,7 +712,7 @@
                 a.remove();
 
                 if (initDataUser && tg?.showAlert) {
-                    tg.showAlert('📄 Протокол разногласий успешно сформирован и отправлен в чат!');
+                    tg.showAlert('📄 Протокол разногласий успешно сформирован!');
                 }
 
             } catch (error) {
