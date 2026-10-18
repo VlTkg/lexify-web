@@ -389,10 +389,12 @@ async def generate_protocol(data: ProtocolRequest):
                 )
                 if tg_resp.status_code == 200:
                     return {"status": "ok", "message": "Файл успешно отправлен в чат с ботом!"}
+                else:
+                    print(f"Telegram API error: {tg_resp.text}")
         except Exception as e:
             print(f"Ошибка отправки файла в Telegram: {e}")
 
-    # Фолбэк для браузера
+    # Фолбэк для обычного браузера
     return StreamingResponse(
         io.BytesIO(file_bytes),
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
