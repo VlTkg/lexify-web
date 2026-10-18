@@ -32,6 +32,9 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "") # Токен вашего Telegram бота от BotFather
 
+# Список Telegram ID администраторов / разработчиков с безлимитными проверками
+ADMIN_IDS = [8804083078]
+
 # Настройка подключения к PostgreSQL через SQLAlchemy
 if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
@@ -138,6 +141,9 @@ async def serve_index():
 # Эндпоинт для получения информации о пользователе и остатке лимита
 @app.get("/user-info/{telegram_id}")
 async def get_user_info(telegram_id: int):
+    if telegram_id in ADMIN_IDS:
+        return {"telegram_id": telegram_id, "free_checks_left": 999, "is_pro": True}
+
     if not SessionLocal:
         return {"telegram_id": telegram_id, "free_checks_left": 3, "is_pro": False}
     
@@ -400,7 +406,10 @@ async def analyze_contract(data: AnalyzeSchema):
                 db.commit()
                 db.refresh(user)
             
-            if not user.is_pro:
+            # Проверка администратора или PRO-статуса
+            if int(data.telegram_id) in ADMIN_IDS or user.is_pro:
+                checks_left = 999  # Безлимитные проверки для администратора
+            else:
                 if user.free_checks_left <= 0:
                     raise HTTPException(
                         status_code=403, 
@@ -409,8 +418,8 @@ async def analyze_contract(data: AnalyzeSchema):
                 user.free_checks_left -= 1
                 db.commit()
                 db.refresh(user)
-            
-            checks_left = user.free_checks_left
+                checks_left = user.free_checks_left
+
         except HTTPException as he:
             raise he
         except Exception as db_err:
