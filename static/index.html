@@ -678,7 +678,7 @@
             const btn = document.getElementById('protocol-btn');
             if (btn) {
                 btn.disabled = true;
-                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Формирование...</span>`;
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Отправка в чат...</span>`;
             }
 
             try {
@@ -700,19 +700,14 @@
 
                 if (!response.ok) throw new Error('Ошибка генерации');
 
-                // Прямое скачивание файла через Blob (для ПК / браузера)
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'Protocol_Raznogasiy.docx';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                a.remove();
+                const data = await response.json().catch(() => null);
 
                 if (initDataUser && tg?.showAlert) {
-                    tg.showAlert('📄 Протокол разногласий успешно сформирован!');
+                    tg.showAlert('📄 Протокол успешно отправлен в ваш чат с ботом!', () => {
+                        if (typeof tg.close === 'function') tg.close();
+                    });
+                } else {
+                    alert('📄 Протокол успешно отправлен в ваш чат с ботом!');
                 }
 
             } catch (error) {
