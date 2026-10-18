@@ -115,9 +115,9 @@ class InvoiceRequest(BaseModel):
 class RiskItem(BaseModel):
     category: str  # 'red', 'yellow', 'green'
     title: str     # Краткий заголовок риска
-    quote: str     # Цитата или упоминание пункта договора
+    quote: str     # Цитата или фрагмент пункта договора в редакции Заказчика
     explanation: str  # В чем заключается риск для фрилансера/исполнителя
-    recommendation: str  # Готовый текст правки или рекомендация для общения с заказчиком
+    recommendation: str  # Предлагаемая редакция Исполнителя
 
 class AnalysisResponse(BaseModel):
     overall_risk_level: str  # 'Низкий', 'Средний', 'Высокий'
@@ -196,7 +196,7 @@ async def create_invoice(data: InvoiceRequest):
         else:
             raise HTTPException(status_code=500, detail=f"Ошибка создания счета Telegram: {res_data.get('description')}")
 
-# Webhook для получения обновлений от Telegram (обработка успешных платежей с защитой от дубликатов)
+# Webhook для получения обновлений от Telegram
 @app.post("/telegram-webhook")
 async def telegram_webhook(request: Request):
     body = await request.json()
@@ -257,14 +257,11 @@ def set_cell_margins(cell, top=100, bottom=100, left=150, right=150):
     tcPr.append(tcMar)
 
 def clean_text(val: Optional[str]) -> str:
-    """Полная нормализация Юникода и замена проблемных символов/неразрывных пробелов"""
+    """Глубокая нормализация Юникода и безопасная очистка непечатаемых символов"""
     if not val:
         return ""
-    # Нормализуем юникод (заменяем спецузлы вроде \xa0 на обычный пробел)
     text_str = unicodedata.normalize("NFKC", str(val))
-    # Заменяем все виды неразрывных/нулевых пробелов на обычные
     text_str = re.sub(r'[\xa0\u200b\u202f\u200e\u200f\ufeff]', ' ', text_str)
-    # Удаляем непечатаемые управляющие байты
     text_str = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]', '', text_str)
     return text_str.strip()
 
@@ -349,8 +346,9 @@ async def generate_protocol(data: ProtocolRequest):
             if row_cells[0].paragraphs[0].runs:
                 row_cells[0].paragraphs[0].runs[0].bold = True
 
-            row_cells[1].text = clean_text(risk.quote)
-            row_cells[2].text = clean_text(risk.recommendation)
+            # Во второй столбец помещается полный очищенный текст цитаты из договора
+            row_cells[1].text = clean_text(risk.quote) or "—"
+            row_cells[2].text = clean_text(risk.recommendation) or "—"
             row_cells[3].text = clean_text(risk.explanation) or "Защита интересов исполнителя"
 
     doc.add_paragraph("\n")
@@ -395,7 +393,7 @@ async def generate_protocol(data: ProtocolRequest):
         except Exception as e:
             print(f"Ошибка отправки файла в Telegram: {e}")
 
-    # Фолбэк для браузера (если вызов вне Telegram)
+    # Фолбэк для браузера
     return StreamingResponse(
         io.BytesIO(file_bytes),
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -428,7 +426,7 @@ async def analyze_contract(data: AnalyzeSchema):
     if not ai_client:
         raise HTTPException(status_code=500, detail="GEMINI_API_KEY не настроен на сервере.")
 
-    # Предварительная чистка входящего текста договора
+    # Очистка входящего текста договора
     contract_content = clean_text(data.text)
     if not contract_content:
         raise HTTPException(status_code=400, detail="Текст договора пуст.")
@@ -490,9 +488,9 @@ async def analyze_contract(data: AnalyzeSchema):
 3. `risks`: Список выявленных пунктов и рисков (3-6 пунктов). Для каждого укажи:
    - `category`: Цветовой маркер риска ('red' — критический, 'yellow' — средний/внимание, 'green' — безопасное/выгодное условие).
    - `title`: Четкое название риска (например, "Неограниченный штраф за задержку", "Передача прав до оплаты").
-   - `quote`: Точный номер пункта и заголовок (например, "Пункт 7.2" или "Раздел 5"). Не пиши длинных цитат с символами, давай только короткую привязку к номеру пункта!
+   - `quote`: Точная цитата спорного пункта из договора в редакции Заказчика (например: "Пункт 7.2. В случае нарушения сроков сдачи работ Исполнитель выплачивает штраф в размере 100%"). Обязательно приводи саму цитату спорного правила!
    - `explanation`: Чем именно это условие грозит Исполнителю.
-   - `recommendation`: Готовая формулировка правки, которую фрилансер может скопировать и выслать заказчику для защиты своих интересов.
+   - `recommendation`: Предлагаемая редакция Исполнителя (готовая формулировка пункта с выгодой для фрилансера).
 """
 
     try:
