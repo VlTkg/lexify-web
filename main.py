@@ -378,7 +378,7 @@ async def generate_protocol(data: ProtocolRequest):
         except Exception as e:
             print(f"Ошибка отправки файла в Telegram: {e}")
 
-    # Фолбэк для браузёра (если вызов вне Telegram)
+    # Фолбэк для браузера (если вызов вне Telegram)
     return StreamingResponse(
         io.BytesIO(file_bytes),
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -402,4 +402,113 @@ async def receive_feedback(data: FeedbackSchema):
                 return {"status": "ok", "message": "Feedback saved to Google Sheet"}
             else:
                 raise HTTPException(status_code=500, detail="Failed to post to Google Sheet")
-    except Exception
+    except Exception as e:
+        print(f"Error sending feedback: {e}")
+        return {"status": "error", "detail": str(e)}
+
+@app.post("/analyze")
+async def analyze_contract(data: AnalyzeSchema):
+    if not ai_client:
+        raise HTTPException(status_code=500, detail="GEMINI_API_KEY не настроен на сервере.")
+
+    contract_content = data.text.strip()
+    if not contract_content:
+        raise HTTPException(status_code=400, detail="Текст договора пуст.")
+
+    checks_left = 3
+    if data.telegram_id and SessionLocal:
+        db = SessionLocal()
+        try:
+            user = db.query(UserDB).filter(UserDB.telegram_id == int(data.telegram_id)).first()
+            if not user:
+                user = UserDB(
+                    telegram_id=int(data.telegram_id),
+                    first_name=data.first_name or "",
+                    username=data.username or "",
+                    free_checks_left=3
+                )
+                db.add(user)
+                db.commit()
+                db.refresh(user)
+            
+            # Проверка администратора или PRO-статуса
+            if int(data.telegram_id) in ADMIN_IDS or user.is_pro:
+                checks_left = 999  # Безлимитные проверки для администратора
+            else:
+                if user.free_checks_left <= 0:
+                    raise HTTPException(
+                        status_code=403, 
+                        detail="У вас закончились бесплатные проверки. Пополните баланс звездами Telegram!"
+                    )
+                user.free_checks_left -= 1
+                db.commit()
+                db.refresh(user)
+                checks_left = user.free_checks_left
+
+        except HTTPException as he:
+            raise he
+        except Exception as db_err:
+            print(f"Ошибка работы с БД пользователей: {db_err}")
+        finally:
+            db.close()
+
+    prompt = f"""
+Ты — профессиональный юрист-аналитик, специализирующийся на защите интересов фрилансеров, подрядчиков и специалистов.
+Проведи экспресс-анализ представленного договора и выяви потенциальные риски для Исполнителя.
+Пиши современным, понятным и деловым языком. Избегай архаичных юридических канцеляризмов (не используй слова вроде «кабальный», заменяй их на «неприемлемые условия», «критические риски» или «односторонние невыгодные ограничения»).
+
+Контекст анализа:
+- Тип договора / Занятость: {data.doc_type}
+- Юрисдикция: {data.jurisdiction}
+
+Текст договора:
+---
+{contract_content[:15000]}
+---
+
+Сформируй разбор строго в формате JSON:
+1. `overall_risk_level`: Оцени общий уровень риска (строго одно из значений: 'Низкий', 'Средний', 'Высокий').
+2. `summary`: Краткий вывод по договору в 1-2 предложениях (без канцелярита).
+3. `risks`: Список выявленных пунктов и рисков (3-6 пунктов). Для каждого укажи:
+   - `category`: Цветовой маркер риска ('red' — критический, 'yellow' — средний/внимание, 'green' — безопасное/выгодное условие).
+   - `title`: Четкое название риска (например, "Неограниченный штраф за задержку", "Передача прав до оплаты").
+   - `quote`: Цитата или фрагмент пункта договора (если применимо).
+   - `explanation`: Чем именно это условие грозит Исполнителю.
+   - `recommendation`: Готовая формулировка правки, которую фрилансер может скопировать и выслать заказчику для защиты своих интересов.
+"""
+
+    try:
+        response = ai_client.models.generate_content(
+            model="gemini-3.8-flash",
+            contents=prompt,
+            config={
+                "response_mime_type": "application/json",
+                "response_schema": AnalysisResponse,
+            }
+        )
+        
+        if SessionLocal:
+            try:
+                db = SessionLocal()
+                db_log = AnalysisLogDB(
+                    telegram_id=int(data.telegram_id) if data.telegram_id else None,
+                    doc_type=data.doc_type,
+                    jurisdiction=data.jurisdiction,
+                    risk_level="Анализ выполнен"
+                )
+                db.add(db_log)
+                db.commit()
+                db.close()
+            except Exception as db_err:
+                print(f"Ошибка сохранения лога в БД: {db_err}")
+
+        return {
+            "status": "ok", 
+            "result": response.text,
+            "checks_left": checks_left
+        }
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        print(f"Gemini API error: {e}")
+        raise HTTPException(status_code=500, detail=f"Ошибка анализа через Gemini API: {str(e)}")
