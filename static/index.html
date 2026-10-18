@@ -702,12 +702,25 @@
 
                 const data = await response.json().catch(() => null);
 
-                if (initDataUser && tg?.showAlert) {
-                    tg.showAlert('📄 Протокол успешно отправлен в ваш чат с ботом!', () => {
+                if (initDataUser) {
+                    if (tg?.showAlert) {
+                        tg.showAlert('📄 Протокол успешно отправлен в ваш чат с ботом!', () => {
+                            if (typeof tg.close === 'function') tg.close();
+                        });
+                    } else {
+                        alert('📄 Протокол успешно отправлен в ваш чат с ботом!');
                         if (typeof tg.close === 'function') tg.close();
-                    });
+                    }
                 } else {
-                    alert('📄 Протокол успешно отправлен в ваш чат с ботом!');
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'Protocol_Raznogasiy.docx';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    a.remove();
                 }
 
             } catch (error) {
