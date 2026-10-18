@@ -254,6 +254,12 @@ def set_cell_margins(cell, top=100, bottom=100, left=150, right=150):
         tcMar.append(node)
     tcPr.append(tcMar)
 
+def clean_text(val: Optional[str]) -> str:
+    """Очистка строк от управляющих или некорректных символов кодировки"""
+    if not val:
+        return ""
+    return str(val).encode('utf-8', 'ignore').decode('utf-8')
+
 # Эндпоинт генерации Протокола разногласий в профессиональном стиле .docx
 @app.post("/generate-protocol")
 async def generate_protocol(data: ProtocolRequest):
@@ -282,7 +288,7 @@ async def generate_protocol(data: ProtocolRequest):
 
     sub_p = doc.add_paragraph()
     sub_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    sub_run = sub_p.add_run(f"к проекту договора ({data.doc_type}), юрисдикция: {data.jurisdiction}\n")
+    sub_run = sub_p.add_run(f"к проекту договора ({clean_text(data.doc_type)}), юрисдикция: {clean_text(data.jurisdiction)}\n")
     sub_run.font.size = Pt(12)
     sub_run.italic = True
     sub_run.font.color.rgb = RGBColor(0x4B, 0x55, 0x63)
@@ -330,11 +336,14 @@ async def generate_protocol(data: ProtocolRequest):
                 row_cells[i].width = col_widths[i]
                 set_cell_margins(row_cells[i], top=100, bottom=100, left=100, right=100)
 
-            row_cells[0].text = risk.title or "—"
-            row_cells[0].paragraphs[0].runs[0].bold = True
-            row_cells[1].text = risk.quote or ""
-            row_cells[2].text = risk.recommendation or ""
-            row_cells[3].text = risk.explanation or "Защита интересов исполнителя"
+            title_clean = clean_text(risk.title) or "—"
+            row_cells[0].text = title_clean
+            if row_cells[0].paragraphs[0].runs:
+                row_cells[0].paragraphs[0].runs[0].bold = True
+
+            row_cells[1].text = clean_text(risk.quote)
+            row_cells[2].text = clean_text(risk.recommendation)
+            row_cells[3].text = clean_text(risk.explanation) or "Защита интересов исполнителя"
 
     doc.add_paragraph("\n")
     doc.add_paragraph("Настоящий Протокол разногласий является неотъемлемой частью Договора.\n")
