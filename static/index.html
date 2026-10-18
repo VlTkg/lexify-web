@@ -677,7 +677,7 @@
             const btn = document.getElementById('protocol-btn');
             if (btn) {
                 btn.disabled = true;
-                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Скачивание...</span>`;
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Сохранение...</span>`;
             }
 
             try {
@@ -699,8 +699,29 @@
 
                 if (!response.ok) throw new Error('Ошибка генерации');
 
-                // Прямое скачивание файла через Blob
                 const blob = await response.blob();
+
+                // На ПК вызываем диалоговое окно выбора папки «Сохранить как...»
+                if (window.showSaveFilePicker) {
+                    try {
+                        const handle = await window.showSaveFilePicker({
+                            suggestedName: 'Protocol_Raznogasiy.docx',
+                            types: [{
+                                description: 'Word Document',
+                                accept: { 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'] },
+                            }],
+                        });
+                        const writable = await handle.createWritable();
+                        await writable.write(blob);
+                        await writable.close();
+                        if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                        return;
+                    } catch (err) {
+                        if (err.name === 'AbortError') return; // Отмена пользователем
+                    }
+                }
+
+                // Стандартное скачивание (для мобильных телефонов и браузеров без showSaveFilePicker)
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
