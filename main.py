@@ -1,6 +1,7 @@
 import os
 import io
 import httpx
+import re
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, StreamingResponse
@@ -255,10 +256,13 @@ def set_cell_margins(cell, top=100, bottom=100, left=150, right=150):
     tcPr.append(tcMar)
 
 def clean_text(val: Optional[str]) -> str:
-    """Очистка строк от управляющих или некорректных символов кодировки"""
+    """Глубокая очистка строк от битых символов и проблемных UTF-8 багов"""
     if not val:
         return ""
-    return str(val).encode('utf-8', 'ignore').decode('utf-8')
+    text_str = str(val)
+    # Заменяем некорректные непечатаемые символы и битый юникод
+    text_str = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]', '', text_str)
+    return text_str.encode('utf-8', 'ignore').decode('utf-8')
 
 # Эндпоинт генерации Протокола разногласий в профессиональном стиле .docx
 @app.post("/generate-protocol")
@@ -420,7 +424,8 @@ async def analyze_contract(data: AnalyzeSchema):
     if not ai_client:
         raise HTTPException(status_code=500, detail="GEMINI_API_KEY не настроен на сервере.")
 
-    contract_content = data.text.strip()
+    # Предварительная чистка входящего текста договора от непечатаемых символов
+    contract_content = clean_text(data.text.strip())
     if not contract_content:
         raise HTTPException(status_code=400, detail="Текст договора пуст.")
 
@@ -481,7 +486,7 @@ async def analyze_contract(data: AnalyzeSchema):
 3. `risks`: Список выявленных пунктов и рисков (3-6 пунктов). Для каждого укажи:
    - `category`: Цветовой маркер риска ('red' — критический, 'yellow' — средний/внимание, 'green' — безопасное/выгодное условие).
    - `title`: Четкое название риска (например, "Неограниченный штраф за задержку", "Передача прав до оплаты").
-   - `quote`: Цитата или фрагмент пункта договора (если применимо).
+   - `quote`: Цитата или фрагмент пункта договора (вытаскивай точный текст из договора).
    - `explanation`: Чем именно это условие грозит Исполнителю.
    - `recommendation`: Готовая формулировка правки, которую фрилансер может скопировать и выслать заказчику для защиты своих интересов.
 """
