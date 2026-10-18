@@ -115,7 +115,7 @@ class InvoiceRequest(BaseModel):
 class RiskItem(BaseModel):
     category: str  # 'red', 'yellow', 'green'
     title: str     # Краткий заголовок риска
-    quote: str     # Цитата или фрагмент пункта договора в редакции Заказчика
+    quote: str     # Описание сурового условия в редакции Заказчика
     explanation: str  # В чем заключается риск для фрилансера/исполнителя
     recommendation: str  # Предлагаемая редакция Исполнителя
 
@@ -257,12 +257,12 @@ def set_cell_margins(cell, top=100, bottom=100, left=150, right=150):
     tcPr.append(tcMar)
 
 def clean_text(val: Optional[str]) -> str:
-    """Глубокая нормализация Юникода и безопасная очистка непечатаемых символов"""
+    """Глубокая нормализация текста"""
     if not val:
         return ""
     text_str = unicodedata.normalize("NFKC", str(val))
     text_str = re.sub(r'[\xa0\u200b\u202f\u200e\u200f\ufeff]', ' ', text_str)
-    text_str = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]', '', text_str)
+    text_str = re.sub(r'[^\w\s\d.,!?;:()"\'-–—«»/%\\]', '', text_str)
     return text_str.strip()
 
 # Эндпоинт генерации Протокола разногласий в профессиональном стиле .docx
@@ -346,7 +346,6 @@ async def generate_protocol(data: ProtocolRequest):
             if row_cells[0].paragraphs[0].runs:
                 row_cells[0].paragraphs[0].runs[0].bold = True
 
-            # Во второй столбец помещается полный очищенный текст цитаты из договора
             row_cells[1].text = clean_text(risk.quote) or "—"
             row_cells[2].text = clean_text(risk.recommendation) or "—"
             row_cells[3].text = clean_text(risk.explanation) or "Защита интересов исполнителя"
@@ -426,7 +425,6 @@ async def analyze_contract(data: AnalyzeSchema):
     if not ai_client:
         raise HTTPException(status_code=500, detail="GEMINI_API_KEY не настроен на сервере.")
 
-    # Очистка входящего текста договора
     contract_content = clean_text(data.text)
     if not contract_content:
         raise HTTPException(status_code=400, detail="Текст договора пуст.")
@@ -488,7 +486,7 @@ async def analyze_contract(data: AnalyzeSchema):
 3. `risks`: Список выявленных пунктов и рисков (3-6 пунктов). Для каждого укажи:
    - `category`: Цветовой маркер риска ('red' — критический, 'yellow' — средний/внимание, 'green' — безопасное/выгодное условие).
    - `title`: Четкое название риска (например, "Неограниченный штраф за задержку", "Передача прав до оплаты").
-   - `quote`: Точная цитата спорного пункта из договора в редакции Заказчика (например: "Пункт 7.2. В случае нарушения сроков сдачи работ Исполнитель выплачивает штраф в размере 100%"). Обязательно приводи саму цитату спорного правила!
+   - `quote`: Опиши суть условия Заказчика простым, чистым русским языком со ссылкой на номер пункта (например: "Пункт 7.2. Штраф 100% за любой день задержки и отказ от оплаты всей работы"). НЕ копируй длинный сырой текст с формулами или битыми знаками из оригинального файла!
    - `explanation`: Чем именно это условие грозит Исполнителю.
    - `recommendation`: Предлагаемая редакция Исполнителя (готовая формулировка пункта с выгодой для фрилансера).
 """
