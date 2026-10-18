@@ -298,7 +298,7 @@
     <script>
         const tg = window.Telegram?.WebApp;
         let initDataUser = null;
-        let lastAnalysisData = null; // Сохраняем результаты для генерации протокола
+        let lastAnalysisData = null;
 
         if (tg) {
             tg.ready();
@@ -558,6 +558,12 @@
                     renderDashboard(data.result);
                     document.getElementById('protocol-btn').classList.remove('hidden');
                     
+                    // Автоматический плавный скролл к блоку результатов
+                    const resultsCard = document.getElementById('results-card');
+                    if (resultsCard) {
+                        resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+
                     if (data.checks_left !== undefined && data.checks_left !== null) {
                         document.getElementById('checks-count').textContent = data.checks_left;
                         if (data.checks_left <= 0) {
@@ -693,20 +699,7 @@
                     throw new Error('Ошибка генерации файла');
                 }
 
-                // Внутри Telegram — получаем подтверждение и уведомляем пользователя
-                if (initDataUser) {
-                    const result = await response.json().catch(() => null);
-                    if (result && result.status === 'ok') {
-                        if (tg?.showAlert) {
-                            tg.showAlert('📄 Протокол разногласий отправлен вам прямо в чат с ботом!');
-                        } else {
-                            alert('📄 Протокол разногласий отправлен вам прямо в чат с ботом!');
-                        }
-                        return;
-                    }
-                }
-
-                // В обычном браузерах (вне Telegram)
+                // Прямое скачивание файла в виде Blob для 100% совместимости с браузером и Telegram WebApp
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -716,6 +709,10 @@
                 a.click();
                 window.URL.revokeObjectURL(url);
                 a.remove();
+
+                if (initDataUser && tg?.showAlert) {
+                    tg.showAlert('📄 Протокол разногласий скачан и отправлен в чат!');
+                }
 
             } catch (error) {
                 console.error('Ошибка скачивания протокола:', error);
