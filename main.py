@@ -2,6 +2,7 @@ import os
 import io
 import httpx
 import re
+import unicodedata
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, StreamingResponse
@@ -256,13 +257,16 @@ def set_cell_margins(cell, top=100, bottom=100, left=150, right=150):
     tcPr.append(tcMar)
 
 def clean_text(val: Optional[str]) -> str:
-    """Глубокая очистка строк от битых символов и проблемных UTF-8 багов"""
+    """Полная нормализация Юникода и замена проблемных символов/неразрывных пробелов"""
     if not val:
         return ""
-    text_str = str(val)
-    # Заменяем некорректные непечатаемые символы и битый юникод
+    # Нормализуем юникод (заменяем спецузлы вроде \xa0 на обычный пробел)
+    text_str = unicodedata.normalize("NFKC", str(val))
+    # Заменяем все виды неразрывных/нулевых пробелов на обычные
+    text_str = re.sub(r'[\xa0\u200b\u202f\u200e\u200f\ufeff]', ' ', text_str)
+    # Удаляем непечатаемые управляющие байты
     text_str = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]', '', text_str)
-    return text_str.encode('utf-8', 'ignore').decode('utf-8')
+    return text_str.strip()
 
 # Эндпоинт генерации Протокола разногласий в профессиональном стиле .docx
 @app.post("/generate-protocol")
@@ -424,8 +428,8 @@ async def analyze_contract(data: AnalyzeSchema):
     if not ai_client:
         raise HTTPException(status_code=500, detail="GEMINI_API_KEY не настроен на сервере.")
 
-    # Предварительная чистка входящего текста договора от непечатаемых символов
-    contract_content = clean_text(data.text.strip())
+    # Предварительная чистка входящего текста договора
+    contract_content = clean_text(data.text)
     if not contract_content:
         raise HTTPException(status_code=400, detail="Текст договора пуст.")
 
@@ -486,7 +490,7 @@ async def analyze_contract(data: AnalyzeSchema):
 3. `risks`: Список выявленных пунктов и рисков (3-6 пунктов). Для каждого укажи:
    - `category`: Цветовой маркер риска ('red' — критический, 'yellow' — средний/внимание, 'green' — безопасное/выгодное условие).
    - `title`: Четкое название риска (например, "Неограниченный штраф за задержку", "Передача прав до оплаты").
-   - `quote`: Цитата или фрагмент пункта договора (вытаскивай точный текст из договора).
+   - `quote`: Точный номер пункта и заголовок (например, "Пункт 7.2" или "Раздел 5"). Не пиши длинных цитат с символами, давай только короткую привязку к номеру пункта!
    - `explanation`: Чем именно это условие грозит Исполнителю.
    - `recommendation`: Готовая формулировка правки, которую фрилансер может скопировать и выслать заказчику для защиты своих интересов.
 """
