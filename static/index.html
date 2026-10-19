@@ -767,4 +767,65 @@
             contractText.style.height = 'auto';
             fileSelectedInfo.classList.add('hidden');
             dropzonePrompt.classList.remove('hidden');
-            document.getElementById('protocol-btn').classList.
+            document.getElementById('protocol-btn').classList.add('hidden');
+
+            const wrapper = document.getElementById('results-container-wrapper');
+            wrapper.classList.remove('block', 'p-2', 'overflow-y-auto');
+            wrapper.classList.add('flex', 'items-center', 'justify-center', 'p-4');
+
+            const output = document.getElementById('analysis-output');
+            output.classList.remove('text-left');
+            output.classList.add('text-center');
+            output.innerHTML = 'Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».';
+
+            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        }
+
+        async function sendFeedback() {
+            const text = document.getElementById('feedback-text').value.trim();
+            const fbTypeEl = document.querySelector('input[name="fb-type"]:checked');
+            const fbType = fbTypeEl ? fbTypeEl.value : 'Оценка анализа';
+            const docType = document.querySelector('#doc-type-group .chip-btn.active')?.dataset.value || 'Общий';
+            const jurisdiction = document.querySelector('#jurisdiction-group .chip-btn.active')?.dataset.value || 'Россия (РФ)';
+
+            if (!text && !selectedSentiment) {
+                alert('Пожалуйста, напишите сообщение или выберите кнопку оценки.');
+                return;
+            }
+
+            const sendBtn = document.getElementById('send-fb-btn');
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Отправка...</span>`;
+
+            try {
+                const response = await fetch('/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: fbType,
+                        rating: selectedRating,
+                        sentiment: selectedSentiment,
+                        feedback: text,
+                        doc_type: docType,
+                        jurisdiction: jurisdiction
+                    })
+                });
+
+                if (response.ok) {
+                    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                    alert('Спасибо за ваш отзыв! Он поможет нам сделать сервис лучше.');
+                    document.getElementById('feedback-text').value = '';
+                } else {
+                    alert('Не удалось отправить отзыв. Попробуйте еще раз.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Ошибка сети при отправке отзыва.');
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = `<i class="fa-regular fa-paper-plane text-xs"></i> <span>Отправить отзыв</span>`;
+            }
+        }
+    </script>
+</body>
+</html>
