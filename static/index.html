@@ -76,9 +76,9 @@
         }
     </style>
 </head>
-<body class="min-h-screen pb-6 pt-2 px-3 md:px-6">
+<body class="min-h-screen pb-6 pt-2 px-3 md:px-6 flex flex-col justify-between">
 
-    <div class="max-w-7xl mx-auto space-y-3">
+    <div class="max-w-7xl mx-auto space-y-3 w-full">
         
         <!-- Header -->
         <header class="mb-1 flex items-center justify-between">
@@ -183,8 +183,13 @@
                             </div>
                         </div>
 
+                        <!-- Legal Notice -->
+                        <div class="text-[10px] text-slate-200 text-center leading-tight">
+                            Нажимая «Анализировать», вы принимаете условия <a href="#" onclick="openTermsModal(event)" class="underline hover:text-white">Публичной оферты</a>.
+                        </div>
+
                         <!-- Action Buttons -->
-                        <div class="flex flex-col sm:flex-row gap-2 pt-1">
+                        <div class="flex flex-col sm:flex-row gap-2 pt-0.5">
                             <button type="button" id="analyze-btn" onclick="startAnalysis()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow transition-all flex items-center justify-center gap-2 text-xs">
                                 <span>Анализировать</span>
                             </button>
@@ -261,6 +266,12 @@
         </div>
     </div>
 
+    <!-- Footer -->
+    <footer class="mt-6 text-center text-xs text-slate-300 border-t border-slate-500/30 pt-3">
+        <span>© 2026 Lexify. Все права защищены. • </span>
+        <a href="#" onclick="openTermsModal(event)" class="underline hover:text-white transition-colors">Публичная оферта</a>
+    </footer>
+
     <!-- Модальное окно покупки проверок за Telegram Stars -->
     <div id="stars-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
         <div class="bg-white rounded-2xl max-w-sm w-full p-5 space-y-4 text-slate-900 shadow-xl border border-slate-100">
@@ -299,7 +310,7 @@
         </div>
     </div>
 
-    <!-- Модальное окно Админ-панели с персонализированным списком пользователей -->
+    <!-- Модальное окно Админ-панели -->
     <div id="admin-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
         <div class="bg-white rounded-2xl max-w-lg w-full p-5 space-y-4 text-slate-900 shadow-xl border border-slate-100 max-h-[90vh] flex flex-col">
             <div class="flex items-center justify-between border-b pb-2 flex-shrink-0">
@@ -317,6 +328,53 @@
 
             <button type="button" onclick="closeAdminModal()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-800 font-medium py-2 rounded-xl text-xs transition-all flex-shrink-0">
                 Закрыть
+            </button>
+        </div>
+    </div>
+
+    <!-- Модальное окно Публичной Оферты -->
+    <div id="terms-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-5 space-y-4 text-slate-900 shadow-xl border border-slate-100 max-h-[85vh] flex flex-col">
+            <div class="flex items-center justify-between border-b pb-2 flex-shrink-0">
+                <h3 class="font-bold text-base flex items-center gap-2 text-slate-900">
+                    <i class="fa-solid fa-file-contract text-blue-600"></i> Публичная оферта
+                </h3>
+                <button type="button" onclick="closeTermsModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-3 overflow-y-auto flex-1 pr-2 text-xs text-slate-700 leading-relaxed">
+                <p class="font-bold text-slate-900">ПУБЛИЧНАЯ ОФЕРТА (ПОЛЬЗОВАТЕЛЬСКОЕ СОГЛАШЕНИЕ)</p>
+                <p class="text-[10px] text-slate-400">Дата последнего обновления: 19 октября 2026 года</p>
+
+                <div class="space-y-1">
+                    <p class="font-bold text-slate-900">1. ОБЩИЕ ПОЛОЖЕНИЯ</p>
+                    <p>1.1. Настоящий документ является официальным предложением (публичной офертой) Исполнителя и содержит все существенные условия предоставления услуг по автоматизированному экспресс-анализу документов с использованием программного сервиса «Lexify».</p>
+                    <p>1.2. Использование Сервиса, включая загрузку документов, нажатие кнопки «Анализировать», а также осуществление оплаты внутренних пакетов проверок, означает полное и безоговорочное согласие Пользователя со всеми условиями настоящего Соглашения.</p>
+                </div>
+
+                <div class="space-y-1">
+                    <p class="font-bold text-slate-900">2. ПРЕДМЕТ СОГЛАШЕНИЯ И ОГРАНИЧЕНИЕ ОТВЕТСТВЕННОСТИ</p>
+                    <p>2.1. Исполнитель предоставляет Пользователю доступ к функционалу Сервиса для проведения автоматизированного анализа текстов договоров и генерации справочно-информационных материалов.</p>
+                    <p>2.2. Сервис функционирует на базе алгоритмов искусственного интеллекта и носит <strong>исключительно информационно-справочный характер</strong>. Результаты анализа <strong>не являются официальной юридической консультацией</strong>. Пользователь самостоятельно принимает решения о подписании договоров и несет за них ответственность.</p>
+                </div>
+
+                <div class="space-y-1">
+                    <p class="font-bold text-slate-900">3. ПОРЯДОК ПРЕДОСТАВЛЕНИЯ И ОПЛАТЫ УСЛУГ</p>
+                    <p>3.1. Базовый доступ к Сервису предоставляется с ограничением по количеству бесплатных проверок.</p>
+                    <p>3.2. Оплата дополнительных пакетов проверок осуществляется через платежную систему Telegram (включая Telegram Stars).</p>
+                    <p>3.3. Услуга считается оказанной в момент зачисления купленных проверок на баланс Пользователя. Возврат средств за использованные пакеты не производится.</p>
+                </div>
+
+                <div class="space-y-1">
+                    <p class="font-bold text-slate-900">4. КОНФИДЕНЦИАЛЬНОСТЬ</p>
+                    <p>4.1. Тексты загружаемых документов обрабатываются автоматически исключительно для целей выполнения анализа и формирования результата.</p>
+                </div>
+            </div>
+
+            <button type="button" onclick="closeTermsModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-xl text-xs transition-all flex-shrink-0">
+                Понятно
             </button>
         </div>
     </div>
@@ -365,6 +423,18 @@
             } catch (err) {
                 console.error("Не удалось получить данные пользователя:", err);
             }
+        }
+
+        function openTermsModal(e) {
+            if (e) e.preventDefault();
+            document.getElementById('terms-modal').classList.remove('hidden');
+            document.getElementById('terms-modal').classList.add('flex');
+            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        }
+
+        function closeTermsModal() {
+            document.getElementById('terms-modal').classList.remove('flex');
+            document.getElementById('terms-modal').classList.add('hidden');
         }
 
         async function openAdminModal() {
