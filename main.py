@@ -161,17 +161,31 @@ async def get_admin_stats(telegram_id: int):
         raise HTTPException(status_code=403, detail="Доступ запрещен")
     
     if not SessionLocal:
-        return {"total_users": 0, "total_analyses": 0, "total_payments": 0}
+        return {"total_users": 0, "total_analyses": 0, "total_payments": 0, "users_list": []}
     
     db = SessionLocal()
     try:
         total_users = db.query(UserDB).count()
         total_analyses = db.query(AnalysisLogDB).count()
         total_payments = db.query(PaymentLogDB).count()
+        
+        users = db.query(UserDB).order_by(UserDB.created_at.desc()).limit(50).all()
+        users_list = []
+        for u in users:
+            users_list.append({
+                "telegram_id": u.telegram_id,
+                "first_name": u.first_name or "Без имени",
+                "username": f"@{u.username}" if u.username else "—",
+                "free_checks_left": u.free_checks_left,
+                "is_pro": u.is_pro,
+                "created_at": u.created_at.strftime("%d.%m.%Y %H:%M") if u.created_at else "—"
+            })
+
         return {
             "total_users": total_users,
             "total_analyses": total_analyses,
-            "total_payments": total_payments
+            "total_payments": total_payments,
+            "users_list": users_list
         }
     finally:
         db.close()
@@ -413,6 +427,12 @@ async def analyze_contract(data: AnalyzeSchema):
                 db.add(user)
                 db.commit()
                 db.refresh(user)
+            else:
+                if data.first_name and user.first_name != data.first_name:
+                    user.first_name = data.first_name
+                if data.username and user.username != data.username:
+                    user.username = data.username
+                db.commit()
             
             if int(data.telegram_id) in ADMIN_IDS or user.is_pro:
                 checks_left = 999
