@@ -677,7 +677,7 @@
             const btn = document.getElementById('protocol-btn');
             if (btn) {
                 btn.disabled = true;
-                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Подготовка...</span>`;
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Создание...</span>`;
             }
 
             try {
@@ -699,58 +699,22 @@
 
                 if (!response.ok) throw new Error('Ошибка генерации');
 
-                const blob = await response.blob();
-                const file = new File([blob], 'Protocol_Raznogasiy.docx', { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-
-                // Мобильные устройства: открытие системного меню «Поделиться»
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    try {
-                        await navigator.share({
-                            files: [file],
-                            title: 'Протокол разногласий',
-                            text: 'Готовый протокол разногласий к договору'
-                        });
-                        if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                        return;
-                    } catch (shareErr) {
-                        if (shareErr.name === 'AbortError') return;
+                const data = await response.json();
+                
+                if (data.download_url) {
+                    const fullUrl = window.location.origin + data.download_url;
+                    
+                    if (window.Telegram?.WebApp?.openLink) {
+                        window.Telegram.WebApp.openLink(fullUrl);
+                    } else {
+                        window.open(fullUrl, '_blank');
                     }
+                    
+                    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
                 }
-
-                // ПК: Выбор папки «Сохранить как...»
-                if (window.showSaveFilePicker) {
-                    try {
-                        const handle = await window.showSaveFilePicker({
-                            suggestedName: 'Protocol_Raznogasiy.docx',
-                            types: [{
-                                description: 'Word Document',
-                                accept: { 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'] },
-                            }],
-                        });
-                        const writable = await handle.createWritable();
-                        await writable.write(blob);
-                        await writable.close();
-                        if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                        return;
-                    } catch (err) {
-                        if (err.name === 'AbortError') return;
-                    }
-                }
-
-                // Запасной фолбэк для остальных систем
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'Protocol_Raznogasiy.docx';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                a.remove();
-
-                if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
 
             } catch (error) {
-                console.error('Ошибка скачивания протокола:', error);
+                console.error('Ошибка генерации протокола:', error);
                 alert('Не удалось сформировать протокол.');
             } finally {
                 if (btn) {
