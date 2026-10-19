@@ -131,11 +131,12 @@ async def serve_index():
 
 @app.get("/user-info/{telegram_id}")
 async def get_user_info(telegram_id: int):
-    if telegram_id in ADMIN_IDS:
-        return {"telegram_id": telegram_id, "free_checks_left": 999, "is_pro": True}
+    is_admin = telegram_id in ADMIN_IDS
+    if is_admin:
+        return {"telegram_id": telegram_id, "free_checks_left": 999, "is_pro": True, "is_admin": True}
 
     if not SessionLocal:
-        return {"telegram_id": telegram_id, "free_checks_left": 3, "is_pro": False}
+        return {"telegram_id": telegram_id, "free_checks_left": 3, "is_pro": False, "is_admin": False}
     
     db = SessionLocal()
     try:
@@ -148,7 +149,29 @@ async def get_user_info(telegram_id: int):
         return {
             "telegram_id": user.telegram_id,
             "free_checks_left": user.free_checks_left,
-            "is_pro": user.is_pro
+            "is_pro": user.is_pro,
+            "is_admin": False
+        }
+    finally:
+        db.close()
+
+@app.get("/admin/stats/{telegram_id}")
+async def get_admin_stats(telegram_id: int):
+    if telegram_id not in ADMIN_IDS:
+        raise HTTPException(status_code=403, detail="Доступ запрещен")
+    
+    if not SessionLocal:
+        return {"total_users": 0, "total_analyses": 0, "total_payments": 0}
+    
+    db = SessionLocal()
+    try:
+        total_users = db.query(UserDB).count()
+        total_analyses = db.query(AnalysisLogDB).count()
+        total_payments = db.query(PaymentLogDB).count()
+        return {
+            "total_users": total_users,
+            "total_analyses": total_analyses,
+            "total_payments": total_payments
         }
     finally:
         db.close()
