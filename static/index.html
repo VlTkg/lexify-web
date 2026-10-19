@@ -299,23 +299,23 @@
         </div>
     </div>
 
-    <!-- Модальное окно Админ-панели -->
+    <!-- Модальное окно Админ-панели с персонализированным списком пользователей -->
     <div id="admin-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-5 space-y-4 text-slate-900 shadow-xl border border-slate-100">
-            <div class="flex items-center justify-between border-b pb-2">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-5 space-y-4 text-slate-900 shadow-xl border border-slate-100 max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between border-b pb-2 flex-shrink-0">
                 <h3 class="font-bold text-base flex items-center gap-2 text-slate-900">
-                    <i class="fa-solid fa-shield-halved text-indigo-600"></i> Админ-панель (Статистика)
+                    <i class="fa-solid fa-shield-halved text-indigo-600"></i> Админ-панель
                 </h3>
                 <button type="button" onclick="closeAdminModal()" class="text-slate-400 hover:text-slate-600 p-1">
                     <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
             </div>
             
-            <div id="admin-stats-content" class="space-y-3">
-                <div class="text-center text-xs text-slate-500 py-4">Загрузка статистики...</div>
+            <div id="admin-stats-content" class="space-y-4 overflow-y-auto flex-1 pr-1">
+                <div class="text-center text-xs text-slate-500 py-4"><i class="fa-solid fa-spinner fa-spin"></i> Загрузка данных из БД...</div>
             </div>
 
-            <button type="button" onclick="closeAdminModal()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-800 font-medium py-2 rounded-xl text-xs transition-all">
+            <button type="button" onclick="closeAdminModal()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-800 font-medium py-2 rounded-xl text-xs transition-all flex-shrink-0">
                 Закрыть
             </button>
         </div>
@@ -379,23 +379,56 @@
                 const response = await fetch(`/admin/stats/${currentUserId}`);
                 if (response.ok) {
                     const stats = await response.json();
+                    
+                    let usersHtml = '';
+                    if (stats.users_list && stats.users_list.length > 0) {
+                        stats.users_list.forEach(u => {
+                            usersHtml += `
+                                <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs">
+                                    <div class="flex items-center gap-2 overflow-hidden">
+                                        <div class="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-[11px] flex-shrink-0">
+                                            ${u.first_name ? u.first_name.charAt(0).toUpperCase() : 'U'}
+                                        </div>
+                                        <div class="overflow-hidden">
+                                            <div class="font-bold text-slate-900 truncate">${u.first_name} <span class="text-slate-400 font-normal text-[10px]">(${u.username})</span></div>
+                                            <div class="text-[10px] text-slate-400">ID: ${u.telegram_id} • ${u.created_at}</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right flex-shrink-0 pl-2">
+                                        <span class="px-2 py-0.5 rounded-lg font-bold text-[10px] ${u.is_pro ? 'bg-purple-100 text-purple-800' : 'bg-amber-100 text-amber-800'}">
+                                            ${u.is_pro ? 'PRO' : u.free_checks_left + ' пров.'}
+                                        </span>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        usersHtml = '<div class="text-center text-xs text-slate-400 py-3">Пока нет зарегистрированных пользователей в базе.</div>';
+                    }
+
                     statsContainer.innerHTML = `
                         <div class="grid grid-cols-3 gap-2 text-center">
-                            <div class="bg-indigo-50 border border-indigo-100 p-3 rounded-xl">
-                                <div class="text-[10px] uppercase font-bold text-indigo-600 mb-1">Пользователи</div>
-                                <div class="text-lg font-bold text-slate-900">${stats.total_users}</div>
+                            <div class="bg-indigo-50 border border-indigo-100 p-2.5 rounded-xl">
+                                <div class="text-[10px] uppercase font-bold text-indigo-600 mb-0.5">Пользователи</div>
+                                <div class="text-base font-bold text-slate-900">${stats.total_users}</div>
                             </div>
-                            <div class="bg-blue-50 border border-blue-100 p-3 rounded-xl">
-                                <div class="text-[10px] uppercase font-bold text-blue-600 mb-1">Проверки</div>
-                                <div class="text-lg font-bold text-slate-900">${stats.total_analyses}</div>
+                            <div class="bg-blue-50 border border-blue-100 p-2.5 rounded-xl">
+                                <div class="text-[10px] uppercase font-bold text-blue-600 mb-0.5">Проверки</div>
+                                <div class="text-base font-bold text-slate-900">${stats.total_analyses}</div>
                             </div>
-                            <div class="bg-amber-50 border border-amber-100 p-3 rounded-xl">
-                                <div class="text-[10px] uppercase font-bold text-amber-600 mb-1">Оплаты</div>
-                                <div class="text-lg font-bold text-slate-900">${stats.total_payments}</div>
+                            <div class="bg-amber-50 border border-amber-100 p-2.5 rounded-xl">
+                                <div class="text-[10px] uppercase font-bold text-amber-600 mb-0.5">Оплаты</div>
+                                <div class="text-base font-bold text-slate-900">${stats.total_payments}</div>
                             </div>
                         </div>
-                        <div class="text-[11px] text-slate-500 text-center pt-2">
-                            Все показатели агрегируются в реальном времени из базы данных PostgreSQL.
+
+                        <div class="space-y-2 pt-1">
+                            <div class="font-bold text-xs text-slate-800 flex items-center justify-between">
+                                <span>Список пользователей (${stats.users_list ? stats.users_list.length : 0})</span>
+                            </div>
+                            <div class="space-y-1.5 max-h-[260px] overflow-y-auto pr-1">
+                                ${usersHtml}
+                            </div>
                         </div>
                     `;
                 } else {
