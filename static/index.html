@@ -86,12 +86,17 @@
                 <h1 class="text-2xl font-bold tracking-tight text-white">Lexify</h1>
                 <p class="text-xs text-slate-200">Сервис автоматической проверки договоров для фрилансеров</p>
             </div>
-            <!-- Счетчик проверок для Telegram-пользователей -->
-            <div id="user-badge" class="bg-slate-700/90 px-3 py-1.5 rounded-xl border border-slate-500 text-xs text-slate-100 hidden shadow-sm flex items-center gap-2">
-                <span>Проверок: <span id="checks-count" class="font-bold text-amber-400">3</span></span>
-                <button type="button" onclick="openStarsModal()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-2 py-0.5 rounded-lg text-[11px] transition-all flex items-center gap-1 shadow-xs">
-                    <i class="fa-solid fa-star text-[10px]"></i> Купить
+            <!-- Счетчик проверок и Админ-кнопка для администраторов -->
+            <div class="flex items-center gap-2">
+                <button type="button" id="admin-btn" onclick="openAdminModal()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-2.5 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1 shadow-xs">
+                    <i class="fa-solid fa-shield-halved text-[11px]"></i> Админ
                 </button>
+                <div id="user-badge" class="bg-slate-700/90 px-3 py-1.5 rounded-xl border border-slate-500 text-xs text-slate-100 hidden shadow-sm flex items-center gap-2">
+                    <span>Проверок: <span id="checks-count" class="font-bold text-amber-400">3</span></span>
+                    <button type="button" onclick="openStarsModal()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-2 py-0.5 rounded-lg text-[11px] transition-all flex items-center gap-1 shadow-xs">
+                        <i class="fa-solid fa-star text-[10px]"></i> Купить
+                    </button>
+                </div>
             </div>
         </header>
 
@@ -294,6 +299,28 @@
         </div>
     </div>
 
+    <!-- Модальное окно Админ-панели -->
+    <div id="admin-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-5 space-y-4 text-slate-900 shadow-xl border border-slate-100">
+            <div class="flex items-center justify-between border-b pb-2">
+                <h3 class="font-bold text-base flex items-center gap-2 text-slate-900">
+                    <i class="fa-solid fa-shield-halved text-indigo-600"></i> Админ-панель (Статистика)
+                </h3>
+                <button type="button" onclick="closeAdminModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+            
+            <div id="admin-stats-content" class="space-y-3">
+                <div class="text-center text-xs text-slate-500 py-4">Загрузка статистики...</div>
+            </div>
+
+            <button type="button" onclick="closeAdminModal()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-800 font-medium py-2 rounded-xl text-xs transition-all">
+                Закрыть
+            </button>
+        </div>
+    </div>
+
     <!-- Application Script -->
     <script>
         const tg = window.Telegram?.WebApp;
@@ -319,6 +346,10 @@
                     const countEl = document.getElementById('checks-count');
                     countEl.textContent = data.free_checks_left;
                     
+                    if (data.is_admin) {
+                        document.getElementById('admin-btn').classList.remove('hidden');
+                    }
+
                     if (data.free_checks_left <= 0) {
                         countEl.classList.remove('text-amber-400');
                         countEl.classList.add('text-red-400');
@@ -330,6 +361,53 @@
             } catch (err) {
                 console.error("Не удалось получить данные пользователя:", err);
             }
+        }
+
+        async function openAdminModal() {
+            if (!initDataUser) return;
+            document.getElementById('admin-modal').classList.remove('hidden');
+            document.getElementById('admin-modal').classList.add('flex');
+            
+            const statsContainer = document.getElementById('admin-stats-content');
+            statsContainer.innerHTML = '<div class="text-center text-xs text-slate-500 py-4"><i class="fa-solid fa-spinner fa-spin"></i> Загрузка данных из БД...</div>';
+
+            try {
+                const response = await fetch(`/admin/stats/${initDataUser.id}`);
+                if (response.ok) {
+                    const stats = await response.json();
+                    statsContainer.innerHTML = `
+                        <div class="grid grid-cols-3 gap-2 text-center">
+                            <div class="bg-indigo-50 border border-indigo-100 p-3 rounded-xl">
+                                <div class="text-[10px] uppercase font-bold text-indigo-600 mb-1">Пользователи</div>
+                                <div class="text-lg font-bold text-slate-900">${stats.total_users}</div>
+                            </div>
+                            <div class="bg-blue-50 border border-blue-100 p-3 rounded-xl">
+                                <div class="text-[10px] uppercase font-bold text-blue-600 mb-1">Проверки</div>
+                                <div class="text-lg font-bold text-slate-900">${stats.total_analyses}</div>
+                            </div>
+                            <div class="bg-amber-50 border border-amber-100 p-3 rounded-xl">
+                                <div class="text-[10px] uppercase font-bold text-amber-600 mb-1">Оплаты</div>
+                                <div class="text-lg font-bold text-slate-900">${stats.total_payments}</div>
+                            </div>
+                        </div>
+                        <div class="text-[11px] text-slate-500 text-center pt-2">
+                            Все показатели агрегируются в реальном времени из базы данных PostgreSQL.
+                        </div>
+                    `;
+                } else {
+                    statsContainer.innerHTML = '<div class="text-center text-xs text-red-500 py-4">Ошибка загрузки статистики (нет доступа).</div>';
+                }
+            } catch (err) {
+                console.error(err);
+                statsContainer.innerHTML = '<div class="text-center text-xs text-red-500 py-4">Ошибка сети при запросе статистики.</div>';
+            }
+
+            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+        }
+
+        function closeAdminModal() {
+            document.getElementById('admin-modal').classList.remove('flex');
+            document.getElementById('admin-modal').classList.add('hidden');
         }
 
         function openStarsModal() {
