@@ -126,7 +126,11 @@ class ProtocolRequest(BaseModel):
     risks: List[ProtocolItem]
 
 @app.get("/")
-async def serve_index():
+async def serve_landing():
+    return FileResponse("static/landing.html")
+
+@app.get("/app")
+async def serve_app():
     return FileResponse("static/index.html")
 
 @app.get("/user-info/{telegram_id}")
