@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lexify — Экспресс-анализ договоров и поиск рисков с помощью ИИ</title>
-    <meta name="description" content="Автоматический анализ договоров на базе ИИ. Найдите скрытые штрафы, невыгодные условия и риски за 60 секунд прямо в Telegram.">
+    <meta name="description" content="Автоматический анализ договоров на базе ИИ. Найдите скрытые штрафы, невыгодные условия и риски прямо в Telegram.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -254,6 +254,15 @@
         footer a {
             color: var(--text-muted);
             text-decoration: underline;
+            margin: 0 10px;
+        }
+
+        footer a:hover {
+            color: var(--text-main);
+        }
+
+        .footer-links {
+            margin-top: 12px;
         }
 
         /* Responsive */
@@ -277,7 +286,7 @@
     <section class="hero">
         <div class="container">
             <div class="badge">🤖 ИИ-помощник в Telegram</div>
-            <h1>Автоматический анализ договоров и поиск юридических рисков за 60 секунд</h1>
+            <h1>Автоматический анализ договоров и поиск юридических рисков</h1>
             <p>Lexify найдёт скрытые штрафы, размытые формулировки и невыгодные условия до того, как вы подпишете документ.</p>
             <a href="https://t.me/Lexifytelbot" target="_blank" class="btn btn-large">🚀 Проверить договор бесплатно</a>
             <div class="hero-cta-sub">🎁 3 бесплатные проверки при старте • Без регистрации</div>
@@ -292,7 +301,7 @@
                 <div class="card">
                     <div class="card-icon">⚡️</div>
                     <h3>Экономия времени</h3>
-                    <p>Больше не нужно вычитывать десятки страниц мелкого текста вручную. ИИ выделит главное за минуту.</p>
+                    <p>Больше не нужно вычитывать десятки страниц мелкого текста вручную. ИИ выделит главное за считанные мгновения.</p>
                 </div>
                 <div class="card">
                     <div class="card-icon">🔍</div>
@@ -302,7 +311,7 @@
                 <div class="card">
                     <div class="card-icon">✍️</div>
                     <h3>Готовые правки</h3>
-                    <p>Сервис не просто подсвечивает проблему, но и предлагает формулировки безопасных формулировок для согласовании.</p>
+                    <p>Сервис не просто подсвечивает проблему, но и предлагает безопасные формулировки для согласования.</p>
                 </div>
             </div>
         </div>
@@ -364,7 +373,11 @@
     <footer>
         <div class="container">
             <p>© 2026 Lexify AI. Все права защищены.</p>
-            <p style="margin-top: 8px;">Официальный бот: <a href="https://t.me/Lexifytelbot" target="_blank">@Lexifytelbot</a></p>
+            <p style="margin-top: 8px;">Официальный бот: <a href="https://t.me/Lexifytelbot" target="_blank" style="text-decoration: none; margin: 0;">@Lexifytelbot</a></p>
+            <div class="footer-links">
+                <a href="#" onclick="alert('Документ находится в разработке'); return false;">Политика конфиденциальности</a> | 
+                <a href="#" onclick="alert('Документ находится в разработке'); return false;">Условия использования</a>
+            </div>
         </div>
     </footer>
 
