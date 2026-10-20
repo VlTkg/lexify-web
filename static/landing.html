@@ -63,7 +63,13 @@
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+        }
+
+        .logo svg {
+            width: 28px;
+            height: 28px;
+            fill: var(--accent-color);
         }
 
         .btn {
@@ -113,7 +119,9 @@
         }
 
         .badge {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             background-color: rgba(59, 130, 246, 0.1);
             color: #60a5fa;
             border: 1px solid rgba(59, 130, 246, 0.3);
@@ -124,10 +132,25 @@
             margin-bottom: 24px;
         }
 
+        .badge svg {
+            width: 16px;
+            height: 16px;
+            fill: #60a5fa;
+        }
+
         .hero-cta-sub {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             margin-top: 12px;
             font-size: 0.875rem;
             color: var(--text-muted);
+        }
+
+        .hero-cta-sub svg {
+            width: 16px;
+            height: 16px;
+            fill: var(--warning-color);
         }
 
         /* Features */
@@ -160,8 +183,24 @@
         }
 
         .card-icon {
-            font-size: 2rem;
+            width: 48px;
+            height: 48px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             margin-bottom: 16px;
+        }
+
+        .card-icon svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--accent-color);
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         .card h3 {
@@ -209,6 +248,15 @@
             color: var(--warning-color);
             font-weight: 600;
             margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .demo-risk-title svg {
+            width: 18px;
+            height: 18px;
+            fill: var(--warning-color);
         }
 
         .demo-recommendation {
@@ -222,6 +270,15 @@
             color: #60a5fa;
             font-weight: 600;
             margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .demo-rec-title svg {
+            width: 18px;
+            height: 18px;
+            fill: #60a5fa;
         }
 
         /* Steps */
@@ -240,6 +297,7 @@
             border-radius: 50%;
             font-weight: 700;
             margin-bottom: 16px;
+            font-size: 0.95rem;
         }
 
         /* Footer */
@@ -277,7 +335,10 @@
     <!-- Header -->
     <header>
         <div class="container header-content">
-            <a href="#" class="logo">⚖️ Lexify</a>
+            <a href="#" class="logo">
+                <svg viewBox="0 0 24 24"><path d="M12 3L2 12h3v8h14v-8h3L12 3zm0 3.5c1.93 0 3.5 1.57 3.5 3.5s-1.57 3.5-3.5 3.5-3.5-1.57-3.5-3.5 1.57-3.5 3.5-3.5zm-5.5 10.5h11v2h-11v-2z"/></svg>
+                Lexify
+            </a>
             <a href="https://t.me/Lexifytelbot" target="_blank" class="btn">Запустить бота</a>
         </div>
     </header>
@@ -285,11 +346,17 @@
     <!-- Hero -->
     <section class="hero">
         <div class="container">
-            <div class="badge">🤖 ИИ-помощник в Telegram</div>
+            <div class="badge">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.03-.42 1.98-1.03 2.75z"/></svg>
+                ИИ-помощник в Telegram
+            </div>
             <h1>Автоматический анализ договоров и поиск юридических рисков</h1>
             <p>Lexify найдёт скрытые штрафы, размытые формулировки и невыгодные условия до того, как вы подпишете документ.</p>
             <a href="https://t.me/Lexifytelbot" target="_blank" class="btn btn-large">🚀 Проверить договор бесплатно</a>
-            <div class="hero-cta-sub">🎁 3 бесплатные проверки при старте • Без регистрации</div>
+            <div class="hero-cta-sub">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                3 бесплатные проверки при старте • Без регистрации
+            </div>
         </div>
     </section>
 
@@ -299,17 +366,23 @@
             <h2 class="section-title">Зачем нужен Lexify?</h2>
             <div class="grid">
                 <div class="card">
-                    <div class="card-icon">⚡️</div>
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </div>
                     <h3>Экономия времени</h3>
                     <p>Больше не нужно вычитывать десятки страниц мелкого текста вручную. ИИ выделит главное за считанные мгновения.</p>
                 </div>
                 <div class="card">
-                    <div class="card-icon">🔍</div>
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    </div>
                     <h3>Поиск скрытых рисков</h3>
                     <p>Находит скрытые неустойки, размытые сроки оплаты и пункты с односторонним расторжением.</p>
                 </div>
                 <div class="card">
-                    <div class="card-icon">✍️</div>
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </div>
                     <h3>Готовые правки</h3>
                     <p>Сервис не просто подсвечивает проблему, но и предлагает безопасные формулировки для согласования.</p>
                 </div>
@@ -324,11 +397,17 @@
             <div class="demo-box">
                 <div class="demo-header">Результат экспресс-анализа</div>
                 <div class="demo-risk">
-                    <div class="demo-risk-title">⚠️ Найден риск: Высокая неустойка (Пункт 4.2)</div>
+                    <div class="demo-risk-title">
+                        <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4m0 4h.01"/></svg>
+                        Найден риск: Высокая неустойка (Пункт 4.2)
+                    </div>
                     <div>«Исполнитель уплачивает штраф в размере 50% от суммы договора за каждый день просрочки».</div>
                 </div>
                 <div class="demo-recommendation">
-                    <div class="demo-rec-title">💡 Рекомендация Lexify:</div>
+                    <div class="demo-rec-title">
+                        <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+                        Рекомендация Lexify:
+                    </div>
                     <div>Размер штрафа несоразмерен. Рекомендуется снизить неустойку до 0.1% в день и ограничить максимальный размер ответственности 10% от суммы договора.</div>
                 </div>
             </div>
