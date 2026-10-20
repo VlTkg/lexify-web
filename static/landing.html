@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lexify — Экспресс-анализ договоров и поиск рисков с помощью ИИ</title>
+    <meta name="description" content="Автоматический анализ договоров на базе ИИ. Найдите скрытые штрафы, невыгодные условия и риски за 60 секунд прямо в Telegram.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --warning-color: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: rgba(15, 23, 42, 0.8);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-large {
+            padding: 16px 32px;
+            font-size: 1.1rem;
+        }
+
+        /* Hero */
+        .hero {
+            padding: 80px 0 60px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #ffffff, #93c5fd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto 30px;
+        }
+
+        .badge {
+            display: inline-block;
+            background-color: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+
+        .hero-cta-sub {
+            margin-top: 12px;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        /* Features */
+        .features {
+            padding: 60px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 40px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 28px;
+            border-radius: 12px;
+            transition: border-color 0.2s ease;
+        }
+
+        .card:hover {
+            border-color: var(--accent-color);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 16px;
+        }
+
+        .card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Demo Box */
+        .demo-section {
+            padding: 60px 0;
+        }
+
+        .demo-box {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .demo-header {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-color);
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+
+        .demo-risk {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid var(--warning-color);
+            padding: 16px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 16px;
+        }
+
+        .demo-risk-title {
+            color: var(--warning-color);
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .demo-recommendation {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid var(--accent-color);
+            padding: 16px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .demo-rec-title {
+            color: #60a5fa;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        /* Steps */
+        .steps {
+            padding: 60px 0;
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background-color: var(--accent-color);
+            color: #fff;
+            border-radius: 50%;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 0;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--text-muted);
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .hero p { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="container header-content">
+            <a href="#" class="logo">⚖️ Lexify</a>
+            <a href="https://t.me/Lexifytelbot" target="_blank" class="btn">Запустить бота</a>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="container">
+            <div class="badge">🤖 ИИ-помощник в Telegram</div>
+            <h1>Автоматический анализ договоров и поиск юридических рисков за 60 секунд</h1>
+            <p>Lexify найдёт скрытые штрафы, размытые формулировки и невыгодные условия до того, как вы подпишете документ.</p>
+            <a href="https://t.me/Lexifytelbot" target="_blank" class="btn btn-large">🚀 Проверить договор бесплатно</a>
+            <div class="hero-cta-sub">🎁 3 бесплатные проверки при старте • Без регистрации</div>
+        </div>
+    </section>
+
+    <!-- Problems & Solutions -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">Зачем нужен Lexify?</h2>
+            <div class="grid">
+                <div class="card">
+                    <div class="card-icon">⚡️</div>
+                    <h3>Экономия времени</h3>
+                    <p>Больше не нужно вычитывать десятки страниц мелкого текста вручную. ИИ выделит главное за минуту.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🔍</div>
+                    <h3>Поиск скрытых рисков</h3>
+                    <p>Находит скрытые неустойки, размытые сроки оплаты и пункты с односторонним расторжением.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">✍️</div>
+                    <h3>Готовые правки</h3>
+                    <p>Сервис не просто подсвечивает проблему, но и предлагает формулировки безопасных формулировок для согласовании.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section class="demo-section">
+        <div class="container">
+            <h2 class="section-title">Пример работы сервиса</h2>
+            <div class="demo-box">
+                <div class="demo-header">Результат экспресс-анализа</div>
+                <div class="demo-risk">
+                    <div class="demo-risk-title">⚠️ Найден риск: Высокая неустойка (Пункт 4.2)</div>
+                    <div>«Исполнитель уплачивает штраф в размере 50% от суммы договора за каждый день просрочки».</div>
+                </div>
+                <div class="demo-recommendation">
+                    <div class="demo-rec-title">💡 Рекомендация Lexify:</div>
+                    <div>Размер штрафа несоразмерен. Рекомендуется снизить неустойку до 0.1% в день и ограничить максимальный размер ответственности 10% от суммы договора.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it Works -->
+    <section class="steps">
+        <div class="container">
+            <h2 class="section-title">Как это работает</h2>
+            <div class="grid">
+                <div class="card">
+                    <div class="step-number">1</div>
+                    <h3>Запустите бота</h3>
+                    <p>Перейдите в Telegram-бот <a href="https://t.me/Lexifytelbot" style="color:#60a5fa;">@Lexifytelbot</a> без установки сторонних программ.</p>
+                </div>
+                <div class="card">
+                    <div class="step-number">2</div>
+                    <h3>Загрузите документ</h3>
+                    <p>Отправьте файл в формате PDF, DOCX или просто вставьте текст договора в чат.</p>
+                </div>
+                <div class="card">
+                    <div class="step-number">3</div>
+                    <h3>Получите отчёт</h3>
+                    <p>Изучите структурированный разбор рисков и используйте рекомендации при согласовании.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="hero" style="padding: 40px 0 80px;">
+        <div class="container">
+            <h2>Защитите свой бизнес и фриланс прямо сейчас</h2>
+            <p style="margin-top: 10px;">Получите 3 бесплатные проверки сразу после запуска.</p>
+            <br>
+            <a href="https://t.me/Lexifytelbot" target="_blank" class="btn btn-large">Попробовать Lexify в Telegram</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>© 2026 Lexify AI. Все права защищены.</p>
+            <p style="margin-top: 8px;">Официальный бот: <a href="https://t.me/Lexifytelbot" target="_blank">@Lexifytelbot</a></p>
+        </div>
+    </footer>
+
+</body>
+</html>
