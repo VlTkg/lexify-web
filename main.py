@@ -7,7 +7,7 @@ import tempfile
 from datetime import datetime
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse, HTMLResponse
 from pydantic import BaseModel
 from typing import Optional, List
 from google import genai
@@ -132,6 +132,20 @@ async def serve_landing():
 @app.get("/app")
 async def serve_app():
     return FileResponse("static/index.html")
+
+# --- ДОБАВЛЕННЫЕ МАРШРУТЫ ДЛЯ ЮРИДИЧЕСКИХ СТРАНИЦ ---
+@app.get("/privacy", response_class=HTMLResponse)
+async def serve_privacy():
+    if os.path.exists("static/privacy.html"):
+        return FileResponse("static/privacy.html")
+    raise HTTPException(status_code=404, detail="Страница не найдена")
+
+@app.get("/terms", response_class=HTMLResponse)
+async def serve_terms():
+    if os.path.exists("static/terms.html"):
+        return FileResponse("static/terms.html")
+    raise HTTPException(status_code=404, detail="Страница не найдена")
+# ----------------------------------------------------
 
 @app.get("/user-info/{telegram_id}")
 async def get_user_info(telegram_id: int):
@@ -480,7 +494,7 @@ async def analyze_contract(data: AnalyzeSchema):
 
     try:
         response = ai_client.models.generate_content(
-            model="gemini-3.8-flash",
+            model="gemini-2.5-flash",
             contents=prompt,
             config={
                 "response_mime_type": "application/json",
