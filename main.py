@@ -133,7 +133,7 @@ async def serve_landing():
 async def serve_app():
     return FileResponse("static/index.html")
 
-# --- ДОБАВЛЕННЫЕ МАРШРУТЫ ДЛЯ ЮРИДИЧЕСКИХ СТРАНИЦ ---
+# Юридические страницы
 @app.get("/privacy", response_class=HTMLResponse)
 async def serve_privacy():
     if os.path.exists("static/privacy.html"):
@@ -145,7 +145,6 @@ async def serve_terms():
     if os.path.exists("static/terms.html"):
         return FileResponse("static/terms.html")
     raise HTTPException(status_code=404, detail="Страница не найдена")
-# ----------------------------------------------------
 
 @app.get("/user-info/{telegram_id}")
 async def get_user_info(telegram_id: int):
@@ -494,7 +493,7 @@ async def analyze_contract(data: AnalyzeSchema):
 
     try:
         response = ai_client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-3.8-flash",
             contents=prompt,
             config={
                 "response_mime_type": "application/json",
