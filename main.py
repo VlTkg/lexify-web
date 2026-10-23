@@ -239,7 +239,6 @@ async def create_invoice(data: InvoiceRequest):
 async def telegram_webhook(request: Request):
     body = await request.json()
     
-    # Обработка команды /start с прямой ссылкой на /app
     if "message" in body and "text" in body["message"]:
         text = body["message"]["text"]
         chat_id = body["message"]["chat"]["id"]
@@ -524,7 +523,7 @@ async def analyze_contract(data: AnalyzeSchema):
 
     try:
         response = ai_client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-3.8-flash",
             contents=prompt,
             config={
                 "response_mime_type": "application/json",
