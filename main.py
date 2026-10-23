@@ -133,7 +133,6 @@ async def serve_landing():
 async def serve_app():
     return FileResponse("static/index.html")
 
-# Юридические страницы
 @app.get("/privacy", response_class=HTMLResponse)
 async def serve_privacy():
     if os.path.exists("static/privacy.html"):
@@ -240,6 +239,38 @@ async def create_invoice(data: InvoiceRequest):
 async def telegram_webhook(request: Request):
     body = await request.json()
     
+    # Обработка команды /start
+    if "message" in body and "text" in body["message"]:
+        text = body["message"]["text"]
+        chat_id = body["message"]["chat"]["id"]
+        
+        if text.startswith("/start"):
+            if BOT_TOKEN:
+                welcome_text = (
+                    "👋 **Привет! Я Lexify — ваш ИИ-юрист.**\n\n"
+                    "Я помогу за 1 минуту выявить скрытые риски в договоре и сформировать Протокол разногласий.\n\n"
+                    "🎁 **Вам доступно 3 бесплатные проверки!**"
+                )
+                reply_markup = {
+                    "inline_keyboard": [
+                        [
+                            {
+                                "text": "⚖️ Открыть и проверить договор",
+                                "web_app": {"url": "https://lexify-web.onrender.com"}
+                            }
+                        ]
+                    ]
+                }
+                url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+                async with httpx.AsyncClient() as client:
+                    await client.post(url, json={
+                        "chat_id": chat_id,
+                        "text": welcome_text,
+                        "parse_mode": "Markdown",
+                        "reply_markup": reply_markup
+                    })
+            return {"status": "ok"}
+
     if "message" in body and "successful_payment" in body["message"]:
         payment = body["message"]["successful_payment"]
         payload = payment.get("invoice_payload", "")
@@ -493,7 +524,7 @@ async def analyze_contract(data: AnalyzeSchema):
 
     try:
         response = ai_client.models.generate_content(
-            model="gemini-3.8-flash",
+            model="gemini-2.5-flash",
             contents=prompt,
             config={
                 "response_mime_type": "application/json",
