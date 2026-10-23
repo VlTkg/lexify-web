@@ -239,7 +239,7 @@ async def create_invoice(data: InvoiceRequest):
 async def telegram_webhook(request: Request):
     body = await request.json()
     
-    # Обработка команды /start
+    # Обработка команды /start с прямой ссылкой на /app
     if "message" in body and "text" in body["message"]:
         text = body["message"]["text"]
         chat_id = body["message"]["chat"]["id"]
@@ -256,7 +256,7 @@ async def telegram_webhook(request: Request):
                         [
                             {
                                 "text": "⚖️ Открыть и проверить договор",
-                                "web_app": {"url": "https://lexify-web.onrender.com"}
+                                "web_app": {"url": "https://lexify-web.onrender.com/app"}
                             }
                         ]
                     ]
