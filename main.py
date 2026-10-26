@@ -1,5 +1,6 @@
 import os
 import io
+import json
 import httpx
 import re
 import unicodedata
@@ -212,8 +213,8 @@ async def create_invoice(data: InvoiceRequest):
         raise HTTPException(status_code=500, detail="BOT_TOKEN не настроен на сервере.")
     
     packages = {
-        "5_checks": {"title": "Пакет 5 проверок", "description": "5 дополнительных экспресс-анализов договоров", "amount": 50},
-        "15_checks": {"title": "Пакет 15 проверок", "description": "15 дополнительных экспресс-анализов договоров", "amount": 120}
+        "5_checks": {"title": "Пакет 5 проверок", "description": "5 дополнительных экспресс-анализов договоров и генерация протоколов", "amount": 50},
+        "15_checks": {"title": "Пакет 15 проверок", "description": "15 дополнительных экспресс-анализов договоров и генерация протоколов", "amount": 120}
     }
     
     pkg = packages.get(data.package_type, packages["5_checks"])
@@ -247,7 +248,7 @@ async def telegram_webhook(request: Request):
             if BOT_TOKEN:
                 welcome_text = (
                     "👋 **Привет! Я Lexify — ваш ИИ-юрист.**\n\n"
-                    "Я помогу за 1 минуту выявить скрытые риски в договоре и сформировать Протокол разногласий.\n\n"
+                    "Я помогу за 1 минуту выявить скрытые риски в договоре и сформировать Протокол разногласий в Word (.docx).\n\n"
                     "🎁 **Вам доступно 3 бесплатные проверки!**"
                 )
                 reply_markup = {
@@ -499,7 +500,7 @@ async def analyze_contract(data: AnalyzeSchema):
 
     prompt = f"""
 Ты — профессиональный юрист-аналитик, специализирующийся на защите интересов фрилансеров и исполнителей.
-Проведи экспресс-анализ договора. Язык — современный и понятный (без канцеляризмов типа «кабальный»).
+Проведи экспресс-анализ договора. Язык — современный и понятный (без канцеляризмов).
 
 Контекст:
 - Тип договора: {data.doc_type}
@@ -510,20 +511,20 @@ async def analyze_contract(data: AnalyzeSchema):
 {contract_content[:15000]}
 ---
 
-Верни JSON по схеме:
+Верни JSON строго по схеме:
 1. `overall_risk_level`: ('Низкий', 'Средний', 'Высокий').
 2. `summary`: Вывод в 1-2 предложениях.
 3. `risks`: Список рисков (3-6 штук). Поля:
    - `category`: ('red', 'yellow', 'green')
    - `title`: Название риска
-   - `quote`: Обязательно начни с точного номера пункта или статьи договора (например: "Пункт 3.2. ...", "Статья 5.1. ...", "Раздел 4. ..."). Опиши условие Заказчика простыми словами. Если явного номера нет, напиши "Раздел договора: ...".
+   - `quote`: Обязательно начни с точного номера пункта или статьи договора (например: "Пункт 3.2. ...", "Статья 5.1. ..."). Опиши условие Заказчика простыми словами.
    - `explanation`: Чем грозит данное условие Исполнителю
    - `recommendation`: Предлагаемая безопасная редакция пункта для Исполнителя
 """
 
     try:
         response = ai_client.models.generate_content(
-            model="gemini-3.8-flash",
+            model="gemini-2.5-flash",
             contents=prompt,
             config={
                 "response_mime_type": "application/json",
