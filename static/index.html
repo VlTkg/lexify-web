@@ -299,18 +299,18 @@
             <!-- RIGHT COLUMN: Analysis Results / Constructor Output -->
             <aside class="lg:col-span-5 flex flex-col">
                 <div id="results-card" class="tg-card bg-white p-4 rounded-2xl border shadow-sm flex-1 flex flex-col min-h-[460px]">
-                    <div class="border-b border-slate-100 pb-2 flex items-center justify-between">
-                        <h2 id="results-title" class="font-bold text-sm text-slate-900">Результаты анализа</h2>
-                        <div class="flex items-center gap-1.5">
-                            <button type="button" id="copy-doc-btn" onclick="copyDocumentOutput()" class="hidden bg-slate-200 hover:bg-slate-300 text-slate-800 font-medium px-2.5 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1 shadow-xs">
+                    <div class="border-b border-slate-100 pb-2 flex flex-wrap items-center justify-between gap-1">
+                        <h2 id="results-title" class="font-bold text-xs text-slate-900">Результаты анализа</h2>
+                        <div class="flex items-center gap-1">
+                            <button type="button" id="copy-doc-btn" onclick="copyDocumentOutput()" class="hidden bg-slate-200 hover:bg-slate-300 text-slate-800 font-medium px-2 py-1 rounded-lg text-[11px] transition-all flex items-center gap-1 shadow-xs">
                                 <i class="fa-regular fa-copy"></i> Копировать
                             </button>
-                            <button type="button" id="download-doc-btn" onclick="downloadConstructorTxt()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-2.5 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1 shadow-xs">
-                                <i class="fa-solid fa-download"></i> Скачать .txt
+                            <button type="button" id="download-doc-btn" onclick="downloadConstructorTxt()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-2 py-1 rounded-lg text-[11px] transition-all flex items-center gap-1 shadow-xs">
+                                <i class="fa-solid fa-download"></i> .txt
                             </button>
-                            <button type="button" id="protocol-btn" onclick="generateProtocol()" class="hidden bg-slate-800 hover:bg-slate-900 text-white font-medium px-3 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-xs">
+                            <button type="button" id="protocol-btn" onclick="generateProtocol()" class="hidden bg-slate-800 hover:bg-slate-900 text-white font-medium px-2 py-1 rounded-lg text-[11px] transition-all flex items-center gap-1 shadow-xs">
                                 <i class="fa-solid fa-file-word text-blue-400"></i>
-                                <span>Скачать протокол</span>
+                                <span>Протокол</span>
                             </button>
                         </div>
                     </div>
@@ -565,7 +565,7 @@
         function fallbackCopyText(text) {
             const textarea = document.createElement("textarea");
             textarea.value = text;
-            textarea.style.position = "fixed";  // Avoid scrolling to bottom
+            textarea.style.position = "fixed";
             document.body.appendChild(textarea);
             textarea.focus();
             textarea.select();
