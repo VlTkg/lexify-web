@@ -126,6 +126,17 @@ class ProtocolRequest(BaseModel):
     telegram_id: Optional[int] = None
     risks: List[ProtocolItem]
 
+# --- Схема и эндпоинт для генератора договоров/оферт (Wizard) ---
+class ContractGenerationRequest(BaseModel):
+    doc_type: str = "contract"  # 'contract' или 'offer'
+    executor: str = "Самозанятый"
+    client: str = "Заказчик"
+    description: str = "Оказание услуг"
+    payment: str = "Постоплата"
+    deadline: str = "По согласованию"
+    revisions: str = "2"
+    telegram_id: Optional[int] = None
+
 @app.get("/")
 async def serve_landing():
     return FileResponse("static/landing.html")
@@ -436,6 +447,60 @@ async def download_protocol():
         )
     raise HTTPException(status_code=404, detail="Файл не найден")
 
+# --- Эндпоинт для генерации договора / оферты через модуль/логику генератора ---
+@app.post("/api/generate-document")
+async def api_generate_document(data: ContractGenerationRequest):
+    if not ai_client:
+        raise HTTPException(status_code=500, detail="GEMINI_API_KEY не настроен.")
+
+    doc_type = data.doc_type
+    executor = clean_text(data.executor) or "Самозанятый"
+    client = clean_text(data.client) or "Заказчик"
+    description = clean_text(data.description) or "Оказание услуг"
+    payment = clean_text(data.payment) or "Постоплата"
+    deadline = clean_text(data.deadline) or "По согласованию"
+    revisions = clean_text(data.revisions) or "2"
+
+    if doc_type == 'contract':
+        prompt = f"""
+Ты — опытный юрист по IT-контрактам и защите интересов фрилансеров.
+Сгенерируй юридически грамотный, структурированный Договор оказания услуг / подряда в формате Markdown.
+
+Стороны:
+- Исполнитель: {executor}
+- Заказчик: {client}
+
+Суть и условия:
+- Предмет: {description}
+- Порядок оплаты: {payment}
+- Сроки выполнения: {deadline}
+
+ОБЯЗАТЕЛЬНЫЕ ЗАЩИТНЫЕ УСЛОВИЯ (в пользу Исполнителя):
+1. Порядок приемки: если Заказчик в течение 3 рабочих дней после получения акта не подписал его и не предоставил мотивированный отказ, работы считаются принятыми в полном объеме и подлежат оплате.
+2. Ограничение правок: допускается строго {revisions} бесплатная итерация правок в рамках первоначального ТЗ. Доработки сверх ТЗ или сверх лимита оплачиваются отдельно по часовой ставке.
+3. Интеллектуальные права: исключительные права на результаты работ переходят к Заказчику ТОЛЬКО после полной оплаты (100%) стоимости услуг.
+4. Сдвиг сроков: сроки автоматически сдвигаются на время задержки предоставления доступов, материалов или ответов со стороны Заказчика.
+
+Оформи документ профессионально, с номерами разделов, полями для реквизитов и подписей.
+"""
+    else:
+        prompt = f"""
+Ты — профессиональный юрист. Сгенерируй Публичную оферту для оказания услуг в формате Markdown.
+Описание услуг: {description}.
+Условия оплаты: {payment}.
+Сроки: {deadline}.
+Включи стандартные юридические разделы: акцепт оферты, предмет, права и обязанности сторон, финансовые условия, порядок сдачи-приемки, ограничение ответственности исполнителя и порядок расторжения.
+"""
+
+    try:
+        response = ai_client.models.generate_content(
+            model="gemini-3.8-flash",
+            contents=prompt
+        )
+        return {"status": "success", "document": response.text}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка генерации документа через Gemini: {str(e)}")
+
 @app.post("/feedback")
 async def receive_feedback(data: FeedbackSchema):
     if not FEEDBACK_WEBHOOK_URL:
@@ -515,11 +580,11 @@ async def analyze_contract(data: AnalyzeSchema):
 1. `overall_risk_level`: ('Низкий', 'Средний', 'Высокий').
 2. `summary`: Вывод в 1-2 предложениях.
 3. `risks`: Список рисков (3-6 штук). Поля:
-   - `category`: ('red', 'yellow', 'green')
-   - `title`: Название риска
-   - `quote`: Обязательно начни с точного номера пункта или статьи договора (например: "Пункт 3.2. ...", "Статья 5.1. ..."). Опиши условие Заказчика простыми словами.
-   - `explanation`: Чем грозит данное условие Исполнителю
-   - `recommendation`: Предлагаемая безопасная редакция пункта для Исполнителя
+    - `category`: ('red', 'yellow', 'green')
+    - `title`: Название риска
+    - `quote`: Обязательно начни с точного номера пункта или статьи договора (например: "Пункт 3.2. ...", "Статья 5.1. ..."). Опиши условие Заказчика простыми словами.
+    - `explanation`: Чем грозит данное условие Исполнителю
+    - `recommendation`: Предлагаемая безопасная редакция пункта для Исполнителя
 """
 
     try:
