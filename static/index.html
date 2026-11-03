@@ -311,7 +311,7 @@
                                 <i class="fa-regular fa-copy"></i> Копировать
                             </button>
                             <button type="button" id="download-doc-btn" onclick="downloadConstructorTxt()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-2 py-1 rounded-lg text-[11px] transition-all flex items-center gap-1 shadow-xs">
-                                <i class="fa-solid fa-download"></i> .txt
+                                <i class="fa-solid fa-download"></i> Загрузить
                             </button>
                             <button type="button" id="protocol-btn" onclick="generateProtocol()" class="hidden bg-slate-800 hover:bg-slate-900 text-white font-medium px-2 py-1 rounded-lg text-[11px] transition-all flex items-center gap-1 shadow-xs">
                                 <i class="fa-solid fa-file-word text-blue-400"></i>
@@ -441,6 +441,14 @@
             fetchUserBalance(0);
         }
 
+        // Вспомогательная функция для прокрутки к результатам
+        function scrollToResults() {
+            const resultsCard = document.getElementById('results-card');
+            if (resultsCard) {
+                resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
         // Переключение вкладок Анализ / Конструктор
         function switchTab(mode) {
             currentMode = mode;
@@ -529,6 +537,9 @@
 
             const outputDiv = document.getElementById('analysis-output');
             outputDiv.innerHTML = '<div class="text-center text-slate-500 py-10"><i class="fa-solid fa-spinner fa-spin text-lg"></i><br>Генерация юридического документа...</div>';
+            
+            // Автоматически прокручиваем экран к результатам
+            scrollToResults();
 
             try {
                 const response = await fetch('/api/generate-document', {
@@ -594,17 +605,22 @@
                 alert("Нет сгенерированного документа для скачивания.");
                 return;
             }
+            
+            // Надежная генерация Blob и скачивания для всех платформ
             const blob = new Blob([textToSave], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
+            const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
+            a.style.display = 'none';
             a.href = url;
             a.download = 'Lexify_Document.txt';
             document.body.appendChild(a);
             a.click();
+            
             setTimeout(() => {
                 document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }, 100);
+                window.URL.revokeObjectURL(url);
+            }, 200);
+
             if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
         }
 
@@ -702,6 +718,9 @@
             const outputDiv = document.getElementById('analysis-output');
 
             outputDiv.innerHTML = '<div class="text-center text-slate-500 py-10"><i class="fa-solid fa-spinner fa-spin text-lg"></i><br>Анализ договора на риски...</div>';
+            
+            // Автоматически прокручиваем экран к результатам
+            scrollToResults();
 
             try {
                 const response = await fetch('/analyze', {
