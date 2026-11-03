@@ -209,49 +209,59 @@
                 </div>
 
                 <!-- TAB 2: CONSTRUCTOR SECTION (Hidden by default) -->
-                <div id="constructor-section" class="hidden bg-slate-800/90 border border-slate-600 p-4 rounded-2xl shadow-lg space-y-3">
-                    <h2 class="text-xs font-bold text-white mb-2"><i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i> Конструктор документов и оферт</h2>
-                    <div class="space-y-2.5 text-xs">
+                <div id="constructor-section" class="hidden space-y-3">
+                    <!-- Block 1: How it works (Unified) -->
+                    <div class="transparent-card p-2.5">
+                        <h2 class="text-xs font-bold text-white mb-1">Как это работает</h2>
+                        <ol class="text-xs text-slate-100 space-y-0.5 pl-4 list-decimal leading-snug">
+                            <li>Выберите тип и параметры документа</li>
+                            <li>Заполните суть услуг и требования</li>
+                            <li>Нажмите кнопку «Сгенерировать документ»</li>
+                        </ol>
+                    </div>
+
+                    <!-- Block 2: Constructor Form -->
+                    <div class="transparent-card p-0 space-y-2.5 text-xs">
                         <div>
-                            <label class="block font-medium text-slate-200 mb-1">Тип документа</label>
-                            <select id="c-doc_type" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-2 text-white">
+                            <label class="block font-bold text-white mb-1">Тип документа</label>
+                            <select id="c-doc_type" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white">
                                 <option value="contract">Договор оказания услуг / подряда</option>
                                 <option value="offer">Публичная оферта</option>
                             </select>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
                             <div>
-                                <label class="block font-medium text-slate-200 mb-1">Исполнитель</label>
-                                <input type="text" id="c-executor" value="Самозанятый" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-2 text-white">
+                                <label class="block font-bold text-white mb-1">Исполнитель</label>
+                                <input type="text" id="c-executor" value="Самозанятый" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white">
                             </div>
                             <div>
-                                <label class="block font-medium text-slate-200 mb-1">Заказчик</label>
-                                <input type="text" id="c-client" value="Заказчик" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-2 text-white">
+                                <label class="block font-bold text-white mb-1">Заказчик</label>
+                                <input type="text" id="c-client" value="Заказчик" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white">
                             </div>
                         </div>
                         <div>
-                            <label class="block font-medium text-slate-200 mb-1">Суть услуг и предмет</label>
-                            <textarea id="c-description" rows="2" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-2 text-white resize-none" placeholder="Например: Разработка Telegram-бота и бэкенда на Python"></textarea>
+                            <label class="block font-bold text-white mb-1">Суть услуг и предмет</label>
+                            <textarea id="c-description" rows="2" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white resize-none" placeholder="Например: Разработка Telegram-бота и бэкенда на Python"></textarea>
                         </div>
                         <div class="grid grid-cols-3 gap-2">
                             <div>
-                                <label class="block font-medium text-slate-200 mb-1">Оплата</label>
-                                <input type="text" id="c-payment" value="Постоплата" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-2 text-white">
+                                <label class="block font-bold text-white mb-1">Оплата</label>
+                                <input type="text" id="c-payment" value="Постоплата" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white">
                             </div>
                             <div>
-                                <label class="block font-medium text-slate-200 mb-1">Сроки</label>
-                                <input type="text" id="c-deadline" value="14 дней" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-2 text-white">
+                                <label class="block font-bold text-white mb-1">Сроки</label>
+                                <input type="text" id="c-deadline" value="14 дней" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white">
                             </div>
                             <div>
-                                <label class="block font-medium text-slate-200 mb-1">Правки</label>
-                                <input type="text" id="c-revisions" value="2" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-2 text-white">
+                                <label class="block font-bold text-white mb-1">Правки</label>
+                                <input type="text" id="c-revisions" value="2" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white">
                             </div>
                         </div>
                         <div class="flex flex-col sm:flex-row gap-2 pt-1">
                             <button type="button" onclick="generateConstructorDocument()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-4 rounded-xl transition shadow text-xs flex items-center justify-center gap-2">
                                 <span>Сгенерировать документ</span>
                             </button>
-                            <button type="button" onclick="resetConstructorForm()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium py-2.5 px-4 rounded-xl transition shadow text-xs flex items-center justify-center gap-2">
+                            <button type="button" onclick="resetConstructorForm()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2.5 px-4 rounded-xl transition shadow text-xs flex items-center justify-center gap-2">
                                 <span>Новый документ</span>
                             </button>
                         </div>
@@ -441,7 +451,7 @@
             fetchUserBalance(0);
         }
 
-        // Вспомогательная функция для прокрутки к результатам
+        // Авто-прокрутка к карточке результатов
         function scrollToResults() {
             const resultsCard = document.getElementById('results-card');
             if (resultsCard) {
@@ -538,7 +548,7 @@
             const outputDiv = document.getElementById('analysis-output');
             outputDiv.innerHTML = '<div class="text-center text-slate-500 py-10"><i class="fa-solid fa-spinner fa-spin text-lg"></i><br>Генерация юридического документа...</div>';
             
-            // Автоматически прокручиваем экран к результатам
+            // Скроллим к результату, чтобы пользователь сразу видел процесс
             scrollToResults();
 
             try {
@@ -598,28 +608,22 @@
             document.body.removeChild(textarea);
         }
 
+        // Надежная загрузка файла через Data URI для обхода блокировок iframe в Telegram
         function downloadConstructorTxt() {
             const outputDiv = document.getElementById('analysis-output');
             const textToSave = outputDiv.dataset.rawText || outputDiv.innerText;
             if (!textToSave || textToSave.includes("Здесь появится сгенерированный документ")) {
-                alert("Нет сгенерированного документа для скачивания.");
+                alert("Нет сгенерированного документа для загрузки.");
                 return;
             }
-            
-            // Надежная генерация Blob и скачивания для всех платформ
-            const blob = new Blob([textToSave], { type: 'text/plain;charset=utf-8' });
-            const url = window.URL.createObjectURL(blob);
+
+            const encodedUri = 'data:text/plain;charset=utf-8,' + encodeURIComponent(textToSave);
             const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = 'Lexify_Document.txt';
+            a.setAttribute('href', encodedUri);
+            a.setAttribute('download', 'Lexify_Document.txt');
             document.body.appendChild(a);
             a.click();
-            
-            setTimeout(() => {
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-            }, 200);
+            document.body.removeChild(a);
 
             if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
         }
@@ -719,7 +723,7 @@
 
             outputDiv.innerHTML = '<div class="text-center text-slate-500 py-10"><i class="fa-solid fa-spinner fa-spin text-lg"></i><br>Анализ договора на риски...</div>';
             
-            // Автоматически прокручиваем экран к результатам
+            // Скроллим к результату
             scrollToResults();
 
             try {
