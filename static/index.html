@@ -247,9 +247,14 @@
                                 <input type="text" id="c-revisions" value="2" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-2 text-white">
                             </div>
                         </div>
-                        <button type="button" onclick="generateConstructorDocument()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-4 rounded-xl transition shadow text-xs">
-                            Сгенерировать документ
-                        </button>
+                        <div class="flex flex-col sm:flex-row gap-2 pt-1">
+                            <button type="button" onclick="generateConstructorDocument()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-4 rounded-xl transition shadow text-xs flex items-center justify-center gap-2">
+                                <span>Сгенерировать документ</span>
+                            </button>
+                            <button type="button" onclick="resetConstructorForm()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium py-2.5 px-4 rounded-xl transition shadow text-xs flex items-center justify-center gap-2">
+                                <span>Новый документ</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -307,9 +312,6 @@
                             </button>
                             <button type="button" id="download-doc-btn" onclick="downloadConstructorTxt()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-2 py-1 rounded-lg text-[11px] transition-all flex items-center gap-1 shadow-xs">
                                 <i class="fa-solid fa-download"></i> .txt
-                            </button>
-                            <button type="button" id="new-doc-btn" onclick="resetConstructorForm()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-2 py-1 rounded-lg text-[11px] transition-all flex items-center gap-1 shadow-xs">
-                                <i class="fa-solid fa-plus"></i> Новый
                             </button>
                             <button type="button" id="protocol-btn" onclick="generateProtocol()" class="hidden bg-slate-800 hover:bg-slate-900 text-white font-medium px-2 py-1 rounded-lg text-[11px] transition-all flex items-center gap-1 shadow-xs">
                                 <i class="fa-solid fa-file-word text-blue-400"></i>
@@ -450,7 +452,6 @@
             const protocolBtn = document.getElementById('protocol-btn');
             const copyBtn = document.getElementById('copy-doc-btn');
             const downloadBtn = document.getElementById('download-doc-btn');
-            const newDocBtn = document.getElementById('new-doc-btn');
             const outputDiv = document.getElementById('analysis-output');
             
             const fbTypeLabel = document.getElementById('fb-type-label');
@@ -464,7 +465,6 @@
                 resultsTitle.textContent = "Результаты анализа";
                 copyBtn.classList.add('hidden');
                 downloadBtn.classList.add('hidden');
-                newDocBtn.classList.add('hidden');
                 protocolBtn.classList.remove('hidden');
                 outputDiv.innerHTML = "Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».";
                 
@@ -480,7 +480,6 @@
                 protocolBtn.classList.add('hidden');
                 copyBtn.classList.remove('hidden');
                 downloadBtn.classList.remove('hidden');
-                newDocBtn.classList.remove('hidden');
                 outputDiv.innerHTML = "Здесь появится сгенерированный документ в формате Markdown после заполнения формы конструктора.";
                 
                 fbTypeLabel.textContent = "Оценка конструктора";
