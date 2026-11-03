@@ -128,6 +128,7 @@ class ProtocolRequest(BaseModel):
 
 class ContractGenerationRequest(BaseModel):
     doc_type: str = "contract"  # 'contract' или 'offer'
+    jurisdiction: str = "Россия (РФ)"
     executor: str = "Самозанятый"
     client: str = "Заказчик"
     description: str = "Оказание услуг"
@@ -135,6 +136,11 @@ class ContractGenerationRequest(BaseModel):
     deadline: str = "По согласованию"
     revisions: str = "2"
     telegram_id: Optional[int] = None
+
+class ConstructorFileRequest(BaseModel):
+    document_text: str
+    doc_type: str = "contract"
+    jurisdiction: str = "Россия (РФ)"
 
 @app.get("/")
 async def serve_landing():
@@ -446,12 +452,31 @@ async def download_protocol():
         )
     raise HTTPException(status_code=404, detail="Файл не найден")
 
+@app.post("/generate-constructor-file")
+async def generate_constructor_file(data: ConstructorFileRequest):
+    file_path = os.path.join(tempfile.gettempdir(), "Lexify_Document.txt")
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(data.document_text)
+    return {"status": "success", "download_url": "/download-constructor-file"}
+
+@app.get("/download-constructor-file")
+async def download_constructor_file():
+    file_path = os.path.join(tempfile.gettempdir(), "Lexify_Document.txt")
+    if os.path.exists(file_path):
+        return FileResponse(
+            file_path,
+            media_type="text/plain;charset=utf-8",
+            filename="Lexify_Document.txt"
+        )
+    raise HTTPException(status_code=404, detail="Файл не найден")
+
 @app.post("/api/generate-document")
 async def api_generate_document(data: ContractGenerationRequest):
     if not ai_client:
         raise HTTPException(status_code=500, detail="GEMINI_API_KEY не настроен.")
 
     doc_type = data.doc_type
+    jurisdiction = clean_text(data.jurisdiction) or "Россия (РФ)"
     executor = clean_text(data.executor) or "Самозанятый"
     client = clean_text(data.client) or "Заказчик"
     description = clean_text(data.description) or "Оказание услуг"
@@ -461,8 +486,8 @@ async def api_generate_document(data: ContractGenerationRequest):
 
     if doc_type == 'contract':
         prompt = f"""
-Ты — опытный юрист по IT-контрактам и защите интересов фрилансеров.
-Сгенерируй юридически грамотный, структурированный Договор оказания услуг / подряда в формате Markdown.
+Ты — опытный юрист по IT-контрактам и защите интересов фрилансеров в юрисдикции: {jurisdiction}.
+Сгенерируй юридически грамотный, структурированный Договор оказания услуг / подряда в формате Markdown с учетом применимого законодательства ({jurisdiction}).
 
 Стороны:
 - Исполнитель: {executor}
@@ -483,11 +508,11 @@ async def api_generate_document(data: ContractGenerationRequest):
 """
     else:
         prompt = f"""
-Ты — профессиональный юрист. Сгенерируй Публичную оферту для оказания услуг в формате Markdown.
+Ты — профессиональный юрист. Сгенерируй Публичную оферту для оказания услуг в юрисдикции: {jurisdiction} в формате Markdown.
 Описание услуг: {description}.
 Условия оплаты: {payment}.
 Сроки: {deadline}.
-Включи стандартные юридические разделы: акцепт оферты, предмет, права и обязанности сторон, финансовые условия, порядок сдачи-приемки, ограничение ответственности исполнителя и порядок расторжения.
+Включи стандартные юридические разделы: акцепт оферты, предмет, права и обязанности сторон, финансовые условия, порядок сдачи-приемки, ограничение ответственности исполнителя и порядок расторжения с учетом законодательства ({jurisdiction}).
 """
 
     try:
