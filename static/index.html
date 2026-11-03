@@ -210,7 +210,7 @@
 
                 <!-- TAB 2: CONSTRUCTOR SECTION (Hidden by default) -->
                 <div id="constructor-section" class="hidden bg-slate-800/90 border border-slate-600 p-4 rounded-2xl shadow-lg space-y-3">
-                    <h2 class="text-xs font-bold text-white mb-2"><i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i> Конструктор договоров и оферт</h2>
+                    <h2 class="text-xs font-bold text-white mb-2"><i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i> Конструктор документов и оферт</h2>
                     <div class="space-y-2.5 text-xs">
                         <div>
                             <label class="block font-medium text-slate-200 mb-1">Тип документа</label>
@@ -268,7 +268,7 @@
 
                     <div class="flex items-center gap-4 text-xs text-slate-600">
                         <label class="flex items-center gap-1.5 cursor-pointer">
-                            <input type="radio" name="fb-type" value="Оценка анализа" checked class="accent-blue-600"> Оценка анализа
+                            <input type="radio" name="fb-type" id="fb-type-primary" value="Оценка анализа" checked class="accent-blue-600"> <span id="fb-type-label">Оценка анализа</span>
                         </label>
                         <label class="flex items-center gap-1.5 cursor-pointer">
                             <input type="radio" name="fb-type" value="Баг / Ошибка" class="accent-blue-600"> Баг / Ошибка
@@ -444,6 +444,10 @@
             const protocolBtn = document.getElementById('protocol-btn');
             const copyBtn = document.getElementById('copy-doc-btn');
             const outputDiv = document.getElementById('analysis-output');
+            
+            // Элементы обратной связи
+            const fbTypeLabel = document.getElementById('fb-type-label');
+            const fbTypePrimary = document.getElementById('fb-type-primary');
 
             if (mode === 'analysis') {
                 tabAnalysis.className = "px-4 py-1.5 font-semibold text-xs text-white bg-blue-600 rounded-xl transition shadow-xs";
@@ -453,6 +457,11 @@
                 resultsTitle.textContent = "Результаты анализа";
                 copyBtn.classList.add('hidden');
                 outputDiv.innerHTML = "Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».";
+                
+                // Динамическое обновление отзыва для анализа
+                fbTypeLabel.textContent = "Оценка анализа";
+                fbTypePrimary.value = "Оценка анализа";
+                fbTypePrimary.checked = true;
             } else {
                 tabConstructor.className = "px-4 py-1.5 font-semibold text-xs text-white bg-indigo-600 rounded-xl transition shadow-xs";
                 tabAnalysis.className = "px-4 py-1.5 font-semibold text-xs text-slate-200 hover:text-white bg-slate-700/60 rounded-xl transition shadow-xs";
@@ -462,6 +471,11 @@
                 protocolBtn.classList.add('hidden');
                 copyBtn.classList.remove('hidden');
                 outputDiv.innerHTML = "Здесь появится сгенерированный документ в формате Markdown после заполнения формы конструктора.";
+                
+                // Динамическое обновление отзыва для конструктора
+                fbTypeLabel.textContent = "Оценка конструктора";
+                fbTypePrimary.value = "Оценка конструктора";
+                fbTypePrimary.checked = true;
             }
             if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
         }
@@ -505,7 +519,7 @@
             };
 
             const outputDiv = document.getElementById('analysis-output');
-            outputDiv.innerHTML = '<div class="text-center text-slate-500 py-10"><i class="fa-solid fa-spinner fa-spin text-lg"></i><br>Генерация юридического документа с помощью ИИ...</div>';
+            outputDiv.innerHTML = '<div class="text-center text-slate-500 py-10"><i class="fa-solid fa-spinner fa-spin text-lg"></i><br>Генерация юридического документа...</div>';
 
             try {
                 const response = await fetch('/api/generate-document', {
@@ -623,7 +637,7 @@
             const jurisdiction = document.querySelector('#jurisdiction-group button.active')?.dataset.value || "Россия (РФ)";
             const outputDiv = document.getElementById('analysis-output');
 
-            outputDiv.innerHTML = '<div class="text-center text-slate-500 py-10"><i class="fa-solid fa-spinner fa-spin text-lg"></i><br>ИИ анализирует договор на риски...</div>';
+            outputDiv.innerHTML = '<div class="text-center text-slate-500 py-10"><i class="fa-solid fa-spinner fa-spin text-lg"></i><br>Анализ договора на риски...</div>';
 
             try {
                 const response = await fetch('/analyze', {
@@ -859,7 +873,7 @@
 
         async function sendFeedback() {
             const feedbackText = document.getElementById('feedback-text').value.trim();
-            const fbType = document.querySelector('input[name="fb-type"]:checked')?.value || "Оценка анализа";
+            const fbType = document.querySelector('input[name="fb-type"]:checked')?.value || (currentMode === 'analysis' ? "Оценка анализа" : "Оценка конструктора");
             const rating = window.selectedRating || 4;
             const sentiment = window.selectedSentiment || "Полезно";
 
