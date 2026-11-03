@@ -222,17 +222,19 @@
 
                     <!-- Block 2: Constructor Form -->
                     <div class="transparent-card p-0 space-y-2.5 text-xs">
+                        
+                        <!-- Constructor Document Type Chips -->
                         <div>
-                            <label class="block font-bold text-white mb-1">Тип документа</label>
-                            <select id="c-doc_type" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white">
-                                <option value="contract">Договор оказания услуг / подряда</option>
-                                <option value="offer">Публичная оферта</option>
-                            </select>
+                            <label class="block font-bold text-white mb-1.5">Тип документа</label>
+                            <div class="flex flex-wrap gap-1.5" id="c-doc-type-group">
+                                <button type="button" class="chip-btn active px-3 py-1.5 rounded-xl border border-slate-300" data-value="contract">Договор оказания услуг</button>
+                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-800" data-value="offer">Публичная оферта</button>
+                            </div>
                         </div>
                         
-                        <!-- Jurisdiction for Constructor -->
+                        <!-- Constructor Jurisdiction Chips -->
                         <div>
-                            <label class="block font-bold text-white mb-1">Юрисдикция</label>
+                            <label class="block font-bold text-white mb-1.5">Юрисдикция</label>
                             <div class="flex flex-wrap gap-1.5" id="c-jurisdiction-group">
                                 <button type="button" class="chip-btn active px-3 py-1.5 rounded-xl border border-slate-300" data-value="Россия (РФ)">Россия (РФ)</button>
                                 <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-800" data-value="Казахстан">Казахстан</button>
@@ -532,23 +534,33 @@
             }
         }
 
-        // Переключение юрисдикции в конструкторе
-        document.querySelectorAll('#c-jurisdiction-group button').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('#c-jurisdiction-group button').forEach(b => {
-                    b.classList.remove('active', 'bg-blue-600', 'text-white');
-                    b.classList.add('bg-slate-200', 'text-slate-800');
+        // Унифицированная логика переключения кнопок-чипов (Анализ и Конструктор)
+        function setupChipGroup(groupId) {
+            document.querySelectorAll(`#${groupId} button`).forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll(`#${groupId} button`).forEach(b => {
+                        b.classList.remove('active', 'bg-blue-600', 'text-white');
+                        b.classList.add('bg-slate-200', 'text-slate-800');
+                    });
+                    btn.classList.add('active', 'bg-blue-600', 'text-white');
+                    btn.classList.remove('bg-slate-200', 'text-slate-800');
+                    if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
                 });
-                btn.classList.add('active', 'bg-blue-600', 'text-white');
-                btn.classList.remove('bg-slate-200', 'text-slate-800');
             });
-        });
+        }
+
+        setupChipGroup('doc-type-group');
+        setupChipGroup('jurisdiction-group');
+        setupChipGroup('c-doc-type-group');
+        setupChipGroup('c-jurisdiction-group');
 
         // Генерация через конструктор
         async function generateConstructorDocument() {
+            const docType = document.querySelector('#c-doc-type-group button.active')?.dataset.value || "contract";
             const jurisdiction = document.querySelector('#c-jurisdiction-group button.active')?.dataset.value || "Россия (РФ)";
+            
             const payload = {
-                doc_type: document.getElementById('c-doc_type').value,
+                doc_type: docType,
                 jurisdiction: jurisdiction,
                 executor: document.getElementById('c-executor').value,
                 client: document.getElementById('c-client').value,
@@ -595,7 +607,7 @@
             }
         }
 
-        // Загрузка через серверный метод (аналогично протоколу разногласий)
+        // Загрузка через серверный метод
         async function downloadConstructorFile() {
             const outputDiv = document.getElementById('analysis-output');
             const textToSave = outputDiv.dataset.rawText || outputDiv.innerText;
@@ -604,7 +616,7 @@
                 return;
             }
 
-            const docType = document.getElementById('c-doc_type').value;
+            const docType = document.querySelector('#c-doc-type-group button.active')?.dataset.value || "contract";
             const jurisdiction = document.querySelector('#c-jurisdiction-group button.active')?.dataset.value || "Россия (РФ)";
 
             try {
@@ -636,29 +648,6 @@
             document.getElementById('analysis-output').removeAttribute('data-raw-text');
             if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
         }
-
-        // Выбор типа договора и юрисдикции для анализа
-        document.querySelectorAll('#doc-type-group button').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('#doc-type-group button').forEach(b => {
-                    b.classList.remove('active', 'bg-blue-600', 'text-white');
-                    b.classList.add('bg-slate-200', 'text-slate-800');
-                });
-                btn.classList.add('active', 'bg-blue-600', 'text-white');
-                btn.classList.remove('bg-slate-200', 'text-slate-800');
-            });
-        });
-
-        document.querySelectorAll('#jurisdiction-group button').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('#jurisdiction-group button').forEach(b => {
-                    b.classList.remove('active', 'bg-blue-600', 'text-white');
-                    b.classList.add('bg-slate-200', 'text-slate-800');
-                });
-                btn.classList.add('active', 'bg-blue-600', 'text-white');
-                btn.classList.remove('bg-slate-200', 'text-slate-800');
-            });
-        });
 
         // Загрузка файлов (Dropzone)
         const dropzone = document.getElementById('dropzone');
