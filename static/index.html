@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lexify — Экспресс-анализ договоров</title>
+    <title>Lexify — Экспресс-анализ договоров и Конструктор</title>
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <!-- Tailwind CSS CDN -->
@@ -84,11 +84,11 @@
         <header class="mb-1 flex items-center justify-between">
             <div>
                 <h1 class="text-2xl font-bold tracking-tight text-white">Lexify</h1>
-                <p class="text-xs text-slate-200">Сервис автоматической проверки договоров для фрилансеров</p>
+                <p class="text-xs text-slate-200">Сервис автоматической проверки и генерации документов</p>
             </div>
             <!-- Счетчик проверок и Админ-кнопка -->
             <div class="flex items-center gap-2">
-                <button type="button" id="admin-btn" onclick="openAdminModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-2.5 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1 shadow-xs">
+                <button type="button" id="admin-btn" onclick="openAdminModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-2.5 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1 shadow-xs hidden">
                     <i class="fa-solid fa-shield-halved text-[11px]"></i> Админ
                 </button>
                 <div id="user-badge" class="bg-slate-700/90 px-3 py-1.5 rounded-xl border border-slate-500 text-xs text-slate-100 hidden shadow-sm flex items-center gap-2">
@@ -100,13 +100,20 @@
             </div>
         </header>
 
+        <!-- Навигация по вкладкам (Анализ / Конструктор) -->
+        <div class="flex space-x-2 border-b border-slate-500/40 pb-2">
+            <button id="tab-analysis" onclick="switchTab('analysis')" class="px-4 py-1.5 font-semibold text-xs text-white bg-blue-600 rounded-xl transition shadow-xs">🔍 Анализ договора</button>
+            <button id="tab-constructor" onclick="switchTab('constructor')" class="px-4 py-1.5 font-semibold text-xs text-slate-200 hover:text-white bg-slate-700/60 rounded-xl transition shadow-xs">📝 Конструктор документов</button>
+        </div>
+
         <!-- Main Grid Layout -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
 
             <!-- LEFT COLUMN -->
             <main class="lg:col-span-7 flex flex-col justify-between space-y-3">
 
-                <div class="space-y-3">
+                <!-- TAB 1: ANALYSIS SECTION -->
+                <div id="analysis-section" class="space-y-3">
                     <!-- Block 1: How it works -->
                     <div class="transparent-card p-2.5">
                         <h2 class="text-xs font-bold text-white mb-1">Как это работает</h2>
@@ -198,7 +205,51 @@
                                 <span>Новый анализ</span>
                             </button>
                         </div>
+                    </div>
+                </div>
 
+                <!-- TAB 2: CONSTRUCTOR SECTION (Hidden by default) -->
+                <div id="constructor-section" class="hidden bg-slate-800/90 border border-slate-600 p-4 rounded-2xl shadow-lg space-y-3">
+                    <h2 class="text-xs font-bold text-white mb-2"><i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i> Конструктор договоров и оферт</h2>
+                    <div class="space-y-2.5 text-xs">
+                        <div>
+                            <label class="block font-medium text-slate-200 mb-1">Тип документа</label>
+                            <select id="c-doc_type" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-2 text-white">
+                                <option value="contract">Договор оказания услуг / подряда</option>
+                                <option value="offer">Публичная оферта</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block font-medium text-slate-200 mb-1">Исполнитель</label>
+                                <input type="text" id="c-executor" value="Самозанятый" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-2 text-white">
+                            </div>
+                            <div>
+                                <label class="block font-medium text-slate-200 mb-1">Заказчик</label>
+                                <input type="text" id="c-client" value="Заказчик" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-2 text-white">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block font-medium text-slate-200 mb-1">Суть услуг и предмет</label>
+                            <textarea id="c-description" rows="2" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-2 text-white resize-none" placeholder="Например: Разработка Telegram-бота и бэкенда на Python"></textarea>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="block font-medium text-slate-200 mb-1">Оплата</label>
+                                <input type="text" id="c-payment" value="Постоплата" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-2 text-white">
+                            </div>
+                            <div>
+                                <label class="block font-medium text-slate-200 mb-1">Сроки</label>
+                                <input type="text" id="c-deadline" value="14 дней" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-2 text-white">
+                            </div>
+                            <div>
+                                <label class="block font-medium text-slate-200 mb-1">Правки</label>
+                                <input type="text" id="c-revisions" value="2" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-2 text-white">
+                            </div>
+                        </div>
+                        <button type="button" onclick="generateConstructorDocument()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-4 rounded-xl transition shadow text-xs">
+                            Сгенерировать документ
+                        </button>
                     </div>
                 </div>
 
@@ -245,15 +296,20 @@
 
             </main>
 
-            <!-- RIGHT COLUMN: Analysis Results -->
+            <!-- RIGHT COLUMN: Analysis Results / Constructor Output -->
             <aside class="lg:col-span-5 flex flex-col">
                 <div id="results-card" class="tg-card bg-white p-4 rounded-2xl border shadow-sm flex-1 flex flex-col min-h-[460px]">
                     <div class="border-b border-slate-100 pb-2 flex items-center justify-between">
-                        <h2 class="font-bold text-sm text-slate-900">Результаты анализа</h2>
-                        <button type="button" id="protocol-btn" onclick="generateProtocol()" class="hidden bg-slate-800 hover:bg-slate-900 text-white font-medium px-3 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-xs">
-                            <i class="fa-solid fa-file-word text-blue-400"></i>
-                            <span>Скачать протокол</span>
-                        </button>
+                        <h2 id="results-title" class="font-bold text-sm text-slate-900">Результаты анализа</h2>
+                        <div class="flex items-center gap-1.5">
+                            <button type="button" id="copy-doc-btn" onclick="copyDocumentOutput()" class="hidden bg-slate-200 hover:bg-slate-300 text-slate-800 font-medium px-2.5 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1 shadow-xs">
+                                <i class="fa-regular fa-copy"></i> Копировать
+                            </button>
+                            <button type="button" id="protocol-btn" onclick="generateProtocol()" class="hidden bg-slate-800 hover:bg-slate-900 text-white font-medium px-3 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-xs">
+                                <i class="fa-solid fa-file-word text-blue-400"></i>
+                                <span>Скачать протокол</span>
+                            </button>
+                        </div>
                     </div>
                     <div class="flex-1 flex items-center justify-center p-4" id="results-container-wrapper">
                         <div id="analysis-output" class="text-xs text-slate-700 leading-relaxed text-center w-full">
@@ -272,6 +328,7 @@
         <a href="#" onclick="openTermsModal(event)" class="underline hover:text-white transition-colors">Публичная оферта</a>
     </footer>
 
+    <!-- Modals (Stars, Admin, Terms) -->
     <!-- Модальное окно покупки проверок за Telegram Stars -->
     <div id="stars-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
         <div class="bg-white rounded-2xl max-w-sm w-full p-5 space-y-4 text-slate-900 shadow-xl border border-slate-100">
@@ -296,7 +353,6 @@
                         <span>50</span> <i class="fa-solid fa-star text-[10px]"></i>
                     </div>
                 </button>
-
                 <button type="button" onclick="buyPackage('15_checks')" class="w-full bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-400 p-3 rounded-xl transition-all flex items-center justify-between text-left group">
                     <div>
                         <div class="font-bold text-xs text-slate-900 group-hover:text-blue-600">15 проверок договора</div>
@@ -321,11 +377,9 @@
                     <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
             </div>
-            
             <div id="admin-stats-content" class="space-y-4 overflow-y-auto flex-1 pr-1">
                 <div class="text-center text-xs text-slate-500 py-4"><i class="fa-solid fa-spinner fa-spin"></i> Загрузка данных из БД...</div>
             </div>
-
             <button type="button" onclick="closeAdminModal()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-800 font-medium py-2 rounded-xl text-xs transition-all flex-shrink-0">
                 Закрыть
             </button>
@@ -343,36 +397,14 @@
                     <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
             </div>
-            
             <div class="space-y-3 overflow-y-auto flex-1 pr-2 text-xs text-slate-700 leading-relaxed">
                 <p class="font-bold text-slate-900">ПУБЛИЧНАЯ ОФЕРТА (ПОЛЬЗОВАТЕЛЬСКОЕ СОГЛАШЕНИЕ)</p>
                 <p class="text-[10px] text-slate-400">Дата последнего обновления: 19 октября 2026 года</p>
-
                 <div class="space-y-1">
                     <p class="font-bold text-slate-900">1. ОБЩИЕ ПОЛОЖЕНИЯ</p>
-                    <p>1.1. Настоящий документ является официальным предложением (публичной офертой) Исполнителя и содержит все существенные условия предоставления услуг по автоматизированному экспресс-анализу документов с использованием программного сервиса «Lexify».</p>
-                    <p>1.2. Использование Сервиса, включая загрузку документов, нажатие кнопки «Анализировать», а также осуществление оплаты внутренних пакетов проверок, означает полное и безоговорочное согласие Пользователя со всеми условиями настоящего Соглашения.</p>
-                </div>
-
-                <div class="space-y-1">
-                    <p class="font-bold text-slate-900">2. ПРЕДМЕТ СОГЛАШЕНИЯ И ОГРАНИЧЕНИЕ ОТВЕТСТВЕННОСТИ</p>
-                    <p>2.1. Исполнитель предоставляет Пользователю доступ к функционалу Сервиса для проведения автоматизированного анализа текстов договоров и генерации справочно-информационных материалов.</p>
-                    <p>2.2. Сервис функционирует на базе алгоритмов искусственного интеллекта и носит <strong>исключительно информационно-справочный характер</strong>. Результаты анализа <strong>не являются официальной юридической консультацией</strong>. Пользователь самостоятельно принимает решения о подписании договоров и несет за них ответственность.</p>
-                </div>
-
-                <div class="space-y-1">
-                    <p class="font-bold text-slate-900">3. ПОРЯДОК ПРЕДОСТАВЛЕНИЯ И ОПЛАТЫ УСЛУГ</p>
-                    <p>3.1. Базовый доступ к Сервису предоставляется с ограничением по количеству бесплатных проверок.</p>
-                    <p>3.2. Оплата дополнительных пакетов проверок осуществляется через платежную систему Telegram (включая Telegram Stars).</p>
-                    <p>3.3. Услуга считается оказанной в момент зачисления купленных проверок на баланс Пользователя. Возврат средств за использованные пакеты не производится.</p>
-                </div>
-
-                <div class="space-y-1">
-                    <p class="font-bold text-slate-900">4. КОНФИДЕНЦИАЛЬНОСТЬ</p>
-                    <p>4.1. Тексты загружаемых документов обрабатываются автоматически исключительно для целей выполнения анализа и формирования результата.</p>
+                    <p>1.1. Настоящий документ является официальным предложением (публичной офертой) Исполнителя и содержит все существенные условия предоставления услуг по автоматизированному экспресс-анализу и генерации документов с использованием программного сервиса «Lexify».</p>
                 </div>
             </div>
-
             <button type="button" onclick="closeTermsModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-xl text-xs transition-all flex-shrink-0">
                 Понятно
             </button>
@@ -383,7 +415,8 @@
     <script>
         const tg = window.Telegram?.WebApp;
         let initDataUser = null;
-        let lastAnalysisData = null;
+        let currentMode = 'analysis'; // 'analysis' or 'constructor'
+        let uploadedFileText = "";
 
         if (tg) {
             tg.ready();
@@ -398,6 +431,39 @@
             }
         } else {
             fetchUserBalance(0);
+        }
+
+        // Переключение вкладок Анализ / Конструктор
+        function switchTab(mode) {
+            currentMode = mode;
+            const tabAnalysis = document.getElementById('tab-analysis');
+            const tabConstructor = document.getElementById('tab-constructor');
+            const analysisSec = document.getElementById('analysis-section');
+            const constructorSec = document.getElementById('constructor-section');
+            const resultsTitle = document.getElementById('results-title');
+            const protocolBtn = document.getElementById('protocol-btn');
+            const copyBtn = document.getElementById('copy-doc-btn');
+            const outputDiv = document.getElementById('analysis-output');
+
+            if (mode === 'analysis') {
+                tabAnalysis.className = "px-4 py-1.5 font-semibold text-xs text-white bg-blue-600 rounded-xl transition shadow-xs";
+                tabConstructor.className = "px-4 py-1.5 font-semibold text-xs text-slate-200 hover:text-white bg-slate-700/60 rounded-xl transition shadow-xs";
+                analysisSec.classList.remove('hidden');
+                constructorSec.classList.add('hidden');
+                resultsTitle.textContent = "Результаты анализа";
+                copyBtn.classList.add('hidden');
+                outputDiv.innerHTML = "Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».";
+            } else {
+                tabConstructor.className = "px-4 py-1.5 font-semibold text-xs text-white bg-indigo-600 rounded-xl transition shadow-xs";
+                tabAnalysis.className = "px-4 py-1.5 font-semibold text-xs text-slate-200 hover:text-white bg-slate-700/60 rounded-xl transition shadow-xs";
+                constructorSec.classList.remove('hidden');
+                analysisSec.classList.add('hidden');
+                resultsTitle.textContent = "Сгенерированный документ";
+                protocolBtn.classList.add('hidden');
+                copyBtn.classList.remove('hidden');
+                outputDiv.innerHTML = "Здесь появится сгенерированный документ в формате Markdown после заполнения формы конструктора.";
+            }
+            if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
         }
 
         async function fetchUserBalance(telegramId) {
@@ -425,228 +491,353 @@
             }
         }
 
-        function openTermsModal(e) {
-            if (e) e.preventDefault();
-            document.getElementById('terms-modal').classList.remove('hidden');
-            document.getElementById('terms-modal').classList.add('flex');
-            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-        }
+        // Логика генерации через конструктор
+        async function generateConstructorDocument() {
+            const payload = {
+                doc_type: document.getElementById('c-doc_type').value,
+                executor: document.getElementById('c-executor').value,
+                client: document.getElementById('c-client').value,
+                description: document.getElementById('c-description').value,
+                payment: document.getElementById('c-payment').value,
+                deadline: document.getElementById('c-deadline').value,
+                revisions: document.getElementById('c-revisions').value,
+                telegram_id: initDataUser ? initDataUser.id : null
+            };
 
-        function closeTermsModal() {
-            document.getElementById('terms-modal').classList.remove('flex');
-            document.getElementById('terms-modal').classList.add('hidden');
-        }
-
-        async function openAdminModal() {
-            const currentUserId = initDataUser ? initDataUser.id : 0;
-            document.getElementById('admin-modal').classList.remove('hidden');
-            document.getElementById('admin-modal').classList.add('flex');
-            
-            const statsContainer = document.getElementById('admin-stats-content');
-            statsContainer.innerHTML = '<div class="text-center text-xs text-slate-500 py-4"><i class="fa-solid fa-spinner fa-spin"></i> Загрузка данных из БД...</div>';
+            const outputDiv = document.getElementById('analysis-output');
+            outputDiv.innerHTML = '<div class="text-center text-slate-500 py-10"><i class="fa-solid fa-spinner fa-spin text-lg"></i><br>Генерация юридического документа с помощью ИИ...</div>';
 
             try {
-                const response = await fetch(`/admin/stats/${currentUserId}`);
-                if (response.ok) {
-                    const stats = await response.json();
-                    
-                    let usersHtml = '';
-                    if (stats.users_list && stats.users_list.length > 0) {
-                        stats.users_list.forEach(u => {
-                            usersHtml += `
-                                <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs">
-                                    <div class="flex items-center gap-2 overflow-hidden">
-                                        <div class="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-[11px] flex-shrink-0">
-                                            ${u.first_name ? u.first_name.charAt(0).toUpperCase() : 'U'}
-                                        </div>
-                                        <div class="overflow-hidden">
-                                            <div class="font-bold text-slate-900 truncate">${u.first_name} <span class="text-slate-400 font-normal text-[10px]">(${u.username})</span></div>
-                                            <div class="text-[10px] text-slate-400">ID: ${u.telegram_id} • ${u.created_at}</div>
-                                        </div>
-                                    </div>
-                                    <div class="text-right flex-shrink-0 pl-2">
-                                        <span class="px-2 py-0.5 rounded-lg font-bold text-[10px] ${u.is_pro ? 'bg-purple-100 text-purple-800' : 'bg-amber-100 text-amber-800'}">
-                                            ${u.is_pro ? 'PRO' : u.free_checks_left + ' пров.'}
-                                        </span>
-                                    </div>
-                                </div>
-                            `;
-                        });
-                    } else {
-                        usersHtml = '<div class="text-center text-xs text-slate-400 py-3">Пока нет зарегистрированных пользователей в базе.</div>';
-                    }
+                const response = await fetch('/api/generate-document', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
 
-                    statsContainer.innerHTML = `
-                        <div class="grid grid-cols-3 gap-2 text-center">
-                            <div class="bg-indigo-50 border border-indigo-100 p-2.5 rounded-xl">
-                                <div class="text-[10px] uppercase font-bold text-indigo-600 mb-0.5">Пользователи</div>
-                                <div class="text-base font-bold text-slate-900">${stats.total_users}</div>
-                            </div>
-                            <div class="bg-blue-50 border border-blue-100 p-2.5 rounded-xl">
-                                <div class="text-[10px] uppercase font-bold text-blue-600 mb-0.5">Проверки</div>
-                                <div class="text-base font-bold text-slate-900">${stats.total_analyses}</div>
-                            </div>
-                            <div class="bg-amber-50 border border-amber-100 p-2.5 rounded-xl">
-                                <div class="text-[10px] uppercase font-bold text-amber-600 mb-0.5">Оплаты</div>
-                                <div class="text-base font-bold text-slate-900">${stats.total_payments}</div>
-                            </div>
-                        </div>
-
-                        <div class="space-y-2 pt-1">
-                            <div class="font-bold text-xs text-slate-800 flex items-center justify-between">
-                                <span>Список пользователей (${stats.users_list ? stats.users_list.length : 0})</span>
-                            </div>
-                            <div class="space-y-1.5 max-h-[260px] overflow-y-auto pr-1">
-                                ${usersHtml}
-                            </div>
-                        </div>
-                    `;
+                if (response.ok && data.status === "success") {
+                    outputDiv.innerHTML = marked.parse(data.document);
+                    outputDiv.dataset.rawText = data.document;
                 } else {
-                    statsContainer.innerHTML = '<div class="text-center text-xs text-red-500 py-4">Ошибка загрузки статистики (нет доступа).</div>';
+                    outputDiv.innerHTML = `<span class="text-red-500">Ошибка: ${data.detail || "Не удалось сгенерировать документ"}</span>`;
                 }
             } catch (err) {
-                console.error(err);
-                statsContainer.innerHTML = '<div class="text-center text-xs text-red-500 py-4">Ошибка сети при запросе статистики.</div>';
+                outputDiv.innerHTML = `<span class="text-red-500">Ошибка соединения: ${err.message}</span>`;
             }
 
-            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
         }
 
-        function closeAdminModal() {
-            document.getElementById('admin-modal').classList.remove('flex');
-            document.getElementById('admin-modal').classList.add('hidden');
+        function copyDocumentOutput() {
+            const outputDiv = document.getElementById('analysis-output');
+            const textToCopy = outputDiv.dataset.rawText || outputDiv.innerText;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                alert("Документ скопирован в буфер обмена!");
+            });
+        }
+
+        // Выбор типа договора и юрисдикции через кнопки
+        document.querySelectorAll('#doc-type-group button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#doc-type-group button').forEach(b => {
+                    b.classList.remove('active', 'bg-blue-600', 'text-white');
+                    b.classList.add('bg-slate-200', 'text-slate-800');
+                });
+                btn.classList.add('active', 'bg-blue-600', 'text-white');
+                btn.classList.remove('bg-slate-200', 'text-slate-800');
+            });
+        });
+
+        document.querySelectorAll('#jurisdiction-group button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#jurisdiction-group button').forEach(b => {
+                    b.classList.remove('active', 'bg-blue-600', 'text-white');
+                    b.classList.add('bg-slate-200', 'text-slate-800');
+                });
+                btn.classList.add('active', 'bg-blue-600', 'text-white');
+                btn.classList.remove('bg-slate-200', 'text-slate-800');
+            });
+        });
+
+        // Обработка файлов (Dropzone / input)
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('file-input');
+
+        dropzone.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', async (e) => {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                document.getElementById('file-name').textContent = file.name;
+                document.getElementById('dropzone-prompt').classList.add('hidden');
+                document.getElementById('file-selected-info').classList.remove('hidden');
+                
+                try {
+                    uploadedFileText = await extractTextFromFile(file);
+                } catch (err) {
+                    alert("Ошибка чтения файла: " + err.message);
+                }
+            }
+        });
+
+        document.getElementById('remove-file-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            fileInput.value = '';
+            uploadedFileText = "";
+            document.getElementById('file-selected-info').classList.add('hidden');
+            document.getElementById('dropzone-prompt').classList.remove('hidden');
+        });
+
+        async function extractTextFromFile(file) {
+            const ext = file.name.split('.').pop().toLowerCase();
+            if (ext === 'txt') {
+                return await file.text();
+            } else if (ext === 'docx') {
+                const arrayBuffer = await file.arrayBuffer();
+                const result = await mammoth.extractRawText({ arrayBuffer });
+                return result.value;
+            } else if (ext === 'pdf') {
+                const typedarray = new Uint8Array(await file.arrayBuffer());
+                const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                let text = "";
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const content = await page.getTextContent();
+                    text += content.items.map(item => item.str).join(" ") + "\n";
+                }
+                return text;
+            }
+            throw new Error("Неподдерживаемый формат файла");
+        }
+
+        // Запуск анализа договора
+        async function startAnalysis() {
+            const textContent = uploadedFileText || document.getElementById('contract-text').value.trim();
+            if (!textContent) {
+                alert("Пожалуйста, загрузите файл или вставьте текст договора.");
+                return;
+            }
+
+            const docType = document.querySelector('#doc-type-group button.active')?.dataset.value || "Общий";
+            const jurisdiction = document.querySelector('#jurisdiction-group button.active')?.dataset.value || "Россия (РФ)";
+            const outputDiv = document.getElementById('analysis-output');
+
+            outputDiv.innerHTML = '<div class="text-center text-slate-500 py-10"><i class="fa-solid fa-spinner fa-spin text-lg"></i><br>ИИ анализирует договор на риски...</div>';
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: textContent,
+                        doc_type: docType,
+                        jurisdiction: jurisdiction,
+                        telegram_id: initDataUser ? initDataUser.id : null,
+                        first_name: initDataUser ? initDataUser.first_name : "",
+                        username: initDataUser ? initDataUser.username : ""
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok && data.status === "ok") {
+                    const analysis = JSON.parse(data.result);
+                    renderAnalysisResult(analysis);
+                    fetchUserBalance(initDataUser ? initDataUser.id : 0);
+                    document.getElementById('protocol-btn').classList.remove('hidden');
+                } else {
+                    if (response.status === 403) {
+                        openStarsModal();
+                    }
+                    outputDiv.innerHTML = `<span class="text-red-500">Ошибка: ${data.detail || "Не удалось выполнить анализ"}</span>`;
+                }
+            } catch (err) {
+                outputDiv.innerHTML = `<span class="text-red-500">Ошибка сети: ${err.message}</span>`;
+            }
+        }
+
+        function renderAnalysisResult(data) {
+            const outputDiv = document.getElementById('analysis-output');
+            let riskClass = "bg-green-100 text-green-800";
+            if (data.overall_risk_level === "Средний") riskClass = "bg-amber-100 text-amber-800";
+            if (data.overall_risk_level === "Высокий") riskClass = "bg-red-100 text-red-800";
+
+            let html = `
+                <div class="space-y-3 text-left">
+                    <div class="flex items-center justify-between bg-slate-50 p-2.5 rounded-xl border">
+                        <span class="font-bold text-slate-700">Уровень риска:</span>
+                        <span class="px-2.5 py-1 rounded-lg font-bold text-xs ${riskClass}">${data.overall_risk_level}</span>
+                    </div>
+                    <div class="bg-blue-50/50 p-2.5 rounded-xl border border-blue-100 text-slate-800">
+                        <span class="font-bold block mb-0.5">Резюме:</span>
+                        ${data.summary}
+                    </div>
+                    <div class="space-y-2">
+                        <span class="font-bold text-slate-800 block">Выявленные риски (${data.risks.length}):</span>
+            `;
+
+            data.risks.forEach((r, idx) => {
+                let badgeBg = "bg-green-500";
+                if (r.category === "yellow") badgeBg = "bg-amber-500";
+                if (r.category === "red") badgeBg = "bg-red-500";
+
+                html += `
+                    <div class="p-2.5 rounded-xl border bg-white space-y-1 shadow-xs">
+                        <div class="flex items-center gap-1.5 font-bold text-slate-900">
+                            <span class="w-2 h-2 rounded-full ${badgeBg}"></span>
+                            <span>${idx + 1}. ${r.title}</span>
+                        </div>
+                        <div class="text-[11px] text-slate-500 italic">Цитата: "${r.quote}"</div>
+                        <div class="text-[11px] text-slate-700"><strong class="text-red-600">Риск:</strong> ${r.explanation}</div>
+                        <div class="text-[11px] text-slate-700 bg-slate-50 p-1.5 rounded"><strong class="text-blue-600">Решение:</strong> ${r.recommendation}</div>
+                    </div>
+                `;
+            });
+
+            html += `</div></div>`;
+            outputDiv.innerHTML = html;
+            window.lastAnalysisData = data;
+        }
+
+        async function generateProtocol() {
+            if (!window.lastAnalysisData) return;
+            const docType = document.querySelector('#doc-type-group button.active')?.dataset.value || "Общий";
+            const jurisdiction = document.querySelector('#jurisdiction-group button.active')?.dataset.value || "Россия (РФ)";
+
+            try {
+                const response = await fetch('/generate-protocol', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        doc_type: docType,
+                        jurisdiction: jurisdiction,
+                        risks: window.lastAnalysisData.risks.map(r => ({
+                            title: r.title,
+                            quote: r.quote,
+                            explanation: r.explanation,
+                            recommendation: r.recommendation
+                        }))
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    window.location.href = data.download_url;
+                } else {
+                    alert("Не удалось сгенерировать протокол.");
+                }
+            } catch (err) {
+                alert("Ошибка сети при скачивании протокола.");
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('contract-text').value = '';
+            document.getElementById('file-input').value = '';
+            uploadedFileText = "";
+            document.getElementById('file-selected-info').classList.add('hidden');
+            document.getElementById('dropzone-prompt').classList.remove('hidden');
+            document.getElementById('analysis-output').innerHTML = "Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».";
+            document.getElementById('protocol-btn').classList.add('hidden');
         }
 
         function openStarsModal() {
             document.getElementById('stars-modal').classList.remove('hidden');
             document.getElementById('stars-modal').classList.add('flex');
-            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
         }
-
         function closeStarsModal() {
             document.getElementById('stars-modal').classList.remove('flex');
             document.getElementById('stars-modal').classList.add('hidden');
         }
 
         async function buyPackage(packageType) {
-            if (!initDataUser) {
-                alert('Функция оплаты доступна только внутри Telegram Mini App.');
-                return;
-            }
-
+            const currentUserId = initDataUser ? initDataUser.id : 0;
             try {
                 const response = await fetch('/create-invoice', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        telegram_id: initDataUser.id,
-                        package_type: packageType
-                    })
+                    body: JSON.stringify({ telegram_id: currentUserId, package_type: packageType })
                 });
-
                 const data = await response.json();
                 if (response.ok && data.invoice_link) {
-                    closeStarsModal();
-                    tg.openInvoice(data.invoice_link, async (status) => {
-                        if (status === 'paid') {
-                            if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                            alert('Оплата прошла успешно! Проверки добавлены на ваш баланс.');
-                            fetchUserBalance(initDataUser.id);
-                        } else if (status === 'cancelled') {
-                            console.log('Оплата отменена пользователем');
-                        }
-                    });
+                    if (tg?.openInvoice) {
+                        tg.openInvoice(data.invoice_link, (status) => {
+                            if (status === 'paid') {
+                                alert("Оплата прошла успешно! Проверки зачислены.");
+                                fetchUserBalance(currentUserId);
+                                closeStarsModal();
+                            }
+                        });
+                    } else {
+                        window.location.href = data.invoice_link;
+                    }
                 } else {
-                    alert('Не удалось создать счет на оплату: ' + (data.detail || 'Ошибка сервера'));
+                    alert("Ошибка создания счета: " + (data.detail || "Неизвестно"));
                 }
             } catch (err) {
-                console.error('Ошибка запроса инвойса:', err);
-                alert('Ошибка сети при попытке оплаты.');
+                alert("Ошибка соединения: " + err.message);
             }
         }
 
-        const dropzone = document.getElementById('dropzone');
-        const fileInput = document.getElementById('file-input');
-        const dropzonePrompt = document.getElementById('dropzone-prompt');
-        const fileSelectedInfo = document.getElementById('file-selected-info');
-        const fileName = document.getElementById('file-name');
-        const removeFileBtn = document.getElementById('remove-file-btn');
-        const contractText = document.getElementById('contract-text');
-        const analyzeBtn = document.getElementById('analyze-btn');
+        async function openAdminModal() {
+            const currentUserId = initDataUser ? initDataUser.id : 0;
+            document.getElementById('admin-modal').classList.remove('hidden');
+            document.getElementById('admin-modal').classList.add('flex');
+            const statsContainer = document.getElementById('admin-stats-content');
+            statsContainer.innerHTML = '<div class="text-center text-xs text-slate-500 py-4"><i class="fa-solid fa-spinner fa-spin"></i> Загрузка...</div>';
 
-        let selectedFile = null;
-        let selectedRating = 4;
-        let selectedSentiment = '';
-
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropzone.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false);
-        });
-
-        dropzone.addEventListener('drop', (e) => {
-            const files = e.dataTransfer.files;
-            if (files.length) handleFileSelect(files[0]);
-        });
-
-        dropzone.addEventListener('click', (e) => {
-            if (removeFileBtn.contains(e.target)) return;
-            fileInput.click();
-        });
-
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length) handleFileSelect(e.target.files[0]);
-        });
-
-        function handleFileSelect(file) {
-            selectedFile = file;
-            fileName.textContent = file.name;
-            dropzonePrompt.classList.add('hidden');
-            fileSelectedInfo.classList.remove('hidden');
-            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            try {
+                const response = await fetch(`/admin/stats/${currentUserId}`);
+                if (response.ok) {
+                    const stats = await response.json();
+                    let usersHtml = '';
+                    if (stats.users_list && stats.users_list.length > 0) {
+                        stats.users_list.forEach(u => {
+                            usersHtml += `
+                                <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border text-xs">
+                                    <div>
+                                        <div class="font-bold">${u.first_name} (@${u.username})</div>
+                                        <div class="text-[10px] text-slate-400">ID: ${u.telegram_id} • Пров: ${u.free_checks_left}</div>
+                                    </div>
+                                    <span class="px-2 py-0.5 rounded font-bold text-[10px] ${u.is_pro ? 'bg-purple-100 text-purple-800' : 'bg-amber-100 text-amber-800'}">${u.is_pro ? 'PRO' : 'Free'}</span>
+                                </div>
+                            `;
+                        });
+                    }
+                    statsContainer.innerHTML = `
+                        <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                            <div class="bg-indigo-50 p-2 rounded-xl"><b>${stats.total_users}</b><br>Юзеров</div>
+                            <div class="bg-blue-50 p-2 rounded-xl"><b>${stats.total_analyses}</b><br>Анализов</div>
+                            <div class="bg-amber-50 p-2 rounded-xl"><b>${stats.total_payments}</b><br>Оплат</div>
+                        </div>
+                        <div class="space-y-1.5 max-h-[220px] overflow-y-auto">${usersHtml}</div>
+                    `;
+                }
+            } catch (err) {
+                statsContainer.innerHTML = '<div class="text-center text-xs text-red-500">Ошибка загрузки</div>';
+            }
+        }
+        function closeAdminModal() {
+            document.getElementById('admin-modal').classList.remove('flex');
+            document.getElementById('admin-modal').classList.add('hidden');
         }
 
-        removeFileBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            selectedFile = null;
-            fileInput.value = '';
-            fileSelectedInfo.classList.add('hidden');
-            dropzonePrompt.classList.remove('hidden');
-        });
-
-        function setupChipGroup(groupId) {
-            const container = document.getElementById(groupId);
-            if (!container) return;
-            const buttons = container.querySelectorAll('.chip-btn');
-            buttons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    buttons.forEach(b => {
-                        b.classList.remove('active', 'bg-blue-600', 'text-white');
-                        b.classList.add('bg-slate-200', 'text-slate-800');
-                    });
-                    btn.classList.add('active', 'bg-blue-600', 'text-white');
-                    btn.classList.remove('bg-slate-200', 'text-slate-800');
-                    if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
-                });
-            });
+        function openTermsModal(e) {
+            if (e) e.preventDefault();
+            document.getElementById('terms-modal').classList.remove('hidden');
+            document.getElementById('terms-modal').classList.add('flex');
+        }
+        function closeTermsModal() {
+            document.getElementById('terms-modal').classList.remove('flex');
+            document.getElementById('terms-modal').classList.add('hidden');
         }
 
-        setupChipGroup('doc-type-group');
-        setupChipGroup('jurisdiction-group');
-
-        const sentimentBtns = document.querySelectorAll('.sentiment-btn');
-        sentimentBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                sentimentBtns.forEach(b => b.classList.remove('border-blue-500', 'bg-blue-100'));
-                btn.classList.add('border-blue-500', 'bg-blue-100');
-                selectedSentiment = btn.dataset.value;
-            });
-        });
-
-        const stars = document.querySelectorAll('#star-rating i');
-        stars.forEach(star => {
-            star.addEventListener('click', () => {
-                selectedRating = parseInt(star.getAttribute('data-rating'));
-                stars.forEach((s, idx) => {
-                    if (idx < selectedRating) {
+        // Обратная связь
+        document.querySelectorAll('#star-rating i').forEach(star => {
+            star.addEventListener('click', (e) => {
+                const rating = e.target.dataset.rating;
+                document.querySelectorAll('#star-rating i').forEach((s, idx) => {
+                    if (idx < rating) {
                         s.classList.remove('text-slate-300');
                         s.classList.add('text-amber-400');
                     } else {
@@ -654,297 +845,23 @@
                         s.classList.add('text-slate-300');
                     }
                 });
+                window.selectedRating = rating;
             });
         });
 
-        async function extractTextFromFile(file) {
-            const ext = file.name.split('.').pop().toLowerCase();
-            const arrayBuffer = await file.arrayBuffer();
-
-            if (ext === 'txt' || ext === 'odt') {
-                return new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => resolve(e.target.result);
-                    reader.readAsText(file, 'UTF-8');
-                });
-            } else if (ext === 'docx') {
-                const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
-                return result.value;
-            } else if (ext === 'pdf') {
-                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                let fullText = '';
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const textContent = await page.getTextContent();
-                    const pageText = textContent.items.map(item => item.str).join(' ');
-                    fullText += pageText + '\n';
-                }
-                return fullText;
-            } else {
-                return new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => resolve(e.target.result);
-                    reader.readAsText(file, 'UTF-8');
-                });
-            }
-        }
-
-        async function startAnalysis() {
-            let textToSend = contractText.value.trim();
-
-            if (selectedFile) {
-                analyzeBtn.disabled = true;
-                analyzeBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Чтение файла...</span>`;
-                try {
-                    textToSend = await extractTextFromFile(selectedFile);
-                } catch (err) {
-                    console.error(err);
-                    alert('Не удалось прочитать файл на устройстве.');
-                    analyzeBtn.disabled = false;
-                    analyzeBtn.innerHTML = `<span>Анализировать</span>`;
-                    return;
-                }
-            }
-
-            if (!textToSend.trim()) {
-                alert('Пожалуйста, загрузите файл или вставьте текст договора.');
-                return;
-            }
-
-            const docType = document.querySelector('#doc-type-group .chip-btn.active')?.dataset.value || 'Общий';
-            const jurisdiction = document.querySelector('#jurisdiction-group .chip-btn.active')?.dataset.value || 'Россия (РФ)';
-
-            analyzeBtn.disabled = true;
-            analyzeBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Анализируем...</span>`;
-
-            try {
-                const response = await fetch('/analyze', { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        text: textToSend,
-                        doc_type: docType,
-                        jurisdiction: jurisdiction,
-                        telegram_id: initDataUser ? initDataUser.id : null,
-                        first_name: initDataUser ? initDataUser.first_name : '',
-                        username: initDataUser ? initDataUser.username : ''
-                    })
-                });
-                const data = await response.json();
-
-                if (response.ok && data.result) {
-                    try {
-                        lastAnalysisData = JSON.parse(data.result);
-                    } catch (e) {
-                        lastAnalysisData = null;
-                    }
-                    
-                    renderDashboard(data.result);
-                    document.getElementById('protocol-btn').classList.remove('hidden');
-                    
-                    const resultsCard = document.getElementById('results-card');
-                    if (resultsCard) {
-                        resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-
-                    if (data.checks_left !== undefined && data.checks_left !== null) {
-                        document.getElementById('checks-count').textContent = data.checks_left;
-                        if (data.checks_left <= 0) {
-                            openStarsModal();
-                        }
-                    } else if (initDataUser) {
-                        fetchUserBalance(initDataUser.id);
-                    }
-                } else {
-                    if (response.status === 403) {
-                        openStarsModal();
-                    }
-                    alert('Ошибка анализа: ' + (data.detail || 'Не удалось получить ответ.'));
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Ошибка сети при отправке.');
-            } finally {
-                analyzeBtn.disabled = false;
-                analyzeBtn.innerHTML = `<span>Анализировать</span>`;
-            }
-        }
-
-        function renderDashboard(jsonString) {
-            let res;
-            try {
-                res = JSON.parse(jsonString);
-            } catch (e) {
-                const output = document.getElementById('analysis-output');
-                output.parentElement.classList.remove('items-center', 'justify-center', 'p-4');
-                output.parentElement.classList.add('block', 'p-2', 'overflow-y-auto', 'max-h-[500px]');
-                output.classList.remove('text-center');
-                output.classList.add('text-left');
-                output.innerHTML = marked.parse(jsonString);
-                return;
-            }
-
-            const wrapper = document.getElementById('results-container-wrapper');
-            wrapper.classList.remove('items-center', 'justify-center', 'p-4');
-            wrapper.classList.add('block', 'p-2', 'overflow-y-auto', 'max-h-[520px]');
-
-            let riskBg = 'bg-green-100 text-green-800 border-green-300';
-            let riskIcon = 'fa-shield-check text-green-600';
-            if (res.overall_risk_level === 'Высокий') {
-                riskBg = 'bg-red-100 text-red-800 border-red-300';
-                riskIcon = 'fa-triangle-exclamation text-red-600';
-            } else if (res.overall_risk_level === 'Средний') {
-                riskBg = 'bg-amber-100 text-amber-800 border-amber-300';
-                riskIcon = 'fa-circle-exclamation text-amber-600';
-            }
-
-            let html = `
-                <div class="space-y-3 text-left">
-                    <div class="p-3 rounded-xl border ${riskBg} flex items-center justify-between shadow-xs">
-                        <div class="flex items-center gap-2">
-                            <i class="fa-solid ${riskIcon} text-sm"></i>
-                            <div>
-                                <div class="text-[10px] uppercase font-bold opacity-80">Общий уровень риска</div>
-                                <div class="font-bold text-xs">${res.overall_risk_level || 'Не определен'}</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    ${res.summary ? `
-                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 leading-relaxed">
-                            <div class="font-bold text-slate-900 mb-1">Резюме юриста:</div>
-                            ${res.summary}
-                        </div>
-                    ` : ''}
-
-                    <div class="space-y-2">
-                        <div class="font-bold text-xs text-slate-900">Выявленные риски и правки:</div>
-            `;
-
-            if (res.risks && Array.isArray(res.risks)) {
-                res.risks.forEach(item => {
-                    let catColor = 'border-l-4 border-l-amber-500 bg-amber-50/50';
-                    let catBadge = 'bg-amber-100 text-amber-800';
-                    
-                    if (item.category === 'red') {
-                        catColor = 'border-l-4 border-l-red-500 bg-red-50/50';
-                        catBadge = 'bg-red-100 text-red-800';
-                    } else if (item.category === 'green') {
-                        catColor = 'border-l-4 border-l-emerald-500 bg-emerald-50/50';
-                        catBadge = 'bg-emerald-100 text-emerald-800';
-                    }
-
-                    html += `
-                        <div class="p-3 rounded-xl border border-slate-200 ${catColor} space-y-1.5">
-                            <div class="flex items-center justify-between gap-2">
-                                <span class="font-bold text-xs text-slate-900">${item.title || 'Риск'}</span>
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold ${catBadge}">${item.category === 'red' ? 'Критично' : item.category === 'green' ? 'Выгодно' : 'Внимание'}</span>
-                            </div>
-                            ${item.quote ? `<div class="text-[11px] text-slate-600 italic bg-white p-2 rounded border border-slate-150">"${item.quote}"</div>` : ''}
-                            ${item.explanation ? `<div class="text-xs text-slate-700">${item.explanation}</div>` : ''}
-                            ${item.recommendation ? `
-                                <div class="mt-2 text-xs bg-blue-50 border border-blue-200 p-2 rounded-lg text-blue-900">
-                                    <div class="font-bold text-[10px] text-blue-700 uppercase mb-0.5">Предлагаемая правка:</div>
-                                    ${item.recommendation}
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
-                });
-            }
-
-            html += `</div></div>`;
-            document.getElementById('analysis-output').innerHTML = html;
-        }
-
-        async function generateProtocol() {
-            const btn = document.getElementById('protocol-btn');
-            if (btn) {
-                btn.disabled = true;
-                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Создание...</span>`;
-            }
-
-            try {
-                const docType = document.querySelector('#doc-type-group .chip-btn.active')?.dataset.value || 'Общий';
-                const jurisdiction = document.querySelector('#jurisdiction-group .chip-btn.active')?.dataset.value || 'Россия (РФ)';
-
-                const payload = {
-                    doc_type: docType,
-                    jurisdiction: jurisdiction,
-                    telegram_id: initDataUser ? initDataUser.id : null,
-                    risks: lastAnalysisData && lastAnalysisData.risks ? lastAnalysisData.risks : []
-                };
-
-                const response = await fetch('/generate-protocol', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) throw new Error('Ошибка генерации');
-
-                const data = await response.json();
-                
-                if (data.download_url) {
-                    const fullUrl = window.location.origin + data.download_url;
-                    
-                    if (window.Telegram?.WebApp?.openLink) {
-                        window.Telegram.WebApp.openLink(fullUrl);
-                    } else {
-                        window.open(fullUrl, '_blank');
-                    }
-                    
-                    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                }
-
-            } catch (error) {
-                console.error('Ошибка генерации протокола:', error);
-                alert('Не удалось сформировать протокол.');
-            } finally {
-                if (btn) {
-                    btn.disabled = false;
-                    btn.innerHTML = `<i class="fa-solid fa-file-word text-blue-400"></i> <span>Скачать протокол</span>`;
-                }
-            }
-        }
-
-        function resetForm() {
-            selectedFile = null;
-            fileInput.value = '';
-            contractText.value = '';
-            contractText.style.height = 'auto';
-            fileSelectedInfo.classList.add('hidden');
-            dropzonePrompt.classList.remove('hidden');
-            document.getElementById('protocol-btn').classList.add('hidden');
-
-            const wrapper = document.getElementById('results-container-wrapper');
-            wrapper.classList.remove('block', 'p-2', 'overflow-y-auto');
-            wrapper.classList.add('flex', 'items-center', 'justify-center', 'p-4');
-
-            const output = document.getElementById('analysis-output');
-            output.classList.remove('text-left');
-            output.classList.add('text-center');
-            output.innerHTML = 'Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».';
-
-            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-        }
+        document.querySelectorAll('.sentiment-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.sentiment-btn').forEach(b => b.classList.remove('border-blue-600', 'bg-blue-50'));
+                btn.classList.add('border-blue-600', 'bg-blue-50');
+                window.selectedSentiment = btn.dataset.value;
+            });
+        });
 
         async function sendFeedback() {
-            const text = document.getElementById('feedback-text').value.trim();
-            const fbTypeEl = document.querySelector('input[name="fb-type"]:checked');
-            const fbType = fbTypeEl ? fbTypeEl.value : 'Оценка анализа';
-            const docType = document.querySelector('#doc-type-group .chip-btn.active')?.dataset.value || 'Общий';
-            const jurisdiction = document.querySelector('#jurisdiction-group .chip-btn.active')?.dataset.value || 'Россия (РФ)';
-
-            if (!text && !selectedSentiment) {
-                alert('Пожалуйста, напишите сообщение или выберите кнопку оценки.');
-                return;
-            }
-
-            const sendBtn = document.getElementById('send-fb-btn');
-            sendBtn.disabled = true;
-            sendBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Отправка...</span>`;
+            const feedbackText = document.getElementById('feedback-text').value.trim();
+            const fbType = document.querySelector('input[name="fb-type"]:checked')?.value || "Оценка анализа";
+            const rating = window.selectedRating || 4;
+            const sentiment = window.selectedSentiment || "Полезно";
 
             try {
                 const response = await fetch('/feedback', {
@@ -952,27 +869,21 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         type: fbType,
-                        rating: selectedRating,
-                        sentiment: selectedSentiment,
-                        feedback: text,
-                        doc_type: docType,
-                        jurisdiction: jurisdiction
+                        rating: parseInt(rating),
+                        sentiment: sentiment,
+                        feedback: feedbackText,
+                        doc_type: document.querySelector('#doc-type-group button.active')?.dataset.value || "Общий",
+                        jurisdiction: document.querySelector('#jurisdiction-group button.active')?.dataset.value || "Россия (РФ)"
                     })
                 });
-
                 if (response.ok) {
-                    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                    alert('Спасибо за ваш отзыв! Он поможет нам сделать сервис лучше.');
+                    alert("Спасибо! Ваш отзыв успешно отправлен.");
                     document.getElementById('feedback-text').value = '';
                 } else {
-                    alert('Не удалось отправить отзыв. Попробуйте еще раз.');
+                    alert("Не удалось отправить отзыв.");
                 }
             } catch (err) {
-                console.error(err);
-                alert('Ошибка сети при отправке отзыва.');
-            } finally {
-                sendBtn.disabled = false;
-                sendBtn.innerHTML = `<i class="fa-regular fa-paper-plane text-xs"></i> <span>Отправить отзыв</span>`;
+                alert("Ошибка сети при отправке отзыва.");
             }
         }
     </script>
