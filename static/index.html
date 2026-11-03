@@ -305,6 +305,9 @@
                             <button type="button" id="copy-doc-btn" onclick="copyDocumentOutput()" class="hidden bg-slate-200 hover:bg-slate-300 text-slate-800 font-medium px-2.5 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1 shadow-xs">
                                 <i class="fa-regular fa-copy"></i> Копировать
                             </button>
+                            <button type="button" id="download-doc-btn" onclick="downloadConstructorTxt()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-2.5 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1 shadow-xs">
+                                <i class="fa-solid fa-download"></i> Скачать .txt
+                            </button>
                             <button type="button" id="protocol-btn" onclick="generateProtocol()" class="hidden bg-slate-800 hover:bg-slate-900 text-white font-medium px-3 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-xs">
                                 <i class="fa-solid fa-file-word text-blue-400"></i>
                                 <span>Скачать протокол</span>
@@ -443,9 +446,9 @@
             const resultsTitle = document.getElementById('results-title');
             const protocolBtn = document.getElementById('protocol-btn');
             const copyBtn = document.getElementById('copy-doc-btn');
+            const downloadBtn = document.getElementById('download-doc-btn');
             const outputDiv = document.getElementById('analysis-output');
             
-            // Элементы обратной связи
             const fbTypeLabel = document.getElementById('fb-type-label');
             const fbTypePrimary = document.getElementById('fb-type-primary');
 
@@ -456,10 +459,10 @@
                 constructorSec.classList.add('hidden');
                 resultsTitle.textContent = "Результаты анализа";
                 copyBtn.classList.add('hidden');
+                downloadBtn.classList.add('hidden');
                 protocolBtn.classList.remove('hidden');
                 outputDiv.innerHTML = "Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».";
                 
-                // Динамическое обновление отзыва для анализа
                 fbTypeLabel.textContent = "Оценка анализа";
                 fbTypePrimary.value = "Оценка анализа";
                 fbTypePrimary.checked = true;
@@ -471,9 +474,9 @@
                 resultsTitle.textContent = "Сгенерированный документ";
                 protocolBtn.classList.add('hidden');
                 copyBtn.classList.remove('hidden');
+                downloadBtn.classList.remove('hidden');
                 outputDiv.innerHTML = "Здесь появится сгенерированный документ в формате Markdown после заполнения формы конструктора.";
                 
-                // Динамическое обновление отзыва для конструктора
                 fbTypeLabel.textContent = "Оценка конструктора";
                 fbTypePrimary.value = "Оценка конструктора";
                 fbTypePrimary.checked = true;
@@ -546,10 +549,51 @@
         function copyDocumentOutput() {
             const outputDiv = document.getElementById('analysis-output');
             const textToCopy = outputDiv.dataset.rawText || outputDiv.innerText;
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                alert("Документ скопирован в буфер обмена!");
-            });
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                    alert("Документ скопирован в буфер обмена!");
+                }).catch(() => {
+                    fallbackCopyText(textToCopy);
+                });
+            } else {
+                fallbackCopyText(textToCopy);
+            }
+        }
+
+        function fallbackCopyText(text) {
+            const textarea = document.createElement("textarea");
+            textarea.value = text;
+            textarea.style.position = "fixed";  // Avoid scrolling to bottom
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    alert("Документ скопирован в буфер обмена!");
+                } else {
+                    alert("Не удалось скопировать. Воспользуйтесь кнопкой «Скачать .txt».");
+                }
+            } catch (err) {
+                alert("Ошибка копирования. Воспользуйтесь кнопкой «Скачать .txt».");
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function downloadConstructorTxt() {
+            const outputDiv = document.getElementById('analysis-output');
+            const textToSave = outputDiv.dataset.rawText || outputDiv.innerText;
+            const blob = new Blob([textToSave], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Lexify_Document.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
 
         // Выбор типа договора и юрисдикции через кнопки
