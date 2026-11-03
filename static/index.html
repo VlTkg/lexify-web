@@ -301,12 +301,15 @@
                 <div id="results-card" class="tg-card bg-white p-4 rounded-2xl border shadow-sm flex-1 flex flex-col min-h-[460px]">
                     <div class="border-b border-slate-100 pb-2 flex flex-wrap items-center justify-between gap-1">
                         <h2 id="results-title" class="font-bold text-xs text-slate-900">Результаты анализа</h2>
-                        <div class="flex items-center gap-1">
+                        <div class="flex items-center gap-1 flex-wrap justify-end">
                             <button type="button" id="copy-doc-btn" onclick="copyDocumentOutput()" class="hidden bg-slate-200 hover:bg-slate-300 text-slate-800 font-medium px-2 py-1 rounded-lg text-[11px] transition-all flex items-center gap-1 shadow-xs">
                                 <i class="fa-regular fa-copy"></i> Копировать
                             </button>
                             <button type="button" id="download-doc-btn" onclick="downloadConstructorTxt()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-2 py-1 rounded-lg text-[11px] transition-all flex items-center gap-1 shadow-xs">
                                 <i class="fa-solid fa-download"></i> .txt
+                            </button>
+                            <button type="button" id="new-doc-btn" onclick="resetConstructorForm()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-2 py-1 rounded-lg text-[11px] transition-all flex items-center gap-1 shadow-xs">
+                                <i class="fa-solid fa-plus"></i> Новый
                             </button>
                             <button type="button" id="protocol-btn" onclick="generateProtocol()" class="hidden bg-slate-800 hover:bg-slate-900 text-white font-medium px-2 py-1 rounded-lg text-[11px] transition-all flex items-center gap-1 shadow-xs">
                                 <i class="fa-solid fa-file-word text-blue-400"></i>
@@ -447,6 +450,7 @@
             const protocolBtn = document.getElementById('protocol-btn');
             const copyBtn = document.getElementById('copy-doc-btn');
             const downloadBtn = document.getElementById('download-doc-btn');
+            const newDocBtn = document.getElementById('new-doc-btn');
             const outputDiv = document.getElementById('analysis-output');
             
             const fbTypeLabel = document.getElementById('fb-type-label');
@@ -460,6 +464,7 @@
                 resultsTitle.textContent = "Результаты анализа";
                 copyBtn.classList.add('hidden');
                 downloadBtn.classList.add('hidden');
+                newDocBtn.classList.add('hidden');
                 protocolBtn.classList.remove('hidden');
                 outputDiv.innerHTML = "Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».";
                 
@@ -475,6 +480,7 @@
                 protocolBtn.classList.add('hidden');
                 copyBtn.classList.remove('hidden');
                 downloadBtn.classList.remove('hidden');
+                newDocBtn.classList.remove('hidden');
                 outputDiv.innerHTML = "Здесь появится сгенерированный документ в формате Markdown после заполнения формы конструктора.";
                 
                 fbTypeLabel.textContent = "Оценка конструктора";
@@ -574,10 +580,10 @@
                 if (successful) {
                     alert("Документ скопирован в буфер обмена!");
                 } else {
-                    alert("Не удалось скопировать. Воспользуйтесь кнопкой «Скачать .txt».");
+                    alert("Не удалось скопировать.");
                 }
             } catch (err) {
-                alert("Ошибка копирования. Воспользуйтесь кнопкой «Скачать .txt».");
+                alert("Ошибка копирования.");
             }
             document.body.removeChild(textarea);
         }
@@ -585,6 +591,10 @@
         function downloadConstructorTxt() {
             const outputDiv = document.getElementById('analysis-output');
             const textToSave = outputDiv.dataset.rawText || outputDiv.innerText;
+            if (!textToSave || textToSave.includes("Здесь появится сгенерированный документ")) {
+                alert("Нет сгенерированного документа для скачивания.");
+                return;
+            }
             const blob = new Blob([textToSave], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -592,8 +602,18 @@
             a.download = 'Lexify_Document.txt';
             document.body.appendChild(a);
             a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 100);
+            if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+        }
+
+        function resetConstructorForm() {
+            document.getElementById('c-description').value = '';
+            document.getElementById('analysis-output').innerHTML = "Здесь появится сгенерированный документ в формате Markdown после заполнения формы конструктора.";
+            document.getElementById('analysis-output').removeAttribute('data-raw-text');
+            if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
         }
 
         // Выбор типа договора и юрисдикции через кнопки
