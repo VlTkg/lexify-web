@@ -451,7 +451,7 @@
             fetchUserBalance(0);
         }
 
-        // Авто-прокрутка к карточке результатов
+        // Авто-прокрутка к результатам
         function scrollToResults() {
             const resultsCard = document.getElementById('results-card');
             if (resultsCard) {
@@ -608,7 +608,7 @@
             document.body.removeChild(textarea);
         }
 
-        // Надежная загрузка файла через Data URI для обхода блокировок iframe в Telegram
+        // Абсолютно надежная загрузка файла (Data URI + fallback через новое окно)
         function downloadConstructorTxt() {
             const outputDiv = document.getElementById('analysis-output');
             const textToSave = outputDiv.dataset.rawText || outputDiv.innerText;
@@ -617,15 +617,29 @@
                 return;
             }
 
-            const encodedUri = 'data:text/plain;charset=utf-8,' + encodeURIComponent(textToSave);
-            const a = document.createElement('a');
-            a.setAttribute('href', encodedUri);
-            a.setAttribute('download', 'Lexify_Document.txt');
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            try {
+                const encodedUri = 'data:text/plain;charset=utf-8,' + encodeURIComponent(textToSave);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = encodedUri;
+                a.download = 'Lexify_Document.txt';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                }, 100);
 
-            if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            } catch (e) {
+                const win = window.open();
+                if (win) {
+                    win.document.open();
+                    win.document.write('<pre style="white-space: pre-wrap; font-family: sans-serif;">' + textToSave + '</pre>');
+                    win.document.close();
+                } else {
+                    alert("Не удалось запустить загрузку. Пожалуйста, воспользуйтесь кнопкой «Копировать».");
+                }
+            }
         }
 
         function resetConstructorForm() {
