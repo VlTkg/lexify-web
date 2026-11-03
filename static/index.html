@@ -608,38 +608,30 @@
             }
         }
 
-        // Загрузка через серверный метод
-        async function downloadConstructorFile() {
+        // Надежное скачивание сгенерированного документа на стороне клиента (с поддержкой Markdown)
+        function downloadConstructorFile() {
             const outputDiv = document.getElementById('analysis-output');
             const textToSave = outputDiv.dataset.rawText || outputDiv.innerText;
+            
             if (!textToSave || textToSave.includes("Здесь появится сгенерированный документ")) {
                 alert("Нет сгенерированного документа для загрузки.");
                 return;
             }
 
-            const docType = document.querySelector('#c-doc-type-group button.active')?.dataset.value || "contract";
-            const jurisdiction = document.querySelector('#c-jurisdiction-group button.active')?.dataset.value || "Россия (РФ)";
+            const blob = new Blob(["\ufeff" + textToSave], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Lexify_Document.txt';
+            document.body.appendChild(a);
+            a.click();
+            
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
 
-            try {
-                const response = await fetch('/generate-constructor-file', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        document_text: textToSave,
-                        doc_type: docType,
-                        jurisdiction: jurisdiction
-                    })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    window.location.href = data.download_url;
-                    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                } else {
-                    alert("Не удалось подготовить файл для скачивания.");
-                }
-            } catch (err) {
-                alert("Ошибка сети при скачивании файла.");
+            if (tg?.HapticFeedback) {
+                tg.HapticFeedback.notificationOccurred('success');
             }
         }
 
