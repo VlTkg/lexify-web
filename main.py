@@ -12,16 +12,14 @@ from fastapi.responses import FileResponse, StreamingResponse, HTMLResponse
 from pydantic import BaseModel
 from typing import Optional, List
 from google import genai
-import docx
-from docx.shared import Inches, Pt, RGBColor
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.table import WD_TABLE_ALIGNMENT, WD_CELL_VERTICAL_ALIGNMENT
-from docx.oxml import OxmlElement, parse_xml
-from docx.oxml.ns import nsdecls, qn
 
 from sqlalchemy import create_engine, Column, BigInteger, Integer, String, Text, DateTime, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+
+# Импорт наших генераторов
+from contract_generator import generate_legal_document
+from protocol_generator import generate_disagreements_protocol
 
 app = FastAPI()
 
@@ -127,7 +125,7 @@ class ProtocolRequest(BaseModel):
     risks: List[ProtocolItem]
 
 class ContractGenerationRequest(BaseModel):
-    doc_type: str = "contract"  # 'contract' или 'offer'
+    doc_type: str = "contract"
     jurisdiction: str = "Россия (РФ)"
     executor: str = "Самозанятый"
     client: str = "Заказчик"
@@ -318,21 +316,6 @@ async def telegram_webhook(request: Request):
                         
     return {"status": "ok"}
 
-def set_cell_background(cell, fill_hex: str):
-    tcPr = cell._tc.get_or_add_tcPr()
-    shd = parse_xml(f'<w:shd {nsdecls("w")} w:fill="{fill_hex}"/>')
-    tcPr.append(shd)
-
-def set_cell_margins(cell, top=100, bottom=100, left=150, right=150):
-    tcPr = cell._tc.get_or_add_tcPr()
-    tcMar = OxmlElement('w:tcMar')
-    for m, val in [('top', top), ('bottom', bottom), ('left', left), ('right', right)]:
-        node = OxmlElement(f'w:{m}')
-        node.set(qn('w:w'), str(val))
-        node.set(qn('w:type'), 'dxa')
-        tcMar.append(node)
-    tcPr.append(tcMar)
-
 def clean_text(val: Optional[str]) -> str:
     if not val:
         return ""
@@ -343,186 +326,34 @@ def clean_text(val: Optional[str]) -> str:
 
 @app.post("/generate-protocol")
 async def generate_protocol(data: ProtocolRequest):
-    doc = docx.Document()
-
-    for section in doc.sections:
-        section.top_margin = Inches(0.78)
-        section.bottom_margin = Inches(0.78)
-        section.left_margin = Inches(0.78)
-        section.right_margin = Inches(0.78)
-
-    normal_style = doc.styles['Normal']
-    normal_style.font.name = 'Calibri'
-    normal_style.font.size = Pt(11)
-    normal_style.font.color.rgb = RGBColor(0x33, 0x33, 0x33)
-
-    title_p = doc.add_paragraph()
-    title_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    title_run = title_p.add_run("ПРОТОКОЛ РАЗНОГЛАСИЙ")
-    title_run.bold = True
-    title_run.font.size = Pt(16)
-    title_run.font.color.rgb = RGBColor(0x11, 0x18, 0x27)
-
-    sub_p = doc.add_paragraph()
-    sub_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    sub_run = sub_p.add_run(f"к проекту договора ({clean_text(data.doc_type)}), юрисдикция: {clean_text(data.jurisdiction)}\n")
-    sub_run.font.size = Pt(12)
-    sub_run.italic = True
-    sub_run.font.color.rgb = RGBColor(0x4B, 0x55, 0x63)
-
-    date_p = doc.add_paragraph()
-    date_p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    date_run = date_p.add_run(f"Дата формирования: {datetime.now().strftime('%d.%m.%Y')}\n")
-    date_run.font.size = Pt(10)
-
-    table = doc.add_table(rows=1, cols=4)
-    table.alignment = WD_TABLE_ALIGNMENT.CENTER
-    table.style = 'Table Grid'
-
-    col_widths = [Inches(1.0), Inches(2.2), Inches(2.3), Inches(1.8)]
-
-    hdr_cells = table.rows[0].cells
-    headers = ["Пункт", "Редакция Заказчика", "Предлагаемая редакция Исполнителя", "Обоснование"]
-
-    for i, header_text in enumerate(headers):
-        cell = hdr_cells[i]
-        cell.width = col_widths[i]
-        cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
-        set_cell_background(cell, "1F2937")
-        set_cell_margins(cell, top=120, bottom=120, left=120, right=120)
-
-        p = cell.paragraphs[0]
-        p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-        run = p.add_run(header_text)
-        run.bold = True
-        run.font.size = Pt(10)
-        run.font.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
-
-    if not data.risks:
-        row_cells = table.add_row().cells
-        for i in range(4):
-            row_cells[i].width = col_widths[i]
-        row_cells[0].merge(row_cells[3])
-        row_cells[0].text = "Существенных рисков и замечаний к редакции договора не выявлено."
-    else:
-        for risk in data.risks:
-            row_cells = table.add_row().cells
-
-            for i in range(4):
-                row_cells[i].width = col_widths[i]
-                set_cell_margins(row_cells[i], top=100, bottom=100, left=100, right=100)
-
-            title_clean = clean_text(risk.title) or "—"
-            row_cells[0].text = title_clean
-            if row_cells[0].paragraphs[0].runs:
-                row_cells[0].paragraphs[0].runs[0].bold = True
-
-            row_cells[1].text = clean_text(risk.quote) or "—"
-            row_cells[2].text = clean_text(risk.recommendation) or "—"
-            row_cells[3].text = clean_text(risk.explanation) or "Защита интересов исполнителя"
-
-    doc.add_paragraph("\n")
-    doc.add_paragraph("Настоящий Протокол разногласий является неотъемлемой частью Договора.\n")
-
-    sig_table = doc.add_table(rows=1, cols=2)
-    sig_table.alignment = WD_TABLE_ALIGNMENT.CENTER
-
-    cell_left = sig_table.rows[0].cells[0]
-    cell_right = sig_table.rows[0].cells[1]
-
-    cell_left.width = Inches(3.6)
-    cell_right.width = Inches(3.6)
-
-    cell_left.text = "ПОДРЯДЧИК / ИСПОЛНИТЕЛЬ:\n\n\n_______________________ / ____________ /\nМ.П."
-    cell_right.text = "ЗАКАЗЧИК:\n\n\n_______________________ / ____________ /\nМ.П."
-
-    file_path = os.path.join(tempfile.gettempdir(), "Protocol_Raznogasiy.docx")
-    doc.save(file_path)
-
-    return {"status": "ok", "download_url": "/download-protocol"}
-
-@app.get("/download-protocol")
-async def download_protocol():
-    file_path = os.path.join(tempfile.gettempdir(), "Protocol_Raznogasiy.docx")
-    if os.path.exists(file_path):
-        return FileResponse(
-            file_path,
-            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            filename="Protocol_Raznogasiy.docx"
-        )
-    raise HTTPException(status_code=404, detail="Файл не найден")
-
-@app.post("/generate-constructor-file")
-async def generate_constructor_file(data: ConstructorFileRequest):
-    file_path = os.path.join(tempfile.gettempdir(), "Lexify_Document.txt")
-    with open(file_path, "w", encoding="utf-8") as f:
-        f.write(data.document_text)
-    return {"status": "success", "download_url": "/download-constructor-file"}
-
-@app.get("/download-constructor-file")
-async def download_constructor_file():
-    file_path = os.path.join(tempfile.gettempdir(), "Lexify_Document.txt")
-    if os.path.exists(file_path):
-        return FileResponse(
-            file_path,
-            media_type="text/plain;charset=utf-8",
-            filename="Lexify_Document.txt"
-        )
-    raise HTTPException(status_code=404, detail="Файл не найден")
+    # Превращаем входящие риски в формат, ожидаемый protocol_generator
+    formatted_risks = []
+    for r in data.risks:
+        formatted_risks.append({
+            "level": "red",
+            "clause_num": clean_text(r.title),
+            "description": clean_text(r.quote),
+            "suggested_fix": clean_text(r.recommendation),
+            "reasoning": clean_text(r.explanation)
+        })
+    
+    analysis_data = {"risks": formatted_risks}
+    contract_title = f"проекту договора ({clean_text(data.doc_type)}), юрисдикция: {clean_text(data.jurisdiction)}"
+    
+    file_stream = generate_disagreements_protocol(analysis_data, contract_title)
+    
+    return StreamingResponse(
+        file_stream,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": "attachment; filename=Protocol_Raznogasiy.docx"}
+    )
 
 @app.post("/api/generate-document")
 async def api_generate_document(data: ContractGenerationRequest):
-    if not ai_client:
-        raise HTTPException(status_code=500, detail="GEMINI_API_KEY не настроен.")
-
-    doc_type = data.doc_type
-    jurisdiction = clean_text(data.jurisdiction) or "Россия (РФ)"
-    executor = clean_text(data.executor) or "Самозанятый"
-    client = clean_text(data.client) or "Заказчик"
-    description = clean_text(data.description) or "Оказание услуг"
-    payment = clean_text(data.payment) or "Постоплата"
-    deadline = clean_text(data.deadline) or "По согласованию"
-    revisions = clean_text(data.revisions) or "2"
-
-    if doc_type == 'contract':
-        prompt = f"""
-Ты — опытный юрист по IT-контрактам и защите интересов фрилансеров в юрисдикции: {jurisdiction}.
-Сгенерируй юридически грамотный, структурированный Договор оказания услуг / подряда в формате Markdown с учетом применимого законодательства ({jurisdiction}).
-
-Стороны:
-- Исполнитель: {executor}
-- Заказчик: {client}
-
-Суть и условия:
-- Предмет: {description}
-- Порядок оплаты: {payment}
-- Сроки выполнения: {deadline}
-
-ОБЯЗАТЕЛЬНЫЕ ЗАЩИТНЫЕ УСЛОВИЯ (в пользу Исполнителя):
-1. Порядок приемки: если Заказчик в течение 3 рабочих дней после получения акта не подписал его и не предоставил мотивированный отказ, работы считаются принятыми в полном объеме и подлежат оплате.
-2. Ограничение правок: допускается строго {revisions} бесплатная итерация правок в рамках первоначального ТЗ. Доработки сверх ТЗ или сверх лимита оплачиваются отдельно по часовой ставке.
-3. Интеллектуальные права: исключительные права на результаты работ переходят к Заказчику ТОЛЬКО после полной оплаты (100%) стоимости услуг.
-4. Сдвиг сроков: сроки автоматически сдвигаются на время задержки предоставления доступов, материалов или ответов со стороны Заказчика.
-
-Оформи документ профессионально, с номерами разделов, полями для реквизитов и подписей.
-"""
-    else:
-        prompt = f"""
-Ты — профессиональный юрист. Сгенерируй Публичную оферту для оказания услуг в юрисдикции: {jurisdiction} в формате Markdown.
-Описание услуг: {description}.
-Условия оплаты: {payment}.
-Сроки: {deadline}.
-Включи стандартные юридические разделы: акцепт оферты, предмет, права и обязанности сторон, финансовые условия, порядок сдачи-приемки, ограничение ответственности исполнителя и порядок расторжения с учетом законодательства ({jurisdiction}).
-"""
-
-    try:
-        response = ai_client.models.generate_content(
-            model="gemini-3.8-flash",
-            contents=prompt
-        )
-        return {"status": "success", "document": response.text}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Ошибка генерации документа через Gemini: {str(e)}")
+    document_text = generate_legal_document(data.dict())
+    if document_text.startswith("Ошибка при генерации"):
+        raise HTTPException(status_code=500, detail=document_text)
+    return {"status": "success", "document": document_text}
 
 @app.post("/feedback")
 async def receive_feedback(data: FeedbackSchema):
@@ -612,7 +443,7 @@ async def analyze_contract(data: AnalyzeSchema):
 
     try:
         response = ai_client.models.generate_content(
-            model="gemini-3.8-flash",
+            model="gemini-2.5-flash",
             contents=prompt,
             config={
                 "response_mime_type": "application/json",
