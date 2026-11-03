@@ -283,6 +283,4 @@ async def telegram_webhook(request: Request):
                         "parse_mode": "Markdown",
                         "reply_markup": reply_markup
                     })
-            return {"status": "ok"}
-
-    if "
+    return {"status": "ok"}
