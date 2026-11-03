@@ -126,7 +126,6 @@ class ProtocolRequest(BaseModel):
     telegram_id: Optional[int] = None
     risks: List[ProtocolItem]
 
-# --- Схема и эндпоинт для генератора договоров/оферт (Wizard) ---
 class ContractGenerationRequest(BaseModel):
     doc_type: str = "contract"  # 'contract' или 'offer'
     executor: str = "Самозанятый"
@@ -258,15 +257,15 @@ async def telegram_webhook(request: Request):
         if text.startswith("/start"):
             if BOT_TOKEN:
                 welcome_text = (
-                    "👋 **Привет! Я Lexify — ваш ИИ-юрист.**\n\n"
-                    "Я помогу за 1 минуту выявить скрытые риски в договоре и сформировать Протокол разногласий в Word (.docx).\n\n"
+                    "👋 **Привет! Я Lexify — ваш ИИ-юрист и конструктор документов.**\n\n"
+                    "Я помогу за 1 минуту выявить скрытые риски в договоре, сформировать Протокол разногласий в Word (.docx) или с нуля составить безопасный договор/оферту.\n\n"
                     "🎁 **Вам доступно 3 бесплатные проверки!**"
                 )
                 reply_markup = {
                     "inline_keyboard": [
                         [
                             {
-                                "text": "⚖️ Открыть и проверить договор",
+                                "text": "🛠️ Открыть Lexify (Анализ и Конструктор)",
                                 "web_app": {"url": "https://lexify-web.onrender.com/app"}
                             }
                         ]
@@ -447,7 +446,6 @@ async def download_protocol():
         )
     raise HTTPException(status_code=404, detail="Файл не найден")
 
-# --- Эндпоинт для генерации договора / оферты через модуль/логику генератора ---
 @app.post("/api/generate-document")
 async def api_generate_document(data: ContractGenerationRequest):
     if not ai_client:
