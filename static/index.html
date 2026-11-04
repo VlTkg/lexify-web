@@ -322,8 +322,8 @@
                             </button>
                         </div>
                     </div>
-                    <div class="flex-1 flex items-center justify-center p-4 overflow-y-auto max-h-[500px]" id="results-container-wrapper">
-                        <div id="analysis-output" class="text-xs text-slate-700 leading-relaxed text-center w-full">
+                    <div class="flex-1 flex flex-col p-4 overflow-y-auto max-h-[500px]" id="results-container-wrapper">
+                        <div id="analysis-output" class="text-xs text-slate-700 leading-relaxed text-center w-full my-auto">
                             Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».
                         </div>
                     </div>
@@ -493,9 +493,10 @@
                 }
                 outputDiv.innerHTML = currentGeneratedDocumentText ? `<div class="whitespace-pre-wrap text-left">${marked.parse(currentGeneratedDocumentText)}</div>` : "Здесь появится текст сгенерированного документа после заполнения параметров.";
             }
+            document.getElementById('results-container-wrapper').scrollTop = 0;
         }
 
-        // Выбор чипсов (Тип договора и юрисдикция)
+        // Выбор чипсов
         document.querySelectorAll('#doc-type-group button').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('#doc-type-group button').forEach(b => {
@@ -598,7 +599,7 @@
             }
 
             const outputDiv = document.getElementById('analysis-output');
-            outputDiv.innerHTML = `<div class="text-center text-slate-500 py-8"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2 text-blue-600"></i><p>ИИ-юрист анализирует договор...</p></div>`;
+            outputDiv.innerHTML = `<div class="text-center text-slate-500 py-8 my-auto"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2 text-blue-600"></i><p>ИИ-юрист анализирует договор...</p></div>`;
 
             const telegramId = initDataUser ? initDataUser.id : 0;
             const firstName = initDataUser ? initDataUser.firstName : "";
@@ -627,6 +628,7 @@
                 currentAnalysisResult = data;
                 outputDiv.innerHTML = renderAnalysisHTML(data);
                 document.getElementById('protocol-btn').classList.remove('hidden');
+                document.getElementById('results-container-wrapper').scrollTop = 0;
                 fetchUserBalance(telegramId);
             } catch (err) {
                 outputDiv.innerHTML = `<div class="text-red-600 p-4 text-center">Ошибка: ${err.message}</div>`;
@@ -639,30 +641,30 @@
             if (data.overall_risk_level === "Высокий") riskColor = "bg-red-100 text-red-800";
 
             let html = `
-                <div class="space-y-4 text-left">
+                <div class="space-y-4 text-left pb-4">
                     <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border">
                         <span class="font-bold text-slate-800">Общий уровень риска:</span>
                         <span class="px-3 py-1 rounded-lg font-bold text-xs ${riskColor}">${data.overall_risk_level}</span>
                     </div>
-                    <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100">
-                        <h3 class="font-bold text-slate-900 mb-1">Резюме юриста:</h3>
+                    <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100 space-y-1">
+                        <h3 class="font-bold text-slate-900">Резюме юриста:</h3>
                         <p class="text-slate-700 leading-relaxed">${data.summary}</p>
                     </div>
-                    <div>
-                        <h3 class="font-bold text-slate-900 mb-2">Выявленные риски (${data.risks.length}):</h3>
+                    <div class="space-y-2">
+                        <h3 class="font-bold text-slate-900">Выявленные риски (${data.risks.length}):</h3>
                         <div class="space-y-3">
             `;
 
             data.risks.forEach((r, idx) => {
                 html += `
-                    <div class="bg-slate-50 p-3 rounded-xl border space-y-1.5">
-                        <div class="flex items-center justify-between">
-                            <span class="font-bold text-xs text-blue-600">${idx + 1}. ${r.category}</span>
-                            <span class="text-[11px] font-semibold text-slate-800">${r.title}</span>
+                    <div class="bg-slate-50 p-3 rounded-xl border space-y-2">
+                        <div class="flex items-start justify-between gap-2">
+                            <span class="font-bold text-xs text-blue-600 shrink-0">${idx + 1}. ${r.category}</span>
+                            <span class="text-[11px] font-semibold text-slate-900 text-right leading-tight">${r.title}</span>
                         </div>
                         <div class="text-[11px] text-slate-600 italic bg-white p-2 rounded border border-slate-200">«${r.quote}»</div>
-                        <p class="text-slate-700 text-xs"><strong>Опасность:</strong> ${r.explanation}</p>
-                        <p class="text-slate-700 text-xs text-emerald-700"><strong>Рекомендация:</strong> ${r.recommendation}</p>
+                        <p class="text-slate-700 text-xs leading-normal"><strong>Опасность:</strong> ${r.explanation}</p>
+                        <p class="text-slate-700 text-xs text-emerald-700 leading-normal"><strong>Рекомендация:</strong> ${r.recommendation}</p>
                     </div>
                 `;
             });
@@ -671,7 +673,7 @@
             return html;
         }
 
-        // --- ГЕНЕРАЦИЯ ПРОТОКОЛА ---
+        // --- БЕЗОПАСНОЕ СКАЧИВАНИЕ ПРОТОКОЛА В TELEGRAM ---
         async function generateProtocol() {
             if (!currentAnalysisResult) return;
             try {
@@ -690,12 +692,18 @@
 
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = "Protokol_raznoglasiy.docx";
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
+                
+                // Проверяем Telegram WebApp для безопасного открытия/скачивания
+                if (window.Telegram?.WebApp && window.Telegram.WebApp.openLink) {
+                    window.open(url, '_blank');
+                } else {
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = "Protokol_raznoglasiy.docx";
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                }
             } catch (e) {
                 alert(e.message);
             }
@@ -704,7 +712,7 @@
         // --- КОНСТРУКТОР ДОКУМЕНТОВ ---
         async function generateConstructorDocument() {
             const outputDiv = document.getElementById('analysis-output');
-            outputDiv.innerHTML = `<div class="text-center text-slate-500 py-8"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2 text-indigo-600"></i><p>Составляем юридический документ...</p></div>`;
+            outputDiv.innerHTML = `<div class="text-center text-slate-500 py-8 my-auto"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2 text-indigo-600"></i><p>Составляем юридический документ...</p></div>`;
 
             try {
                 const response = await fetch('/api/generate-document', {
@@ -730,9 +738,10 @@
 
                 const data = await response.json();
                 currentGeneratedDocumentText = data.document_text;
-                outputDiv.innerHTML = `<div class="whitespace-pre-wrap text-left">${marked.parse(currentGeneratedDocumentText)}</div>`;
+                outputDiv.innerHTML = `<div class="whitespace-pre-wrap text-left pb-4">${marked.parse(currentGeneratedDocumentText)}</div>`;
                 document.getElementById('copy-doc-btn').classList.remove('hidden');
                 document.getElementById('download-doc-btn').classList.remove('hidden');
+                document.getElementById('results-container-wrapper').scrollTop = 0;
             } catch (e) {
                 outputDiv.innerHTML = `<div class="text-red-600 p-4 text-center">Ошибка: ${e.message}</div>`;
             }
@@ -755,12 +764,17 @@
 
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = selectedConstructorDocType === 'offer' ? "Oferta.docx" : "Dogovor.docx";
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
+                
+                if (window.Telegram?.WebApp) {
+                    window.open(url, '_blank');
+                } else {
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = selectedConstructorDocType === 'offer' ? "Oferta.docx" : "Dogovor.docx";
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                }
             } catch (e) {
                 alert(e.message);
             }
