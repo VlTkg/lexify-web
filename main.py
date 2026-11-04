@@ -306,7 +306,7 @@ async def api_generate_protocol(data: ProtocolRequest):
         headers={"Content-Disposition": "attachment; filename=Protokol_raznoglasiy.docx"}
     )
 
-@app.post("/api/generate-contract")
+@app.post("/api/generate-document")
 async def api_generate_contract(data: ContractGenerationRequest):
     if not ai_client:
         raise HTTPException(status_code=500, detail="GEMINI_API_KEY не настроен.")
