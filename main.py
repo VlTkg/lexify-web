@@ -2,6 +2,7 @@ import os
 import io
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from docx import Document
 
@@ -60,27 +61,28 @@ class FeedbackRequest(BaseModel):
 
 @app.get("/")
 def read_root():
-    # Возвращаем главный интерфейс
-    from fastapi.responses import FileResponse
+    return FileResponse("static/index.html")
+
+
+@app.get("/app")
+def read_app():
+    # Исправление ошибки 404 Not Found при открытии мини-приложения из Telegram
     return FileResponse("static/index.html")
 
 
 @app.get("/user-info/{telegram_id}")
 def user_info(telegram_id: int):
-    # Заглушка баланса проверок и прав администратора
     return {
         "free_checks_left": 3,
-        "is_admin": True  # True чтобы видеть админ-кнопку
+        "is_admin": True
     }
 
 
 @app.post("/api/analyze")
 def api_analyze(data: AnalysisRequest):
-    # Логика анализа договора
     if not data.text.strip():
         raise HTTPException(status_code=400, detail="Текст договора пуст")
     
-    # Пример возвращаемого результата анализа
     return {
         "overall_risk_level": "Средний",
         "summary": "Договор содержит стандартные условия оказания услуг, однако требует доработки в части ответственности исполнителя и порядка приемки работ.",
@@ -98,7 +100,6 @@ def api_analyze(data: AnalysisRequest):
 
 @app.post("/api/generate-protocol")
 def api_generate_protocol(data: ProtocolRequest):
-    # Генерация протокола разногласий в формате DOCX
     doc = Document()
     doc.add_heading("ПРОТОКОЛ РАЗНОГЛАСИЙ", level=1)
     doc.add_paragraph(f"к договору ({data.doc_type}), юрисдикция: {data.jurisdiction}")
@@ -121,7 +122,6 @@ def api_generate_protocol(data: ProtocolRequest):
 
 @app.post("/api/generate-document")
 def api_generate_document(data: ConstructorRequest):
-    # Генерация текста документа в конструкторе
     doc_title = "ПУБЛИЧНАЯ ОФЕРТА" if data.doc_type == "offer" else "ДОГОВОР ВОЗМЕЗДНОГО ОКАЗАНИЯ УСЛУГ"
     
     document_text = f"""# {doc_title}
@@ -143,10 +143,8 @@ def api_generate_document(data: ConstructorRequest):
 
 @app.post("/api/download-constructor-file")
 def api_download_constructor_file(data: ConstructorDownloadSchema):
-    # ИСПРАВЛЕННЫЙ ЭНДПОИНТ: принимает ровно 3 аргумента (текст, тип и юрисдикцию)
     doc = Document()
     
-    # Добавляем текст построчно в документ Word
     for line in data.document_text.split('\n'):
         if line.startswith('# '):
             doc.add_heading(line.replace('# ', ''), level=1)
