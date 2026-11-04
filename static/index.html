@@ -314,7 +314,7 @@
                                 <i class="fa-regular fa-copy"></i> Копировать
                             </button>
                             <button type="button" id="download-doc-btn" onclick="downloadConstructorFile()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-2 py-1 rounded-lg text-[11px] transition-all flex items-center gap-1 shadow-xs">
-                                <i class="fa-solid fa-download"></i> Загрузить
+                                <i class="fa-solid fa-download"></i> Загрузить .docx
                             </button>
                             <button type="button" id="protocol-btn" onclick="generateProtocol()" class="hidden bg-slate-800 hover:bg-slate-900 text-white font-medium px-2 py-1 rounded-lg text-[11px] transition-all flex items-center gap-1 shadow-xs">
                                 <i class="fa-solid fa-file-word text-blue-400"></i>
@@ -322,7 +322,7 @@
                             </button>
                         </div>
                     </div>
-                    <div class="flex-1 flex items-center justify-center p-4" id="results-container-wrapper">
+                    <div class="flex-1 flex items-center justify-center p-4 overflow-y-auto max-h-[500px]" id="results-container-wrapper">
                         <div id="analysis-output" class="text-xs text-slate-700 leading-relaxed text-center w-full">
                             Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».
                         </div>
@@ -410,7 +410,7 @@
             <div class="space-y-3 overflow-y-auto flex-1 pr-2 text-xs text-slate-700 leading-relaxed">
                 <p class="font-bold text-slate-900">ПУБЛИЧНАЯ ОФЕРТА (ПОЛЬЗОВАТЕЛЬСКОЕ СОГЛАШЕНИЕ)</p>
                 <p class="text-[10px] text-slate-400">Дата последнего обновления: 19 октября 2026 года</p>
-                <p>1.1. Настоящий документ является официальным предложением (публичной офертой) Исполнителя.</p>
+                <p>1.1. Настоящий документ является официальным предложением (публичной офертой) Исполнителя на оказание услуг по экспресс-анализу и генерации юридических документов.</p>
             </div>
             <button type="button" onclick="closeTermsModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-xl text-xs transition-all flex-shrink-0">
                 Понятно
@@ -491,57 +491,80 @@
                     copyBtn.classList.remove('hidden');
                     downloadBtn.classList.remove('hidden');
                 }
-                outputDiv.innerHTML = currentGeneratedDocumentText ? `<div class="text-left whitespace-pre-wrap">${currentGeneratedDocumentText}</div>` : "Здесь появится сгенерированный документ после заполнения параметров.";
+                outputDiv.innerHTML = currentGeneratedDocumentText ? `<div class="whitespace-pre-wrap text-left">${marked.parse(currentGeneratedDocumentText)}</div>` : "Здесь появится текст сгенерированного документа после заполнения параметров.";
             }
         }
 
-        // Chip selection logic
-        function setupChips(groupId, callback) {
-            const group = document.getElementById(groupId);
-            if (!group) return;
-            group.querySelectorAll('.chip-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    group.querySelectorAll('.chip-btn').forEach(b => {
-                        b.classList.remove('active', 'bg-blue-600', 'text-white');
-                        b.classList.add('bg-slate-200', 'text-slate-800');
-                    });
-                    btn.classList.add('active', 'bg-blue-600', 'text-white');
-                    btn.classList.remove('bg-slate-200', 'text-slate-800');
-                    if (callback) callback(btn.getAttribute('data-value'));
+        // Выбор чипсов (Тип договора и юрисдикция)
+        document.querySelectorAll('#doc-type-group button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#doc-type-group button').forEach(b => {
+                    b.classList.remove('active', 'bg-blue-600', 'text-white');
+                    b.classList.add('bg-slate-200', 'text-slate-800');
                 });
+                btn.classList.add('active', 'bg-blue-600', 'text-white');
+                btn.classList.remove('bg-slate-200', 'text-slate-800');
+                selectedDocType = btn.getAttribute('data-value');
             });
-        }
+        });
 
-        setupChips('doc-type-group', val => selectedDocType = val);
-        setupChips('jurisdiction-group', val => selectedJurisdiction = val);
-        setupChips('c-doc-type-group', val => selectedConstructorDocType = val);
-        setupChips('c-jurisdiction-group', val => selectedConstructorJurisdiction = val);
+        document.querySelectorAll('#jurisdiction-group button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#jurisdiction-group button').forEach(b => {
+                    b.classList.remove('active', 'bg-blue-600', 'text-white');
+                    b.classList.add('bg-slate-200', 'text-slate-800');
+                });
+                btn.classList.add('active', 'bg-blue-600', 'text-white');
+                btn.classList.remove('bg-slate-200', 'text-slate-800');
+                selectedJurisdiction = btn.getAttribute('data-value');
+            });
+        });
 
-        // File upload handling
+        document.querySelectorAll('#c-doc-type-group button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#c-doc-type-group button').forEach(b => {
+                    b.classList.remove('active', 'bg-blue-600', 'text-white');
+                    b.classList.add('bg-slate-200', 'text-slate-800');
+                });
+                btn.classList.add('active', 'bg-blue-600', 'text-white');
+                btn.classList.remove('bg-slate-200', 'text-slate-800');
+                selectedConstructorDocType = btn.getAttribute('data-value');
+            });
+        });
+
+        document.querySelectorAll('#c-jurisdiction-group button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#c-jurisdiction-group button').forEach(b => {
+                    b.classList.remove('active', 'bg-blue-600', 'text-white');
+                    b.classList.add('bg-slate-200', 'text-slate-800');
+                });
+                btn.classList.add('active', 'bg-blue-600', 'text-white');
+                btn.classList.remove('bg-slate-200', 'text-slate-800');
+                selectedConstructorJurisdiction = btn.getAttribute('data-value');
+            });
+        });
+
+        // Загрузка файлов
         const dropzone = document.getElementById('dropzone');
         const fileInput = document.getElementById('file-input');
-        const dropzonePrompt = document.getElementById('dropzone-prompt');
-        const fileSelectedInfo = document.getElementById('file-selected-info');
-        const fileNameSpan = document.getElementById('file-name');
-        const removeFileBtn = document.getElementById('remove-file-btn');
-
         dropzone.addEventListener('click', () => fileInput.click());
+
         fileInput.addEventListener('change', async (e) => {
             if (e.target.files.length > 0) {
                 const file = e.target.files[0];
-                fileNameSpan.textContent = file.name;
-                dropzonePrompt.classList.add('hidden');
-                fileSelectedInfo.classList.remove('hidden');
+                document.getElementById('file-name').textContent = file.name;
+                document.getElementById('dropzone-prompt').classList.add('hidden');
+                document.getElementById('file-selected-info').classList.remove('hidden');
                 uploadedFileText = await extractTextFromFile(file);
             }
         });
 
-        removeFileBtn.addEventListener('click', (e) => {
+        document.getElementById('remove-file-btn').addEventListener('click', (e) => {
             e.stopPropagation();
             fileInput.value = '';
-            uploadedFileText = "";
-            fileSelectedInfo.classList.add('hidden');
-            dropzonePrompt.classList.remove('hidden');
+            uploadedFileText = '';
+            document.getElementById('file-selected-info').classList.add('hidden');
+            document.getElementById('dropzone-prompt').classList.remove('hidden');
         });
 
         async function extractTextFromFile(file) {
@@ -553,130 +576,119 @@
                 const result = await mammoth.extractRawText({ arrayBuffer });
                 return result.value;
             } else if (ext === 'pdf') {
-                const arrayBuffer = await file.arrayBuffer();
-                const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
-                const pdf = await loadingTask.promise;
-                let fullText = "";
+                const typedarray = new Uint8Array(await file.arrayBuffer());
+                const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                let text = '';
                 for (let i = 1; i <= pdf.numPages; i++) {
                     const page = await pdf.getPage(i);
-                    const textContent = await page.getTextContent();
-                    fullText += textContent.items.map(item => item.str).join(' ') + '\n';
+                    const content = await page.getTextContent();
+                    text += content.items.map(item => item.str).join(' ') + '\n';
                 }
-                return fullText;
+                return text;
             }
-            return "";
+            return '';
         }
 
+        // --- АНАЛИЗ ДОГОВОРА ---
         async function startAnalysis() {
-            const manualText = document.getElementById('contract-text').value.trim();
-            const textToAnalyze = manualText || uploadedFileText;
-
-            if (!textToAnalyze) {
-                alert("Пожалуйста, загрузите файл договора или вставьте текст в поле.");
+            const text = uploadedFileText || document.getElementById('contract-text').value.trim();
+            if (!text) {
+                alert('Пожалуйста, загрузите файл или вставьте текст договора.');
                 return;
             }
 
             const outputDiv = document.getElementById('analysis-output');
-            outputDiv.innerHTML = `<div class="text-center py-8 text-slate-500"><i class="fa-solid fa-spinner fa-spin text-2xl text-blue-600 mb-2"></i><br>ИИ-юрист анализирует договор (около 10-20 секунд)...</div>`;
+            outputDiv.innerHTML = `<div class="text-center text-slate-500 py-8"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2 text-blue-600"></i><p>ИИ-юрист анализирует договор...</p></div>`;
+
+            const telegramId = initDataUser ? initDataUser.id : 0;
+            const firstName = initDataUser ? initDataUser.firstName : "";
+            const username = initDataUser ? initDataUser.username : "";
 
             try {
-                const payload = {
-                    text: textToAnalyze,
-                    doc_type: selectedDocType,
-                    jurisdiction: selectedJurisdiction,
-                    telegram_id: initDataUser ? initDataUser.id : 0,
-                    first_name: initDataUser ? initDataUser.first_name : "",
-                    username: initDataUser ? initDataUser.username : ""
-                };
-
-                const res = await fetch('/api/analyze', {
+                const response = await fetch('/api/analyze', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({
+                        text: text,
+                        doc_type: selectedDocType,
+                        jurisdiction: selectedJurisdiction,
+                        telegram_id: telegramId,
+                        first_name: firstName,
+                        username: username
+                    })
                 });
 
-                if (!res.ok) {
-                    const errData = await res.json();
-                    throw new Error(errData.detail || "Ошибка сервера");
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.detail || 'Ошибка сервера');
                 }
 
-                const data = await res.json();
+                const data = await response.json();
                 currentAnalysisResult = data;
                 outputDiv.innerHTML = renderAnalysisHTML(data);
                 document.getElementById('protocol-btn').classList.remove('hidden');
-                if (initDataUser) fetchUserBalance(initDataUser.id);
+                fetchUserBalance(telegramId);
             } catch (err) {
-                outputDiv.innerHTML = `<div class="text-red-600 text-center py-4 font-semibold">Ошибка: ${err.message}</div>`;
+                outputDiv.innerHTML = `<div class="text-red-600 p-4 text-center">Ошибка: ${err.message}</div>`;
             }
         }
 
         function renderAnalysisHTML(data) {
-            let badgeColor = "bg-green-100 text-green-800 border-green-300";
-            if (data.overall_risk_level === "Высокий") badgeColor = "bg-red-100 text-red-800 border-red-300";
-            if (data.overall_risk_level === "Средний") badgeColor = "bg-amber-100 text-amber-800 border-amber-300";
+            let riskColor = "bg-green-100 text-green-800";
+            if (data.overall_risk_level === "Средний") riskColor = "bg-amber-100 text-amber-800";
+            if (data.overall_risk_level === "Высокий") riskColor = "bg-red-100 text-red-800";
 
             let html = `
-                <div class="space-y-3 text-left">
-                    <div class="flex items-center justify-between bg-slate-50 p-2.5 rounded-xl border">
+                <div class="space-y-4 text-left">
+                    <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border">
                         <span class="font-bold text-slate-800">Общий уровень риска:</span>
-                        <span class="px-2.5 py-1 rounded-lg text-xs font-bold border ${badgeColor}">${data.overall_risk_level}</span>
+                        <span class="px-3 py-1 rounded-lg font-bold text-xs ${riskColor}">${data.overall_risk_level}</span>
                     </div>
                     <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100">
-                        <div class="font-bold text-blue-900 mb-1">Резюме юриста:</div>
+                        <h3 class="font-bold text-slate-900 mb-1">Резюме юриста:</h3>
                         <p class="text-slate-700 leading-relaxed">${data.summary}</p>
                     </div>
-                    <div class="space-y-2">
-                        <div class="font-bold text-slate-800">Выявленные риски (${data.risks.length}):</div>
+                    <div>
+                        <h3 class="font-bold text-slate-900 mb-2">Выявленные риски (${data.risks.length}):</h3>
+                        <div class="space-y-3">
             `;
 
-            data.risks.forEach((r, index) => {
-                let borderCol = "border-amber-300 bg-amber-50/30";
-                let textCol = "text-amber-800";
-                if (r.level === "red") {
-                    borderCol = "border-red-300 bg-red-50/30";
-                    textCol = "text-red-800";
-                }
+            data.risks.forEach((r, idx) => {
                 html += `
-                    <div class="p-3 rounded-xl border ${borderCol} space-y-1">
-                        <div class="flex items-center justify-between font-bold text-slate-900 text-xs">
-                            <span>${index + 1}. ${r.title}</span>
-                            <span class="text-[10px] ${textCol} uppercase">${r.category}</span>
+                    <div class="bg-slate-50 p-3 rounded-xl border space-y-1.5">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-xs text-blue-600">${idx + 1}. ${r.category}</span>
+                            <span class="text-[11px] font-semibold text-slate-800">${r.title}</span>
                         </div>
-                        <div class="text-[11px] text-slate-600 italic bg-white/80 p-1.5 rounded border">«${r.quote}»</div>
-                        <div class="text-xs text-slate-700"><strong>Риск:</strong> ${r.explanation}</div>
-                        <div class="text-xs text-blue-900"><strong>Решение:</strong> ${r.recommendation}</div>
+                        <div class="text-[11px] text-slate-600 italic bg-white p-2 rounded border border-slate-200">«${r.quote}»</div>
+                        <p class="text-slate-700 text-xs"><strong>Опасность:</strong> ${r.explanation}</p>
+                        <p class="text-slate-700 text-xs text-emerald-700"><strong>Рекомендация:</strong> ${r.recommendation}</p>
                     </div>
                 `;
             });
 
-            html += `</div></div>`;
+            html += `</div></div></div>`;
             return html;
         }
 
+        // --- ГЕНЕРАЦИЯ ПРОТОКОЛА ---
         async function generateProtocol() {
             if (!currentAnalysisResult) return;
             try {
-                const payload = {
-                    doc_type: selectedDocType,
-                    jurisdiction: selectedJurisdiction,
-                    telegram_id: initDataUser ? initDataUser.id : 0,
-                    risks: currentAnalysisResult.risks.map(r => ({
-                        title: r.title,
-                        quote: r.quote,
-                        explanation: r.explanation,
-                        recommendation: r.recommendation
-                    }))
-                };
-
-                const res = await fetch('/api/generate-protocol', {
+                const response = await fetch('/api/generate-protocol', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({
+                        doc_type: selectedDocType,
+                        jurisdiction: selectedJurisdiction,
+                        telegram_id: initDataUser ? initDataUser.id : 0,
+                        risks: currentAnalysisResult.risks
+                    })
                 });
 
-                if (!res.ok) throw new Error("Ошибка генерации протокола");
-                
-                const blob = await res.blob();
+                if (!response.ok) throw new Error('Не удалось сгенерировать протокол');
+
+                const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
@@ -684,240 +696,182 @@
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
-            } catch (err) {
-                alert("Не удалось скачать протокол: " + err.message);
+            } catch (e) {
+                alert(e.message);
             }
         }
 
+        // --- КОНСТРУКТОР ДОКУМЕНТОВ ---
         async function generateConstructorDocument() {
-            const payload = {
-                doc_type: selectedConstructorDocType,
-                jurisdiction: selectedConstructorJurisdiction,
-                executor: document.getElementById('c-executor').value,
-                client: document.getElementById('c-client').value,
-                description: document.getElementById('c-description').value,
-                payment: document.getElementById('c-payment').value,
-                deadline: document.getElementById('c-deadline').value,
-                revisions: document.getElementById('c-revisions').value,
-                telegram_id: initDataUser ? initDataUser.id : 0
-            };
-
             const outputDiv = document.getElementById('analysis-output');
-            outputDiv.innerHTML = `<div class="text-center py-8 text-slate-500"><i class="fa-solid fa-spinner fa-spin text-2xl text-indigo-600 mb-2"></i><br>ИИ конструирует документ...</div>`;
+            outputDiv.innerHTML = `<div class="text-center text-slate-500 py-8"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2 text-indigo-600"></i><p>Составляем юридический документ...</p></div>`;
 
             try {
-                const res = await fetch('/api/generate-contract', {
+                const response = await fetch('/api/generate-document', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({
+                        doc_type: selectedConstructorDocType,
+                        jurisdiction: selectedConstructorJurisdiction,
+                        executor: document.getElementById('c-executor').value,
+                        client: document.getElementById('c-client').value,
+                        description: document.getElementById('c-description').value,
+                        payment: document.getElementById('c-payment').value,
+                        deadline: document.getElementById('c-deadline').value,
+                        revisions: document.getElementById('c-revisions').value,
+                        telegram_id: initDataUser ? initDataUser.id : 0
+                    })
                 });
 
-                if (!res.ok) throw new Error("Ошибка генерации документа");
-                const data = await res.json();
-                currentGeneratedDocumentText = data.document_text;
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.detail || 'Ошибка генерации');
+                }
 
-                outputDiv.innerHTML = `<div class="text-left whitespace-pre-wrap">${currentGeneratedDocumentText}</div>`;
+                const data = await response.json();
+                currentGeneratedDocumentText = data.document_text;
+                outputDiv.innerHTML = `<div class="whitespace-pre-wrap text-left">${marked.parse(currentGeneratedDocumentText)}</div>`;
                 document.getElementById('copy-doc-btn').classList.remove('hidden');
                 document.getElementById('download-doc-btn').classList.remove('hidden');
-            } catch (err) {
-                outputDiv.innerHTML = `<div class="text-red-600 text-center py-4 font-semibold">Ошибка: ${err.message}</div>`;
+            } catch (e) {
+                outputDiv.innerHTML = `<div class="text-red-600 p-4 text-center">Ошибка: ${e.message}</div>`;
+            }
+        }
+
+        async function downloadConstructorFile() {
+            if (!currentGeneratedDocumentText) return;
+            try {
+                const response = await fetch('/api/download-constructor-file', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        document_text: currentGeneratedDocumentText,
+                        doc_type: selectedConstructorDocType,
+                        jurisdiction: selectedConstructorJurisdiction
+                    })
+                });
+
+                if (!response.ok) throw new Error('Ошибка скачивания файла');
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = selectedConstructorDocType === 'offer' ? "Oferta.docx" : "Dogovor.docx";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            } catch (e) {
+                alert(e.message);
             }
         }
 
         function copyDocumentOutput() {
             if (!currentGeneratedDocumentText) return;
-            navigator.clipboard.writeText(currentGeneratedDocumentText);
-            alert("Документ скопирован в буфер обмена!");
-        }
-
-        async function downloadConstructorFile() {
-            const payload = {
-                document_text: currentGeneratedDocumentText,
-                doc_type: selectedConstructorDocType,
-                jurisdiction: selectedConstructorJurisdiction
-            };
-
-            try {
-                const res = await fetch('/api/download-constructor-file', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (!res.ok) throw new Error("Ошибка скачивания");
-                const blob = await res.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = selectedConstructorDocType === 'contract' ? "Dogovor.docx" : "Oferta.docx";
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-            } catch (err) {
-                alert("Ошибка: " + err.message);
-            }
+            navigator.clipboard.writeText(currentGeneratedDocumentText).then(() => {
+                alert('Текст скопирован в буфер обмена!');
+            });
         }
 
         function resetForm() {
-            document.getElementById('contract-text').value = '';
             uploadedFileText = "";
-            fileSelectedInfo.classList.add('hidden');
-            dropzonePrompt.classList.remove('hidden');
-            document.getElementById('analysis-output').innerHTML = "Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».";
-            document.getElementById('protocol-btn').classList.add('hidden');
+            document.getElementById('contract-text').value = "";
+            document.getElementById('file-input').value = "";
+            document.getElementById('file-selected-info').classList.add('hidden');
+            document.getElementById('dropzone-prompt').classList.remove('hidden');
             currentAnalysisResult = null;
+            document.getElementById('protocol-btn').classList.add('hidden');
+            document.getElementById('analysis-output').innerHTML = "Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».";
         }
 
         function resetConstructorForm() {
-            document.getElementById('c-description').value = '';
             currentGeneratedDocumentText = "";
-            document.getElementById('analysis-output').innerHTML = "Здесь появится сгенерированный документ после заполнения параметров.";
+            document.getElementById('c-description').value = "";
             document.getElementById('copy-doc-btn').classList.add('hidden');
             document.getElementById('download-doc-btn').classList.add('hidden');
+            document.getElementById('analysis-output').innerHTML = "Здесь появится текст сгенерированного документа после заполнения параметров.";
         }
 
+        // Модальные окна
         function openStarsModal() { document.getElementById('stars-modal').classList.remove('hidden'); document.getElementById('stars-modal').classList.add('flex'); }
         function closeStarsModal() { document.getElementById('stars-modal').classList.add('hidden'); document.getElementById('stars-modal').classList.remove('flex'); }
-
-        async function buyPackage(packageType) {
-            if (!initDataUser) {
-                alert("Покупка доступна только внутри Telegram Mini App.");
-                return;
+        function openTermsModal(e) { if(e) e.preventDefault(); document.getElementById('terms-modal').classList.remove('hidden'); document.getElementById('terms-modal').classList.add('flex'); }
+        function closeTermsModal() { document.getElementById('terms-modal').classList.add('hidden'); document.getElementById('terms-modal').classList.remove('flex'); }
+        async function openAdminModal() {
+            document.getElementById('admin-modal').classList.remove('hidden');
+            document.getElementById('admin-modal').classList.add('flex');
+            const telegramId = initDataUser ? initDataUser.id : 0;
+            try {
+                const res = await fetch(`/admin/stats/${telegramId}`);
+                const data = await res.json();
+                let html = `
+                    <div class="grid grid-cols-3 gap-2 text-center font-bold">
+                        <div class="bg-slate-50 p-2 rounded-xl border"><div>Пользователи</div><div class="text-blue-600 text-sm">${data.total_users}</div></div>
+                        <div class="bg-slate-50 p-2 rounded-xl border"><div>Проверки</div><div class="text-indigo-600 text-sm">${data.total_analyses}</div></div>
+                        <div class="bg-slate-50 p-2 rounded-xl border"><div>Платежи</div><div class="text-emerald-600 text-sm">${data.total_payments}</div></div>
+                    </div>
+                `;
+                document.getElementById('admin-stats-content').innerHTML = html;
+            } catch (e) {
+                document.getElementById('admin-stats-content').innerHTML = '<div class="text-red-500">Ошибка загрузки статистики</div>';
             }
+        }
+        function closeAdminModal() { document.getElementById('admin-modal').classList.add('hidden'); document.getElementById('admin-modal').classList.remove('flex'); }
+
+        async function buyPackage(pkgType) {
+            const telegramId = initDataUser ? initDataUser.id : 8804083078;
             try {
                 const res = await fetch('/create-invoice', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ telegram_id: initDataUser.id, package_type: packageType })
+                    body: JSON.stringify({ telegram_id: telegramId, package_type: pkgType })
                 });
                 const data = await res.json();
-                if (data.invoice_link) {
-                    if (tg && tg.openInvoice) {
-                        tg.openInvoice(data.invoice_link, (status) => {
-                            if (status === 'paid') {
-                                alert("Оплата прошла успешно! Баланс пополнен.");
-                                fetchUserBalance(initDataUser.id);
-                                closeStarsModal();
-                            }
-                        });
-                    } else {
-                        window.open(data.invoice_link, '_blank');
-                    }
+                if (data.invoice_link && tg) {
+                    tg.openInvoice(data.invoice_link);
+                } else if (data.invoice_link) {
+                    window.open(data.invoice_link, '_blank');
                 }
             } catch (e) {
-                alert("Ошибка создания счета: " + e.message);
+                alert('Ошибка создания счета');
             }
         }
 
-        function openAdminModal() {
-            document.getElementById('admin-modal').classList.remove('hidden');
-            document.getElementById('admin-modal').classList.add('flex');
-            loadAdminStats();
-        }
-        function closeAdminModal() { document.getElementById('admin-modal').classList.add('hidden'); document.getElementById('admin-modal').classList.remove('flex'); }
-
-        async function loadAdminStats() {
-            const container = document.getElementById('admin-stats-content');
-            try {
-                const tid = initDataUser ? initDataUser.id : 0;
-                const res = await fetch(`/admin/stats/${tid}`);
-                const data = await res.json();
-
-                let html = `
-                    <div class="grid grid-cols-3 gap-2 text-center">
-                        <div class="bg-slate-50 p-2 rounded-xl border"><div class="text-slate-500 text-[10px]">Пользователи</div><div class="font-bold text-sm">${data.total_users}</div></div>
-                        <div class="bg-slate-50 p-2 rounded-xl border"><div class="text-slate-500 text-[10px]">Анализы</div><div class="font-bold text-sm">${data.total_analyses}</div></div>
-                        <div class="bg-slate-50 p-2 rounded-xl border"><div class="text-slate-500 text-[10px]">Оплаты</div><div class="font-bold text-sm">${data.total_payments}</div></div>
-                    </div>
-                    <div class="font-bold text-slate-800 mt-3">Последние пользователи:</div>
-                    <div class="space-y-1.5 max-h-48 overflow-y-auto">
-                `;
-
-                data.users_list.forEach(u => {
-                    html += `
-                        <div class="bg-slate-50 p-2 rounded-xl border flex items-center justify-between">
-                            <div>
-                                <div class="font-bold">${u.first_name} (${u.username})</div>
-                                <div class="text-[10px] text-slate-500">ID: ${u.telegram_id} • Регистрация: ${u.created_at}</div>
-                            </div>
-                            <div class="text-right">
-                                <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold text-[10px]">Проверок: ${u.free_checks_left}</span>
-                            </div>
-                        </div>
-                    `;
-                });
-                html += `</div>`;
-                container.innerHTML = html;
-            } catch (e) {
-                container.innerHTML = `<div class="text-red-500 text-center">Ошибка загрузки статистики</div>`;
-            }
-        }
-
-        function openTermsModal(e) {
-            if (e) e.preventDefault();
-            document.getElementById('terms-modal').classList.remove('hidden');
-            document.getElementById('terms-modal').classList.add('flex');
-        }
-        function closeTermsModal() { document.getElementById('terms-modal').classList.add('hidden'); document.getElementById('terms-modal').classList.remove('flex'); }
-
-        const starRatingContainer = document.getElementById('star-rating');
+        // Отзывы
         let selectedRating = 4;
-        if (starRatingContainer) {
-            starRatingContainer.querySelectorAll('i').forEach(star => {
-                star.addEventListener('click', () => {
-                    selectedRating = parseInt(star.getAttribute('data-rating'));
-                    starRatingContainer.querySelectorAll('i').forEach((s, idx) => {
-                        if (idx < selectedRating) {
-                            s.className = "fa-solid fa-star text-amber-400";
-                        } else {
-                            s.className = "fa-solid fa-star text-slate-300";
-                        }
-                    });
+        let selectedSentiment = "Полезно";
+        document.querySelectorAll('#star-rating i').forEach(star => {
+            star.addEventListener('click', () => {
+                selectedRating = parseInt(star.getAttribute('data-rating'));
+                document.querySelectorAll('#star-rating i').forEach((s, idx) => {
+                    if (idx < selectedRating) {
+                        s.className = "fa-solid fa-star text-amber-400 cursor-pointer";
+                    } else {
+                        s.className = "fa-solid fa-star text-slate-300 cursor-pointer";
+                    }
                 });
             });
-        }
-
+        });
         document.querySelectorAll('.sentiment-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.sentiment-btn').forEach(b => b.classList.remove('border-blue-600', 'bg-blue-50'));
                 btn.classList.add('border-blue-600', 'bg-blue-50');
+                selectedSentiment = btn.getAttribute('data-value');
             });
         });
-
         async function sendFeedback() {
-            const text = document.getElementById('feedback-text').value.trim();
-            const sentimentBtn = document.querySelector('.sentiment-btn.border-blue-600');
-            const sentiment = sentimentBtn ? sentimentBtn.getAttribute('data-value') : "Полезно";
             const fbType = document.querySelector('input[name="fb-type"]:checked').value;
-
-            if (!text) {
-                alert("Пожалуйста, введите текст отзыва.");
-                return;
-            }
-
+            const text = document.getElementById('feedback-text').value.trim();
             try {
-                const payload = {
-                    type: fbType,
-                    rating: selectedRating,
-                    sentiment: sentiment,
-                    feedback: text,
-                    doc_type: selectedDocType,
-                    jurisdiction: selectedJurisdiction
-                };
-
-                const res = await fetch('/api/feedback', {
+                await fetch('/api/feedback', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({ type: fbType, rating: selectedRating, sentiment: selectedSentiment, feedback: text, doc_type: selectedDocType, jurisdiction: selectedJurisdiction })
                 });
-
-                if (res.ok) {
-                    alert("Спасибо! Ваш отзыв успешно отправлен.");
-                    document.getElementById('feedback-text').value = '';
-                } else {
-                    throw new Error("Ошибка отправки");
-                }
-            } catch (e) {
-                alert("Не удалось отправить отзыв: " + e.message);
+                alert('Спасибо за ваш отзыв!');
+                document.getElementById('feedback-text').value = '';
+            } catch(e) {
+                alert('Ошибка отправки отзыва');
             }
         }
     </script>
