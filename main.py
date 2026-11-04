@@ -221,6 +221,141 @@ async def get_admin_stats(telegram_id: int):
     finally:
         db.close()
 
+@app.post("/api/analyze", response_model=AnalysisResponse)
+async def analyze_contract(data: AnalyzeSchema):
+    is_admin = data.telegram_id in ADMIN_IDS or data.telegram_id == 0
+    
+    db = None
+    user = None
+    if SessionLocal and data.telegram_id:
+        db = SessionLocal()
+        user = db.query(UserDB).filter(UserDB.telegram_id == data.telegram_id).first()
+        if not user:
+            user = UserDB(telegram_id=data.telegram_id, first_name=data.first_name or "", username=data.username or "", free_checks_left=3)
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+
+    if not is_admin and user and not user.is_pro and user.free_checks_left <= 0:
+        if db: db.close()
+        raise HTTPException(status_code=403, detail="Лимит бесплатных проверок исчерпан. Пожалуйста, пополните баланс.")
+
+    if not ai_client:
+        if db: db.close()
+        raise HTTPException(status_code=500, detail="GEMINI_API_KEY не настроен на сервере.")
+
+    prompt = f"""
+Ты — профессиональный ИИ-юрист с глубоким знанием законодательства юрисдикции: {data.jurisdiction}.
+Тип проверяемого документа: {data.doc_type}.
+
+Проанализируй текст договора ниже, выяви все скрытые риски, невыгодные условия, кабальные пункты, двусмысленности и правовые ловушки для клиента/исполнителя.
+
+Верни ответ СТРОГО в формате JSON без блоков markdown (без ```json ... ```), в виде объекта со следующей структурой:
+{{
+  "overall_risk_level": "Низкий" / "Средний" / "Высокий",
+  "summary": "Краткое резюме юриста по договору (2-3 предложения).",
+  "risks": [
+    {{
+      "category": "Название категории (например: Оплата, Ответственность, Сроки, Расторжение)",
+      "title": "Краткий заголовок риска",
+      "quote": "Точная цитата из текста договора, где кроется риск",
+      "explanation": "Подробное объяснение, в чём именно опасность этого пункта",
+      "recommendation": "Конкретная рекомендация, как изменить формулировку или чего требовать"
+    }}
+  ]
+}}
+
+Текст договора для анализа:
+{data.text}
+"""
+
+    try:
+        response = ai_client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt,
+        )
+        cleaned_text = response.text.strip()
+        if cleaned_text.startswith("```"):
+            cleaned_text = re.sub(r"^```(?:json)?\s*", "", cleaned_text)
+            cleaned_text = re.sub(r"\s*```$", "", cleaned_text)
+        
+        result_data = json.loads(cleaned_text)
+
+        if db and user and not is_admin:
+            if not user.is_pro:
+                user.free_checks_left = max(0, user.free_checks_left - 1)
+            log_entry = AnalysisLogDB(telegram_id=data.telegram_id, doc_type=data.doc_type, jurisdiction=data.jurisdiction, risk_level=result_data.get("overall_risk_level", "Средний"))
+            db.add(log_entry)
+            db.commit()
+
+        return result_data
+    except Exception as e:
+        if db: db.rollback()
+        raise HTTPException(status_code=500, detail=f"Ошибка обработки ИИ: {str(e)}")
+    finally:
+        if db: db.close()
+
+@app.post("/api/generate-protocol")
+async def api_generate_protocol(data: ProtocolRequest):
+    analysis_data = {"risks": [r.dict() for r in data.risks]}
+    contract_title = f"Договору ({data.doc_type})"
+    file_stream = generate_disagreements_protocol(analysis_data, contract_title)
+    return StreamingResponse(
+        file_stream,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": "attachment; filename=Protokol_raznoglasiy.docx"}
+    )
+
+@app.post("/api/generate-contract")
+async def api_generate_contract(data: ContractGenerationRequest):
+    if not ai_client:
+        raise HTTPException(status_code=500, detail="GEMINI_API_KEY не настроен.")
+    
+    doc_title = "Публичная оферта" if data.doc_type == "offer" else "Договор оказания услуг"
+    prompt = f"""
+Составь профессиональный юридический документ: {doc_title} для юрисдикции: {data.jurisdiction}.
+Параметры:
+- Исполнитель: {data.executor}
+- Заказчик: {data.client}
+- Суть услуг / Предмет: {data.description}
+- Условия оплаты: {data.payment}
+- Сроки выполнения: {data.deadline}
+- Порядок правок: {data.revisions}
+
+Документ должен быть структурированным, юридически грамотным, содержать все существенные условия, ответственность сторон, порядок сдачи-приемки и реквизиты. Выдай чистый текст документа.
+"""
+    try:
+        response = ai_client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt,
+        )
+        return {"document_text": response.text.strip()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/download-constructor-file")
+async def api_download_constructor_file(data: ConstructorFileRequest):
+    doc = generate_legal_document(data.document_text, data.doc_type, data.jurisdiction)
+    file_stream = io.BytesIO()
+    doc.save(file_stream)
+    file_stream.seek(0)
+    filename = "Oferta.docx" if data.doc_type == "offer" else "Dogovor.docx"
+    return StreamingResponse(
+        file_stream,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+@app.post("/api/feedback")
+async def api_feedback(data: FeedbackSchema):
+    if FEEDBACK_WEBHOOK_URL:
+        try:
+            async with httpx.AsyncClient() as client:
+                await client.post(FEEDBACK_WEBHOOK_URL, json=data.dict(), timeout=5.0)
+        except Exception:
+            pass
+    return {"status": "success"}
+
 @app.post("/create-invoice")
 async def create_invoice(data: InvoiceRequest):
     if not BOT_TOKEN:
@@ -233,7 +368,7 @@ async def create_invoice(data: InvoiceRequest):
     
     pkg = packages.get(data.package_type, packages["5_checks"])
     
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/createInvoiceLink"
+    url = f"[https://api.telegram.org/bot](https://api.telegram.org/bot){BOT_TOKEN}/createInvoiceLink"
     payload = {
         "title": pkg["title"],
         "description": pkg["description"],
@@ -270,12 +405,12 @@ async def telegram_webhook(request: Request):
                         [
                             {
                                 "text": "🛠️ Открыть Lexify (Анализ и Конструктор)",
-                                "web_app": {"url": "https://lexify-web.onrender.com/app"}
+                                "web_app": {"url": "[https://lexify-web.onrender.com/app](https://lexify-web.onrender.com/app)"}
                             }
                         ]
                     ]
                 }
-                url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+                url = f"[https://api.telegram.org/bot](https://api.telegram.org/bot){BOT_TOKEN}/sendMessage"
                 async with httpx.AsyncClient() as client:
                     await client.post(url, json={
                         "chat_id": chat_id,
