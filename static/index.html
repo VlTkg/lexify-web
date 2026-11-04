@@ -683,7 +683,7 @@
             return html;
         }
 
-        // --- НАДЕЖНОЕ СКАЧИВАНИЕ ПРОТОКОЛА ---
+        // --- ПРЯМОЕ И НАДЕЖНОЕ СКАЧИВАНИЕ ПРОТОКОЛА ---
         async function generateProtocol() {
             if (!currentAnalysisResult) return;
             try {
@@ -701,13 +701,14 @@
                 if (!response.ok) throw new Error('Не удалось сгенерировать протокол');
 
                 const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = "Protokol_raznoglasiy.docx";
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
+                const blobUrl = window.URL.createObjectURL(blob);
+                const tempLink = document.createElement('a');
+                tempLink.href = blobUrl;
+                tempLink.setAttribute('download', 'Protokol_raznoglasiy.docx');
+                document.body.appendChild(tempLink);
+                tempLink.click();
+                document.body.removeChild(tempLink);
+                window.URL.revokeObjectURL(blobUrl);
             } catch (e) {
                 alert(e.message);
             }
@@ -769,13 +770,15 @@
                 if (!response.ok) throw new Error('Ошибка скачивания файла');
 
                 const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = selectedConstructorDocType === 'offer' ? "Oferta.docx" : "Dogovor.docx";
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
+                const blobUrl = window.URL.createObjectURL(blob);
+                const tempLink = document.createElement('a');
+                tempLink.href = blobUrl;
+                const fileName = selectedConstructorDocType === 'offer' ? "Oferta.docx" : "Dogovor.docx";
+                tempLink.setAttribute('download', fileName);
+                document.body.appendChild(tempLink);
+                tempLink.click();
+                document.body.removeChild(tempLink);
+                window.URL.revokeObjectURL(blobUrl);
             } catch (e) {
                 alert(e.message);
             }
