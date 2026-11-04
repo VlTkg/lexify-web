@@ -445,7 +445,6 @@
             fetchUserBalance(0);
         }
 
-        // Функция автоматического плавного скролла к результатам
         function scrollToResults() {
             const resultsCard = document.getElementById('results-card-container');
             if (resultsCard) {
@@ -683,7 +682,7 @@
             return html;
         }
 
-        // --- УЛЬТРАНАДЕЖНОЕ СКАЧИВАНИЕ ПРОТОКОЛА ---
+        // --- ЖЕЛЕЗОБЕТОННОЕ СКАЧИВАНИЕ ПРОТОКОЛА ЧЕРЕЗ БЭКЕНД-УРЛ ---
         async function generateProtocol() {
             if (!currentAnalysisResult) return;
             try {
@@ -703,13 +702,12 @@
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
                 
-                // Проверяем Telegram WebApp для безупречного открытия скачивания в десктопе/мобильном
+                // Принудительное открытие в системном браузере или новой вкладке для обхода песочницы Telegram
                 if (window.Telegram?.WebApp && window.Telegram.WebApp.openLink) {
-                    // Открываем через системный браузер, обходя песочницу Telegram
+                    // Отправляем пользователя на прямой URL скачивания или используем временный файл
                     const a = document.createElement('a');
                     a.href = url;
                     a.download = "Protokol_raznoglasiy.docx";
-                    a.target = "_blank";
                     document.body.appendChild(a);
                     a.click();
                     a.remove();
@@ -721,7 +719,6 @@
                     a.click();
                     a.remove();
                 }
-                window.URL.revokeObjectURL(url);
             } catch (e) {
                 alert(e.message);
             }
@@ -789,11 +786,9 @@
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = filename;
-                a.target = "_blank";
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
-                window.URL.revokeObjectURL(url);
             } catch (e) {
                 alert(e.message);
             }
