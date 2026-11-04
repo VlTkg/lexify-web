@@ -8,11 +8,8 @@ from docx import Document
 
 app = FastAPI()
 
-# Подключение статических файлов (фронтенд в папке static)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-
-# --- Pydantic Схемы данных ---
 
 class AnalysisRequest(BaseModel):
     text: str
@@ -57,8 +54,6 @@ class FeedbackRequest(BaseModel):
     jurisdiction: str = ""
 
 
-# --- Эндпоинты приложения ---
-
 @app.get("/")
 def read_root():
     return FileResponse("static/index.html")
@@ -66,7 +61,6 @@ def read_root():
 
 @app.get("/app")
 def read_app():
-    # Исправление ошибки 404 Not Found при открытии мини-приложения из Telegram
     return FileResponse("static/index.html")
 
 
