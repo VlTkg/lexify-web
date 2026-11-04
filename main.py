@@ -274,6 +274,10 @@ async def analyze_contract(data: AnalyzeSchema):
             model="gemini-3.8-flash",
             contents=prompt,
         )
+        
+        if not response or not hasattr(response, "text") or not response.text:
+            raise HTTPException(status_code=500, detail="ИИ вернул пустой ответ или сработал фильтр безопасности.")
+
         cleaned_text = response.text.strip()
         if cleaned_text.startswith("```"):
             cleaned_text = re.sub(r"^```(?:json)?\s*", "", cleaned_text)
@@ -313,7 +317,7 @@ async def api_generate_contract(data: ContractGenerationRequest):
     
     doc_title = "Публичная оферта" if data.doc_type == "offer" else "Договор оказания услуг"
     prompt = f"""
-Составь профессиональный юридический документ: {doc_title} для юрисдикции: {data.jurisdiction}.
+Составь полный профессиональный юридический документ: {doc_title} для юрисдикции: {data.jurisdiction}.
 Параметры:
 - Исполнитель: {data.executor}
 - Заказчик: {data.client}
@@ -322,16 +326,20 @@ async def api_generate_contract(data: ContractGenerationRequest):
 - Сроки выполнения: {data.deadline}
 - Порядок правок: {data.revisions}
 
-Документ должен быть структурированным, юридически грамотным, содержать все существенные условия, ответственность сторон, порядок сдачи-приемки и реквизиты. Выдай чистый текст документа.
+Документ должен быть детальным, структурированным, юридически грамотным, содержать все существенные условия, ответственность сторон, порядок сдачи-приемки и реквизиты. Выдай чистый текст документа.
 """
     try:
         response = ai_client.models.generate_content(
             model="gemini-3.8-flash",
             contents=prompt,
         )
+        
+        if not response or not hasattr(response, "text") or not response.text:
+            raise HTTPException(status_code=500, detail="ИИ вернул пустой ответ или сработал фильтр безопасности.")
+            
         return {"document_text": response.text.strip()}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Ошибка генерации: {str(e)}")
 
 @app.post("/api/download-constructor-file")
 async def api_download_constructor_file(data: ConstructorFileRequest):
