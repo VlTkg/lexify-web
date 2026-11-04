@@ -682,7 +682,7 @@
             return html;
         }
 
-        // --- СКАЧИВАНИЕ ПРОТОКОЛА ЧЕРЕЗ ОТКРЫТИЕ ССЫЛКИ В БРАУЗЕРЕ ---
+        // --- ИДЕАЛЬНОЕ СКАЧИВАНИЕ ЧЕРЕЗ ОТПРАВКУ POST И ФОРМАТИРОВАНИЕ ФАЙЛА ---
         async function generateProtocol() {
             if (!currentAnalysisResult) return;
             try {
@@ -702,18 +702,14 @@
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
                 
-                // Принудительно открываем во внешнем браузере, чтобы Telegram не блокировал загрузку
-                if (window.Telegram?.WebApp && window.Telegram.WebApp.openLink) {
-                    window.Telegram.WebApp.openLink(url);
-                } else {
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = "Protokol_raznoglasiy.docx";
-                    a.target = "_blank";
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                }
+                // Используем прямое создание ссылки с аттрибутом download для скачивания в обход WebApp ограничений
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = "Protokol_raznoglasiy.docx";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => window.URL.revokeObjectURL(url), 1000);
             } catch (e) {
                 alert(e.message);
             }
@@ -776,18 +772,15 @@
 
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
+                const filename = selectedConstructorDocType === 'offer' ? "Oferta.docx" : "Dogovor.docx";
 
-                if (window.Telegram?.WebApp && window.Telegram.WebApp.openLink) {
-                    window.Telegram.WebApp.openLink(url);
-                } else {
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = selectedConstructorDocType === 'offer' ? "Oferta.docx" : "Dogovor.docx";
-                    a.target = "_blank";
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                }
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => window.URL.revokeObjectURL(url), 1000);
             } catch (e) {
                 alert(e.message);
             }
