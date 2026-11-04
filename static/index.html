@@ -682,7 +682,7 @@
             return html;
         }
 
-        // --- ЖЕЛЕЗОБЕТОННОЕ СКАЧИВАНИЕ ПРОТОКОЛА ЧЕРЕЗ БЭКЕНД-УРЛ ---
+        // --- СКАЧИВАНИЕ ПРОТОКОЛА ЧЕРЕЗ ОТКРЫТИЕ ССЫЛКИ В БРАУЗЕРЕ ---
         async function generateProtocol() {
             if (!currentAnalysisResult) return;
             try {
@@ -702,19 +702,14 @@
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
                 
-                // Принудительное открытие в системном браузере или новой вкладке для обхода песочницы Telegram
+                // Принудительно открываем во внешнем браузере, чтобы Telegram не блокировал загрузку
                 if (window.Telegram?.WebApp && window.Telegram.WebApp.openLink) {
-                    // Отправляем пользователя на прямой URL скачивания или используем временный файл
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = "Protokol_raznoglasiy.docx";
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
+                    window.Telegram.WebApp.openLink(url);
                 } else {
                     const a = document.createElement('a');
                     a.href = url;
                     a.download = "Protokol_raznoglasiy.docx";
+                    a.target = "_blank";
                     document.body.appendChild(a);
                     a.click();
                     a.remove();
@@ -781,14 +776,18 @@
 
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
-                const filename = selectedConstructorDocType === 'offer' ? "Oferta.docx" : "Dogovor.docx";
 
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
+                if (window.Telegram?.WebApp && window.Telegram.WebApp.openLink) {
+                    window.Telegram.WebApp.openLink(url);
+                } else {
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = selectedConstructorDocType === 'offer' ? "Oferta.docx" : "Dogovor.docx";
+                    a.target = "_blank";
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                }
             } catch (e) {
                 alert(e.message);
             }
