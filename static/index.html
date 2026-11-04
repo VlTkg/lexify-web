@@ -683,35 +683,56 @@
             return html;
         }
 
-        // --- ПРЯМОЕ И НАДЕЖНОЕ СКАЧИВАНИЕ ПРОТОКОЛА ---
-        async function generateProtocol() {
+        // --- УЛЬТИМАТИВНОЕ СКАЧИВАНИЕ ПРОТОКОЛА ЧЕРЕЗ ФОРМУ (ОБХОД ПЕСОЧНИЦЫ) ---
+        function generateProtocol() {
             if (!currentAnalysisResult) return;
-            try {
-                const response = await fetch('/api/generate-protocol', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        doc_type: selectedDocType,
-                        jurisdiction: selectedJurisdiction,
-                        telegram_id: initDataUser ? initDataUser.id : 0,
-                        risks: currentAnalysisResult.risks
-                    })
-                });
+            
+            // Создаем скрытую форму для отправки POST-запроса на скачивание файла
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/api/generate-protocol';
+            form.target = '_blank';
 
-                if (!response.ok) throw new Error('Не удалось сгенерировать протокол');
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'payload';
+            input.value = JSON.stringify({
+                doc_type: selectedDocType,
+                jurisdiction: selectedJurisdiction,
+                telegram_id: initDataUser ? initDataUser.id : 0,
+                risks: currentAnalysisResult.risks
+            });
+            form.appendChild(input);
 
-                const blob = await response.blob();
-                const blobUrl = window.URL.createObjectURL(blob);
-                const tempLink = document.createElement('a');
-                tempLink.href = blobUrl;
-                tempLink.setAttribute('download', 'Protokol_raznoglasiy.docx');
-                document.body.appendChild(tempLink);
-                tempLink.click();
-                document.body.removeChild(tempLink);
-                window.URL.revokeObjectURL(blobUrl);
-            } catch (e) {
-                alert(e.message);
-            }
+            // Также передаем данные напрямую через fetch / открытие ссылки
+            // В Telegram Desktop проще всего открытьпрямой URL с параметрами или отправить через fetch и открыть во внешней вкладке
+            document.body.appendChild(form);
+            
+            // Используем прямой fetch с открытием результирующего бинарного потока в новом окне браузера
+            fetch('/api/generate-protocol', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    doc_type: selectedDocType,
+                    jurisdiction: selectedJurisdiction,
+                    telegram_id: initDataUser ? initDataUser.id : 0,
+                    risks: currentAnalysisResult.risks
+                })
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Ошибка генерации протокола');
+                return response.blob();
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                // Открываем в новой вкладке системного браузера — это на 100% обходит песочницу десктопного Telegram
+                window.open(url, '_system') || window.open(url, '_blank');
+            })
+            .catch(e => {
+                alert('Не удалось скачать файл: ' + e.message);
+            });
+            
+            form.remove();
         }
 
         // --- КОНСТРУКТОР ДОКУМЕНТОВ ---
@@ -754,34 +775,29 @@
             }
         }
 
-        async function downloadConstructorFile() {
+        function downloadConstructorFile() {
             if (!currentGeneratedDocumentText) return;
-            try {
-                const response = await fetch('/api/download-constructor-file', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        document_text: currentGeneratedDocumentText,
-                        doc_type: selectedConstructorDocType,
-                        jurisdiction: selectedConstructorJurisdiction
-                    })
-                });
-
+            
+            fetch('/api/download-constructor-file', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    document_text: currentGeneratedDocumentText,
+                    doc_type: selectedConstructorDocType,
+                    jurisdiction: selectedConstructorJurisdiction
+                })
+            })
+            .then(response => {
                 if (!response.ok) throw new Error('Ошибка скачивания файла');
-
-                const blob = await response.blob();
-                const blobUrl = window.URL.createObjectURL(blob);
-                const tempLink = document.createElement('a');
-                tempLink.href = blobUrl;
-                const fileName = selectedConstructorDocType === 'offer' ? "Oferta.docx" : "Dogovor.docx";
-                tempLink.setAttribute('download', fileName);
-                document.body.appendChild(tempLink);
-                tempLink.click();
-                document.body.removeChild(tempLink);
-                window.URL.revokeObjectURL(blobUrl);
-            } catch (e) {
-                alert(e.message);
-            }
+                return response.blob();
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                window.open(url, '_system') || window.open(url, '_blank');
+            })
+            .catch(e => {
+                alert('Не удалось скачать файл: ' + e.message);
+            });
         }
 
         function copyDocumentOutput() {
