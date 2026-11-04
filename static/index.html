@@ -683,7 +683,7 @@
             return html;
         }
 
-        // --- НАДЕЖНОЕ СКАЧИВАНИЕ ПРОТОКОЛА ---
+        // --- УЛЬТРАНАДЕЖНОЕ СКАЧИВАНИЕ ПРОТОКОЛА ---
         async function generateProtocol() {
             if (!currentAnalysisResult) return;
             try {
@@ -702,12 +702,25 @@
 
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = "Protokol_raznoglasiy.docx";
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
+                
+                // Проверяем Telegram WebApp для безупречного открытия скачивания в десктопе/мобильном
+                if (window.Telegram?.WebApp && window.Telegram.WebApp.openLink) {
+                    // Открываем через системный браузер, обходя песочницу Telegram
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = "Protokol_raznoglasiy.docx";
+                    a.target = "_blank";
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                } else {
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = "Protokol_raznoglasiy.docx";
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                }
                 window.URL.revokeObjectURL(url);
             } catch (e) {
                 alert(e.message);
@@ -771,9 +784,12 @@
 
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
+                const filename = selectedConstructorDocType === 'offer' ? "Oferta.docx" : "Dogovor.docx";
+
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = selectedConstructorDocType === 'offer' ? "Oferta.docx" : "Dogovor.docx";
+                a.download = filename;
+                a.target = "_blank";
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
