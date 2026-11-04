@@ -100,7 +100,7 @@
             </div>
         </header>
 
-        <!-- Навигация по вкладкам (Анализ / Конструктор) -->
+        <!-- Навигация по вкладкам -->
         <div class="flex space-x-2 border-b border-slate-500/40 pb-2">
             <button id="tab-analysis" onclick="switchTab('analysis')" class="px-4 py-1.5 font-semibold text-xs text-white bg-blue-600 rounded-xl transition shadow-xs">🔍 Анализ договора</button>
             <button id="tab-constructor" onclick="switchTab('constructor')" class="px-4 py-1.5 font-semibold text-xs text-slate-200 hover:text-white bg-slate-700/60 rounded-xl transition shadow-xs">📝 Конструктор документов</button>
@@ -114,7 +114,6 @@
 
                 <!-- TAB 1: ANALYSIS SECTION -->
                 <div id="analysis-section" class="space-y-3">
-                    <!-- Block 1: How it works -->
                     <div class="transparent-card p-2.5">
                         <h2 class="text-xs font-bold text-white mb-1">Как это работает</h2>
                         <ol class="text-xs text-slate-100 space-y-0.5 pl-4 list-decimal leading-snug">
@@ -124,10 +123,7 @@
                         </ol>
                     </div>
 
-                    <!-- Block 2: Main Form Card -->
                     <div class="transparent-card p-0 space-y-3">
-                        
-                        <!-- Contract Type -->
                         <div>
                             <label class="block text-xs font-bold text-white mb-1.5">Тип договора</label>
                             <div class="flex flex-wrap gap-1.5" id="doc-type-group">
@@ -139,7 +135,6 @@
                             </div>
                         </div>
 
-                        <!-- Jurisdiction -->
                         <div>
                             <label class="block text-xs font-bold text-white mb-1.5">Юрисдикция</label>
                             <div class="flex flex-wrap gap-1.5" id="jurisdiction-group">
@@ -149,9 +144,7 @@
                             </div>
                         </div>
 
-                        <!-- Input Area -->
                         <div class="space-y-2">
-                            <!-- Dropzone / File selection -->
                             <div>
                                 <div id="dropzone" class="identical-input-box justify-start cursor-pointer hover:bg-slate-50 transition-colors">
                                     <input type="file" id="file-input" accept=".pdf,.docx,.odt,.txt" class="hidden">
@@ -173,7 +166,6 @@
                                 </div>
                             </div>
 
-                            <!-- Text input box (Textarea) -->
                             <div>
                                 <div id="text-input-container" class="identical-input-box justify-start bg-white cursor-text transition-all" onclick="document.getElementById('contract-text').focus()">
                                     <div id="text-icon-wrapper" class="flex items-center justify-center text-blue-600 text-xs flex-shrink-0">
@@ -183,24 +175,21 @@
                                         <textarea id="contract-text" rows="1" placeholder="Вставьте текст"
                                             class="w-full bg-transparent border-none focus:outline-none text-xs text-slate-900 font-medium resize-none overflow-hidden placeholder:text-slate-700 placeholder:font-medium text-left"
                                             oninput="this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';"
-                                            onfocus="document.getElementById('text-input-container').style.borderColor='#2563eb'; document.getElementById('text-input-container').style.boxShadow='0 0 0 2px rgba(37, 99, 235, 0.15)';"
-                                            onblur="document.getElementById('text-input-container').style.borderColor='#cbd5e1'; document.getElementById('text-input-container').style.boxShadow='none';"></textarea>
+                                            onfocus="document.getElementById('text-input-container').style.borderColor='#2563eb';"
+                                            onblur="document.getElementById('text-input-container').style.borderColor='#cbd5e1';"></textarea>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Legal Notice -->
                         <div class="text-[10px] text-slate-200 text-center leading-tight">
                             Нажимая «Анализировать», вы принимаете условия <a href="#" onclick="openTermsModal(event)" class="underline hover:text-white">Публичной оферты</a>.
                         </div>
 
-                        <!-- Action Buttons -->
                         <div class="flex flex-col sm:flex-row gap-2 pt-0.5">
                             <button type="button" id="analyze-btn" onclick="startAnalysis()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow transition-all flex items-center justify-center gap-2 text-xs">
                                 <span>Анализировать</span>
                             </button>
-
                             <button type="button" id="reset-btn" onclick="resetForm()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 text-xs">
                                 <span>Новый анализ</span>
                             </button>
@@ -208,9 +197,8 @@
                     </div>
                 </div>
 
-                <!-- TAB 2: CONSTRUCTOR SECTION (Hidden by default) -->
+                <!-- TAB 2: CONSTRUCTOR SECTION -->
                 <div id="constructor-section" class="hidden space-y-3">
-                    <!-- Block 1: How it works (Unified) -->
                     <div class="transparent-card p-2.5">
                         <h2 class="text-xs font-bold text-white mb-1">Как это работает</h2>
                         <ol class="text-xs text-slate-100 space-y-0.5 pl-4 list-decimal leading-snug">
@@ -220,10 +208,7 @@
                         </ol>
                     </div>
 
-                    <!-- Block 2: Constructor Form -->
                     <div class="transparent-card p-0 space-y-2.5 text-xs">
-                        
-                        <!-- Constructor Document Type Chips -->
                         <div>
                             <label class="block font-bold text-white mb-1.5">Тип документа</label>
                             <div class="flex flex-wrap gap-1.5" id="c-doc-type-group">
@@ -232,7 +217,6 @@
                             </div>
                         </div>
                         
-                        <!-- Constructor Jurisdiction Chips -->
                         <div>
                             <label class="block font-bold text-white mb-1.5">Юрисдикция</label>
                             <div class="flex flex-wrap gap-1.5" id="c-jurisdiction-group">
@@ -281,7 +265,7 @@
                     </div>
                 </div>
 
-                <!-- Block 3: Feedback Panel -->
+                <!-- Feedback Panel -->
                 <div class="tg-card bg-white p-3.5 rounded-2xl border shadow-sm space-y-2">
                     <div class="flex items-center justify-between">
                         <h2 class="font-bold text-slate-800 text-xs">Обратная связь</h2>
@@ -293,7 +277,6 @@
                             <i class="fa-solid fa-star text-slate-300" data-rating="5"></i>
                         </div>
                     </div>
-
                     <div class="flex items-center gap-4 text-xs text-slate-600">
                         <label class="flex items-center gap-1.5 cursor-pointer">
                             <input type="radio" name="fb-type" id="fb-type-primary" value="Оценка анализа" checked class="accent-blue-600"> <span id="fb-type-label">Оценка анализа</span>
@@ -302,7 +285,6 @@
                             <input type="radio" name="fb-type" value="Баг / Ошибка" class="accent-blue-600"> Баг / Ошибка
                         </label>
                     </div>
-
                     <div class="flex items-center gap-2 text-xs font-medium">
                         <button type="button" class="sentiment-btn py-1 px-2.5 border rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1" data-value="Полезно">
                             <i class="fa-regular fa-thumbs-up text-green-600 text-xs"></i> Полезно
@@ -311,10 +293,8 @@
                             <i class="fa-regular fa-thumbs-down text-amber-600 text-xs"></i> Замечания
                         </button>
                     </div>
-
                     <div class="space-y-1.5">
                         <textarea id="feedback-text" rows="1" placeholder="Ваш отзыв или описание проблемы..." class="w-full p-2 text-xs text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
-                        
                         <button type="button" id="send-fb-btn" onclick="sendFeedback()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-xl transition-all text-xs flex items-center justify-center gap-1.5 shadow-sm">
                             <i class="fa-regular fa-paper-plane text-xs"></i>
                             <span>Отправить отзыв</span>
@@ -324,7 +304,7 @@
 
             </main>
 
-            <!-- RIGHT COLUMN: Analysis Results / Constructor Output -->
+            <!-- RIGHT COLUMN: Results -->
             <aside class="lg:col-span-5 flex flex-col">
                 <div id="results-card" class="tg-card bg-white p-4 rounded-2xl border shadow-sm flex-1 flex flex-col min-h-[460px]">
                     <div class="border-b border-slate-100 pb-2 flex flex-wrap items-center justify-between gap-1">
@@ -416,6 +396,7 @@
         </div>
     </div>
 
+    <!-- Terms Modal -->
     <div id="terms-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
         <div class="bg-white rounded-2xl max-w-2xl w-full p-5 space-y-4 text-slate-900 shadow-xl border border-slate-100 max-h-[85vh] flex flex-col">
             <div class="flex items-center justify-between border-b pb-2 flex-shrink-0">
@@ -437,12 +418,18 @@
         </div>
     </div>
 
-    <!-- Application Script -->
+    <!-- App Script -->
     <script>
         const tg = window.Telegram?.WebApp;
         let initDataUser = null;
         let currentMode = 'analysis';
         let uploadedFileText = "";
+        let selectedDocType = "Общий";
+        let selectedJurisdiction = "Россия (РФ)";
+        let selectedConstructorDocType = "contract";
+        let selectedConstructorJurisdiction = "Россия (РФ)";
+        let currentAnalysisResult = null;
+        let currentGeneratedDocumentText = "";
 
         if (tg) {
             tg.ready();
@@ -458,10 +445,16 @@
             fetchUserBalance(0);
         }
 
-        function scrollToResults() {
-            const resultsCard = document.getElementById('results-card');
-            if (resultsCard) {
-                resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        async function fetchUserBalance(telegramId) {
+            try {
+                const res = await fetch(`/user-info/${telegramId}`);
+                const data = await res.json();
+                document.getElementById('checks-count').textContent = data.free_checks_left;
+                if (data.is_admin) {
+                    document.getElementById('admin-btn').classList.remove('hidden');
+                }
+            } catch (e) {
+                console.error("Ошибка загрузки профиля", e);
             }
         }
 
@@ -476,9 +469,6 @@
             const copyBtn = document.getElementById('copy-doc-btn');
             const downloadBtn = document.getElementById('download-doc-btn');
             const outputDiv = document.getElementById('analysis-output');
-            
-            const fbTypeLabel = document.getElementById('fb-type-label');
-            const fbTypePrimary = document.getElementById('fb-type-primary');
 
             if (mode === 'analysis') {
                 tabAnalysis.className = "px-4 py-1.5 font-semibold text-xs text-white bg-blue-600 rounded-xl transition shadow-xs";
@@ -488,437 +478,446 @@
                 resultsTitle.textContent = "Результаты анализа";
                 copyBtn.classList.add('hidden');
                 downloadBtn.classList.add('hidden');
-                protocolBtn.classList.remove('hidden');
-                outputDiv.innerHTML = "Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».";
-                
-                fbTypeLabel.textContent = "Оценка анализа";
-                fbTypePrimary.value = "Оценка анализа";
-                fbTypePrimary.checked = true;
+                if (currentAnalysisResult) protocolBtn.classList.remove('hidden');
+                outputDiv.innerHTML = currentAnalysisResult ? renderAnalysisHTML(currentAnalysisResult) : "Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».";
             } else {
-                tabConstructor.className = "px-4 py-1.5 font-semibold text-xs text-white bg-indigo-600 rounded-xl transition shadow-xs";
+                tabConstructor.className = "px-4 py-1.5 font-semibold text-xs text-white bg-blue-600 rounded-xl transition shadow-xs";
                 tabAnalysis.className = "px-4 py-1.5 font-semibold text-xs text-slate-200 hover:text-white bg-slate-700/60 rounded-xl transition shadow-xs";
                 constructorSec.classList.remove('hidden');
                 analysisSec.classList.add('hidden');
                 resultsTitle.textContent = "Сгенерированный документ";
                 protocolBtn.classList.add('hidden');
-                copyBtn.classList.remove('hidden');
-                downloadBtn.classList.remove('hidden');
-                outputDiv.innerHTML = "Здесь появится сгенерированный документ в формате Markdown после заполнения формы конструктора.";
-                
-                fbTypeLabel.textContent = "Оценка конструктора";
-                fbTypePrimary.value = "Оценка конструктора";
-                fbTypePrimary.checked = true;
-            }
-            if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
-        }
-
-        async function fetchUserBalance(telegramId) {
-            try {
-                const response = await fetch(`/user-info/${telegramId}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    const countEl = document.getElementById('checks-count');
-                    countEl.textContent = data.free_checks_left;
-                    if (data.is_admin) {
-                        document.getElementById('admin-btn').classList.remove('hidden');
-                    }
-                    if (data.free_checks_left <= 0) {
-                        countEl.classList.remove('text-amber-400');
-                        countEl.classList.add('text-red-400');
-                    } else {
-                        countEl.classList.remove('text-red-400');
-                        countEl.classList.add('text-amber-400');
-                    }
+                if (currentGeneratedDocumentText) {
+                    copyBtn.classList.remove('hidden');
+                    downloadBtn.classList.remove('hidden');
                 }
-            } catch (err) {
-                console.error("Не удалось получить баланс:", err);
+                outputDiv.innerHTML = currentGeneratedDocumentText ? `<div class="text-left whitespace-pre-wrap">${currentGeneratedDocumentText}</div>` : "Здесь появится сгенерированный документ после заполнения параметров.";
             }
         }
 
-        // Унифицированная логика переключения кнопок-чипов (Анализ и Конструктор)
-        function setupChipGroup(groupId) {
-            document.querySelectorAll(`#${groupId} button`).forEach(btn => {
+        // Chip selection logic
+        function setupChips(groupId, callback) {
+            const group = document.getElementById(groupId);
+            if (!group) return;
+            group.querySelectorAll('.chip-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    document.querySelectorAll(`#${groupId} button`).forEach(b => {
+                    group.querySelectorAll('.chip-btn').forEach(b => {
                         b.classList.remove('active', 'bg-blue-600', 'text-white');
                         b.classList.add('bg-slate-200', 'text-slate-800');
                     });
                     btn.classList.add('active', 'bg-blue-600', 'text-white');
                     btn.classList.remove('bg-slate-200', 'text-slate-800');
-                    if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
+                    if (callback) callback(btn.getAttribute('data-value'));
                 });
             });
         }
 
-        setupChipGroup('doc-type-group');
-        setupChipGroup('jurisdiction-group');
-        setupChipGroup('c-doc-type-group');
-        setupChipGroup('c-jurisdiction-group');
+        setupChips('doc-type-group', val => selectedDocType = val);
+        setupChips('jurisdiction-group', val => selectedJurisdiction = val);
+        setupChips('c-doc-type-group', val => selectedConstructorDocType = val);
+        setupChips('c-jurisdiction-group', val => selectedConstructorJurisdiction = val);
 
-        // Генерация через конструктор
+        // File upload handling
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('file-input');
+        const dropzonePrompt = document.getElementById('dropzone-prompt');
+        const fileSelectedInfo = document.getElementById('file-selected-info');
+        const fileNameSpan = document.getElementById('file-name');
+        const removeFileBtn = document.getElementById('remove-file-btn');
+
+        dropzone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', async (e) => {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                fileNameSpan.textContent = file.name;
+                dropzonePrompt.classList.add('hidden');
+                fileSelectedInfo.classList.remove('hidden');
+                uploadedFileText = await extractTextFromFile(file);
+            }
+        });
+
+        removeFileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            fileInput.value = '';
+            uploadedFileText = "";
+            fileSelectedInfo.classList.add('hidden');
+            dropzonePrompt.classList.remove('hidden');
+        });
+
+        async function extractTextFromFile(file) {
+            const ext = file.name.split('.').pop().toLowerCase();
+            if (ext === 'txt') {
+                return await file.text();
+            } else if (ext === 'docx') {
+                const arrayBuffer = await file.arrayBuffer();
+                const result = await mammoth.extractRawText({ arrayBuffer });
+                return result.value;
+            } else if (ext === 'pdf') {
+                const arrayBuffer = await file.arrayBuffer();
+                const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+                const pdf = await loadingTask.promise;
+                let fullText = "";
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    fullText += textContent.items.map(item => item.str).join(' ') + '\n';
+                }
+                return fullText;
+            }
+            return "";
+        }
+
+        async function startAnalysis() {
+            const manualText = document.getElementById('contract-text').value.trim();
+            const textToAnalyze = manualText || uploadedFileText;
+
+            if (!textToAnalyze) {
+                alert("Пожалуйста, загрузите файл договора или вставьте текст в поле.");
+                return;
+            }
+
+            const outputDiv = document.getElementById('analysis-output');
+            outputDiv.innerHTML = `<div class="text-center py-8 text-slate-500"><i class="fa-solid fa-spinner fa-spin text-2xl text-blue-600 mb-2"></i><br>ИИ-юрист анализирует договор (около 10-20 секунд)...</div>`;
+
+            try {
+                const payload = {
+                    text: textToAnalyze,
+                    doc_type: selectedDocType,
+                    jurisdiction: selectedJurisdiction,
+                    telegram_id: initDataUser ? initDataUser.id : 0,
+                    first_name: initDataUser ? initDataUser.first_name : "",
+                    username: initDataUser ? initDataUser.username : ""
+                };
+
+                const res = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    const errData = await res.json();
+                    throw new Error(errData.detail || "Ошибка сервера");
+                }
+
+                const data = await res.json();
+                currentAnalysisResult = data;
+                outputDiv.innerHTML = renderAnalysisHTML(data);
+                document.getElementById('protocol-btn').classList.remove('hidden');
+                if (initDataUser) fetchUserBalance(initDataUser.id);
+            } catch (err) {
+                outputDiv.innerHTML = `<div class="text-red-600 text-center py-4 font-semibold">Ошибка: ${err.message}</div>`;
+            }
+        }
+
+        function renderAnalysisHTML(data) {
+            let badgeColor = "bg-green-100 text-green-800 border-green-300";
+            if (data.overall_risk_level === "Высокий") badgeColor = "bg-red-100 text-red-800 border-red-300";
+            if (data.overall_risk_level === "Средний") badgeColor = "bg-amber-100 text-amber-800 border-amber-300";
+
+            let html = `
+                <div class="space-y-3 text-left">
+                    <div class="flex items-center justify-between bg-slate-50 p-2.5 rounded-xl border">
+                        <span class="font-bold text-slate-800">Общий уровень риска:</span>
+                        <span class="px-2.5 py-1 rounded-lg text-xs font-bold border ${badgeColor}">${data.overall_risk_level}</span>
+                    </div>
+                    <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100">
+                        <div class="font-bold text-blue-900 mb-1">Резюме юриста:</div>
+                        <p class="text-slate-700 leading-relaxed">${data.summary}</p>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="font-bold text-slate-800">Выявленные риски (${data.risks.length}):</div>
+            `;
+
+            data.risks.forEach((r, index) => {
+                let borderCol = "border-amber-300 bg-amber-50/30";
+                let textCol = "text-amber-800";
+                if (r.level === "red") {
+                    borderCol = "border-red-300 bg-red-50/30";
+                    textCol = "text-red-800";
+                }
+                html += `
+                    <div class="p-3 rounded-xl border ${borderCol} space-y-1">
+                        <div class="flex items-center justify-between font-bold text-slate-900 text-xs">
+                            <span>${index + 1}. ${r.title}</span>
+                            <span class="text-[10px] ${textCol} uppercase">${r.category}</span>
+                        </div>
+                        <div class="text-[11px] text-slate-600 italic bg-white/80 p-1.5 rounded border">«${r.quote}»</div>
+                        <div class="text-xs text-slate-700"><strong>Риск:</strong> ${r.explanation}</div>
+                        <div class="text-xs text-blue-900"><strong>Решение:</strong> ${r.recommendation}</div>
+                    </div>
+                `;
+            });
+
+            html += `</div></div>`;
+            return html;
+        }
+
+        async function generateProtocol() {
+            if (!currentAnalysisResult) return;
+            try {
+                const payload = {
+                    doc_type: selectedDocType,
+                    jurisdiction: selectedJurisdiction,
+                    telegram_id: initDataUser ? initDataUser.id : 0,
+                    risks: currentAnalysisResult.risks.map(r => ({
+                        title: r.title,
+                        quote: r.quote,
+                        explanation: r.explanation,
+                        recommendation: r.recommendation
+                    }))
+                };
+
+                const res = await fetch('/api/generate-protocol', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) throw new Error("Ошибка генерации протокола");
+                
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = "Protokol_raznoglasiy.docx";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            } catch (err) {
+                alert("Не удалось скачать протокол: " + err.message);
+            }
+        }
+
         async function generateConstructorDocument() {
-            const docType = document.querySelector('#c-doc-type-group button.active')?.dataset.value || "contract";
-            const jurisdiction = document.querySelector('#c-jurisdiction-group button.active')?.dataset.value || "Россия (РФ)";
-            
             const payload = {
-                doc_type: docType,
-                jurisdiction: jurisdiction,
+                doc_type: selectedConstructorDocType,
+                jurisdiction: selectedConstructorJurisdiction,
                 executor: document.getElementById('c-executor').value,
                 client: document.getElementById('c-client').value,
                 description: document.getElementById('c-description').value,
                 payment: document.getElementById('c-payment').value,
                 deadline: document.getElementById('c-deadline').value,
                 revisions: document.getElementById('c-revisions').value,
-                telegram_id: initDataUser ? initDataUser.id : null
+                telegram_id: initDataUser ? initDataUser.id : 0
             };
 
             const outputDiv = document.getElementById('analysis-output');
-            outputDiv.innerHTML = '<div class="text-center text-slate-500 py-10"><i class="fa-solid fa-spinner fa-spin text-lg"></i><br>Генерация юридического документа...</div>';
-            scrollToResults();
+            outputDiv.innerHTML = `<div class="text-center py-8 text-slate-500"><i class="fa-solid fa-spinner fa-spin text-2xl text-indigo-600 mb-2"></i><br>ИИ конструирует документ...</div>`;
 
             try {
-                const response = await fetch('/api/generate-document', {
+                const res = await fetch('/api/generate-contract', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                const data = await response.json();
 
-                if (response.ok && data.status === "success") {
-                    outputDiv.innerHTML = marked.parse(data.document);
-                    outputDiv.dataset.rawText = data.document;
-                } else {
-                    outputDiv.innerHTML = `<span class="text-red-500">Ошибка: ${data.detail || "Не удалось сгенерировать документ"}</span>`;
-                }
+                if (!res.ok) throw new Error("Ошибка генерации документа");
+                const data = await res.json();
+                currentGeneratedDocumentText = data.document_text;
+
+                outputDiv.innerHTML = `<div class="text-left whitespace-pre-wrap">${currentGeneratedDocumentText}</div>`;
+                document.getElementById('copy-doc-btn').classList.remove('hidden');
+                document.getElementById('download-doc-btn').classList.remove('hidden');
             } catch (err) {
-                outputDiv.innerHTML = `<span class="text-red-500">Ошибка соединения: ${err.message}</span>`;
+                outputDiv.innerHTML = `<div class="text-red-600 text-center py-4 font-semibold">Ошибка: ${err.message}</div>`;
             }
-
-            if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
         }
 
         function copyDocumentOutput() {
-            const outputDiv = document.getElementById('analysis-output');
-            const textToCopy = outputDiv.dataset.rawText || outputDiv.innerText;
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(textToCopy).then(() => {
-                    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                    alert("Документ скопирован в буфер обмена!");
-                });
-            }
+            if (!currentGeneratedDocumentText) return;
+            navigator.clipboard.writeText(currentGeneratedDocumentText);
+            alert("Документ скопирован в буфер обмена!");
         }
 
-        // Надежное скачивание сгенерированного документа на стороне клиента (с поддержкой Markdown)
-        function downloadConstructorFile() {
-            const outputDiv = document.getElementById('analysis-output');
-            const textToSave = outputDiv.dataset.rawText || outputDiv.innerText;
-            
-            if (!textToSave || textToSave.includes("Здесь появится сгенерированный документ")) {
-                alert("Нет сгенерированного документа для загрузки.");
-                return;
-            }
-
-            const blob = new Blob(["\ufeff" + textToSave], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'Lexify_Document.txt';
-            document.body.appendChild(a);
-            a.click();
-            
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-
-            if (tg?.HapticFeedback) {
-                tg.HapticFeedback.notificationOccurred('success');
-            }
-        }
-
-        function resetConstructorForm() {
-            document.getElementById('c-description').value = '';
-            document.getElementById('analysis-output').innerHTML = "Здесь появится сгенерированный документ в формате Markdown после заполнения формы конструктора.";
-            document.getElementById('analysis-output').removeAttribute('data-raw-text');
-            if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
-        }
-
-        // Загрузка файлов (Dropzone)
-        const dropzone = document.getElementById('dropzone');
-        const fileInput = document.getElementById('file-input');
-
-        dropzone.addEventListener('click', () => fileInput.click());
-
-        fileInput.addEventListener('change', async (e) => {
-            if (e.target.files.length > 0) {
-                const file = e.target.files[0];
-                document.getElementById('file-name').textContent = file.name;
-                document.getElementById('dropzone-prompt').classList.add('hidden');
-                document.getElementById('file-selected-info').classList.remove('hidden');
-                try {
-                    uploadedFileText = await extractTextFromFile(file);
-                } catch (err) {
-                    alert("Ошибка чтения файла: " + err.message);
-                }
-            }
-        });
-
-        document.getElementById('remove-file-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            fileInput.value = '';
-            uploadedFileText = "";
-            document.getElementById('file-selected-info').classList.add('hidden');
-            document.getElementById('dropzone-prompt').classList.remove('hidden');
-        });
-
-        async function extractTextFromFile(file) {
-            const ext = file.name.split('.').pop().toLowerCase();
-            if (ext === 'txt') return await file.text();
-            else if (ext === 'docx') {
-                const arrayBuffer = await file.arrayBuffer();
-                const result = await mammoth.extractRawText({ arrayBuffer });
-                return result.value;
-            } else if (ext === 'pdf') {
-                const typedarray = new Uint8Array(await file.arrayBuffer());
-                const pdf = await pdfjsLib.getDocument(typedarray).promise;
-                let text = "";
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const content = await page.getTextContent();
-                    text += content.items.map(item => item.str).join(" ") + "\n";
-                }
-                return text;
-            }
-            throw new Error("Неподдерживаемый формат файла");
-        }
-
-        async function startAnalysis() {
-            const textContent = uploadedFileText || document.getElementById('contract-text').value.trim();
-            if (!textContent) {
-                alert("Пожалуйста, загрузите файл или вставьте текст договора.");
-                return;
-            }
-
-            const docType = document.querySelector('#doc-type-group button.active')?.dataset.value || "Общий";
-            const jurisdiction = document.querySelector('#jurisdiction-group button.active')?.dataset.value || "Россия (РФ)";
-            const outputDiv = document.getElementById('analysis-output');
-
-            outputDiv.innerHTML = '<div class="text-center text-slate-500 py-10"><i class="fa-solid fa-spinner fa-spin text-lg"></i><br>Анализ договора на риски...</div>';
-            scrollToResults();
+        async function downloadConstructorFile() {
+            const payload = {
+                document_text: currentGeneratedDocumentText,
+                doc_type: selectedConstructorDocType,
+                jurisdiction: selectedConstructorJurisdiction
+            };
 
             try {
-                const response = await fetch('/analyze', {
+                const res = await fetch('/api/download-constructor-file', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        text: textContent,
-                        doc_type: docType,
-                        jurisdiction: jurisdiction,
-                        telegram_id: initDataUser ? initDataUser.id : null,
-                        first_name: initDataUser ? initDataUser.first_name : "",
-                        username: initDataUser ? initDataUser.username : ""
-                    })
+                    body: JSON.stringify(payload)
                 });
-
-                const data = await response.json();
-                if (response.ok && data.status === "ok") {
-                    const analysis = JSON.parse(data.result);
-                    renderAnalysisResult(analysis);
-                    fetchUserBalance(initDataUser ? initDataUser.id : 0);
-                    document.getElementById('protocol-btn').classList.remove('hidden');
-                } else {
-                    if (response.status === 403) openStarsModal();
-                    outputDiv.innerHTML = `<span class="text-red-500">Ошибка: ${data.detail || "Не удалось выполнить анализ"}</span>`;
-                }
+                if (!res.ok) throw new Error("Ошибка скачивания");
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = selectedConstructorDocType === 'contract' ? "Dogovor.docx" : "Oferta.docx";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
             } catch (err) {
-                outputDiv.innerHTML = `<span class="text-red-500">Ошибка сети: ${err.message}</span>`;
-            }
-        }
-
-        function renderAnalysisResult(data) {
-            const outputDiv = document.getElementById('analysis-output');
-            let riskClass = "bg-green-100 text-green-800";
-            if (data.overall_risk_level === "Средний") riskClass = "bg-amber-100 text-amber-800";
-            if (data.overall_risk_level === "Высокий") riskClass = "bg-red-100 text-red-800";
-
-            let html = `
-                <div class="space-y-3 text-left">
-                    <div class="flex items-center justify-between bg-slate-50 p-2.5 rounded-xl border">
-                        <span class="font-bold text-slate-700">Уровень риска:</span>
-                        <span class="px-2.5 py-1 rounded-lg font-bold text-xs ${riskClass}">${data.overall_risk_level}</span>
-                    </div>
-                    <div class="bg-blue-50/50 p-2.5 rounded-xl border border-blue-100 text-slate-800">
-                        <span class="font-bold block mb-0.5">Резюме:</span>
-                        ${data.summary}
-                    </div>
-                    <div class="space-y-2">
-                        <span class="font-bold text-slate-800 block">Выявленные риски (${data.risks.length}):</span>
-            `;
-
-            data.risks.forEach((r, idx) => {
-                let badgeBg = "bg-green-500";
-                if (r.category === "yellow") badgeBg = "bg-amber-500";
-                if (r.category === "red") badgeBg = "bg-red-500";
-
-                html += `
-                    <div class="p-2.5 rounded-xl border bg-white space-y-1 shadow-xs">
-                        <div class="flex items-center gap-1.5 font-bold text-slate-900">
-                            <span class="w-2 h-2 rounded-full ${badgeBg}"></span>
-                            <span>${idx + 1}. ${r.title}</span>
-                        </div>
-                        <div class="text-[11px] text-slate-500 italic">Цитата: "${r.quote}"</div>
-                        <div class="text-[11px] text-slate-700"><strong class="text-red-600">Риск:</strong> ${r.explanation}</div>
-                        <div class="text-[11px] text-slate-700 bg-slate-50 p-1.5 rounded"><strong class="text-blue-600">Решение:</strong> ${r.recommendation}</div>
-                    </div>
-                `;
-            });
-
-            html += `</div></div>`;
-            outputDiv.innerHTML = html;
-            window.lastAnalysisData = data;
-        }
-
-        async function generateProtocol() {
-            if (!window.lastAnalysisData) return;
-            const docType = document.querySelector('#doc-type-group button.active')?.dataset.value || "Общий";
-            const jurisdiction = document.querySelector('#jurisdiction-group button.active')?.dataset.value || "Россия (РФ)";
-
-            try {
-                const response = await fetch('/generate-protocol', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        doc_type: docType,
-                        jurisdiction: jurisdiction,
-                        risks: window.lastAnalysisData.risks.map(r => ({
-                            title: r.title,
-                            quote: r.quote,
-                            explanation: r.explanation,
-                            recommendation: r.recommendation
-                        }))
-                    })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    window.location.href = data.download_url;
-                } else {
-                    alert("Не удалось сгенерировать протокол.");
-                }
-            } catch (err) {
-                alert("Ошибка сети при скачивании протокола.");
+                alert("Ошибка: " + err.message);
             }
         }
 
         function resetForm() {
             document.getElementById('contract-text').value = '';
-            document.getElementById('file-input').value = '';
             uploadedFileText = "";
-            document.getElementById('file-selected-info').classList.add('hidden');
-            document.getElementById('dropzone-prompt').classList.remove('hidden');
+            fileSelectedInfo.classList.add('hidden');
+            dropzonePrompt.classList.remove('hidden');
             document.getElementById('analysis-output').innerHTML = "Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».";
             document.getElementById('protocol-btn').classList.add('hidden');
+            currentAnalysisResult = null;
+        }
+
+        function resetConstructorForm() {
+            document.getElementById('c-description').value = '';
+            currentGeneratedDocumentText = "";
+            document.getElementById('analysis-output').innerHTML = "Здесь появится сгенерированный документ после заполнения параметров.";
+            document.getElementById('copy-doc-btn').classList.add('hidden');
+            document.getElementById('download-doc-btn').classList.add('hidden');
         }
 
         function openStarsModal() { document.getElementById('stars-modal').classList.remove('hidden'); document.getElementById('stars-modal').classList.add('flex'); }
-        function closeStarsModal() { document.getElementById('stars-modal').classList.remove('flex'); document.getElementById('stars-modal').classList.add('hidden'); }
-        
-        async function openAdminModal() {
-            document.getElementById('admin-modal').classList.remove('hidden');
-            document.getElementById('admin-modal').classList.add('flex');
-            
-            const statsContainer = document.getElementById('admin-stats-content');
-            statsContainer.innerHTML = '<div class="text-center text-slate-500 py-4"><i class="fa-solid fa-spinner fa-spin"></i> Загрузка статистики...</div>';
+        function closeStarsModal() { document.getElementById('stars-modal').classList.add('hidden'); document.getElementById('stars-modal').classList.remove('flex'); }
 
-            const telegramId = initDataUser ? initDataUser.id : 0;
+        async function buyPackage(packageType) {
+            if (!initDataUser) {
+                alert("Покупка доступна только внутри Telegram Mini App.");
+                return;
+            }
             try {
-                const response = await fetch(`/admin/stats/${telegramId}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    let usersHtml = '';
-                    data.users_list.forEach(u => {
-                        usersHtml += `
-                            <div class="bg-slate-50 p-2 rounded-lg border flex items-center justify-between">
-                                <div>
-                                    <div class="font-bold text-slate-800">${u.first_name} (${u.username})</div>
-                                    <div class="text-[10px] text-slate-500">ID: ${u.telegram_id} • Регистрация: ${u.created_at}</div>
-                                </div>
-                                <div class="text-right">
-                                    <div class="font-bold text-blue-600">Проверок: ${u.free_checks_left}</div>
-                                    <div class="text-[10px] text-slate-500">PRO: ${u.is_pro ? 'Да' : 'Нет'}</div>
-                                </div>
-                            </div>
-                        `;
-                    });
-
-                    statsContainer.innerHTML = `
-                        <div class="grid grid-cols-3 gap-2 text-center">
-                            <div class="bg-blue-50 p-2 rounded-xl border border-blue-100">
-                                <div class="text-xs text-slate-500">Всего юзеров</div>
-                                <div class="font-bold text-base text-blue-600">${data.total_users}</div>
-                            </div>
-                            <div class="bg-indigo-50 p-2 rounded-xl border border-indigo-100">
-                                <div class="text-xs text-slate-500">Проверок</div>
-                                <div class="font-bold text-base text-indigo-600">${data.total_analyses}</div>
-                            </div>
-                            <div class="bg-emerald-50 p-2 rounded-xl border border-emerald-100">
-                                <div class="text-xs text-slate-500">Оплат</div>
-                                <div class="font-bold text-base text-emerald-600">${data.total_payments}</div>
-                            </div>
-                        </div>
-                        <div class="space-y-1.5">
-                            <div class="font-bold text-slate-800">Последние пользователи:</div>
-                            <div class="space-y-1 max-h-48 overflow-y-auto pr-1">
-                                ${usersHtml || '<div class="text-slate-400 text-center py-2">Нет данных о пользователях</div>'}
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    statsContainer.innerHTML = '<div class="text-center text-red-500 py-4">Доступ запрещен или ошибка сервера</div>';
+                const res = await fetch('/create-invoice', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ telegram_id: initDataUser.id, package_type: packageType })
+                });
+                const data = await res.json();
+                if (data.invoice_link) {
+                    if (tg && tg.openInvoice) {
+                        tg.openInvoice(data.invoice_link, (status) => {
+                            if (status === 'paid') {
+                                alert("Оплата прошла успешно! Баланс пополнен.");
+                                fetchUserBalance(initDataUser.id);
+                                closeStarsModal();
+                            }
+                        });
+                    } else {
+                        window.open(data.invoice_link, '_blank');
+                    }
                 }
-            } catch (err) {
-                statsContainer.innerHTML = `<div class="text-center text-red-500 py-4">Ошибка сети: ${err.message}</div>`;
+            } catch (e) {
+                alert("Ошибка создания счета: " + e.message);
             }
         }
 
-        function closeAdminModal() { document.getElementById('admin-modal').classList.remove('flex'); document.getElementById('admin-modal').classList.add('hidden'); }
-        function openTermsModal(e) { if (e) e.preventDefault(); document.getElementById('terms-modal').classList.remove('hidden'); document.getElementById('terms-modal').classList.add('flex'); }
-        function closeTermsModal() { document.getElementById('terms-modal').classList.remove('flex'); document.getElementById('terms-modal').classList.add('hidden'); }
+        function openAdminModal() {
+            document.getElementById('admin-modal').classList.remove('hidden');
+            document.getElementById('admin-modal').classList.add('flex');
+            loadAdminStats();
+        }
+        function closeAdminModal() { document.getElementById('admin-modal').classList.add('hidden'); document.getElementById('admin-modal').classList.remove('flex'); }
 
-        // Звезды и отзыв
-        document.querySelectorAll('#star-rating i').forEach(star => {
-            star.addEventListener('click', (e) => {
-                const rating = e.target.dataset.rating;
-                document.querySelectorAll('#star-rating i').forEach((s, idx) => {
-                    s.classList.toggle('text-amber-400', idx < rating);
-                    s.classList.toggle('text-slate-300', idx >= rating);
+        async function loadAdminStats() {
+            const container = document.getElementById('admin-stats-content');
+            try {
+                const tid = initDataUser ? initDataUser.id : 0;
+                const res = await fetch(`/admin/stats/${tid}`);
+                const data = await res.json();
+
+                let html = `
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        <div class="bg-slate-50 p-2 rounded-xl border"><div class="text-slate-500 text-[10px]">Пользователи</div><div class="font-bold text-sm">${data.total_users}</div></div>
+                        <div class="bg-slate-50 p-2 rounded-xl border"><div class="text-slate-500 text-[10px]">Анализы</div><div class="font-bold text-sm">${data.total_analyses}</div></div>
+                        <div class="bg-slate-50 p-2 rounded-xl border"><div class="text-slate-500 text-[10px]">Оплаты</div><div class="font-bold text-sm">${data.total_payments}</div></div>
+                    </div>
+                    <div class="font-bold text-slate-800 mt-3">Последние пользователи:</div>
+                    <div class="space-y-1.5 max-h-48 overflow-y-auto">
+                `;
+
+                data.users_list.forEach(u => {
+                    html += `
+                        <div class="bg-slate-50 p-2 rounded-xl border flex items-center justify-between">
+                            <div>
+                                <div class="font-bold">${u.first_name} (${u.username})</div>
+                                <div class="text-[10px] text-slate-500">ID: ${u.telegram_id} • Регистрация: ${u.created_at}</div>
+                            </div>
+                            <div class="text-right">
+                                <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold text-[10px]">Проверок: ${u.free_checks_left}</span>
+                            </div>
+                        </div>
+                    `;
                 });
-                window.selectedRating = rating;
+                html += `</div>`;
+                container.innerHTML = html;
+            } catch (e) {
+                container.innerHTML = `<div class="text-red-500 text-center">Ошибка загрузки статистики</div>`;
+            }
+        }
+
+        function openTermsModal(e) {
+            if (e) e.preventDefault();
+            document.getElementById('terms-modal').classList.remove('hidden');
+            document.getElementById('terms-modal').classList.add('flex');
+        }
+        function closeTermsModal() { document.getElementById('terms-modal').classList.add('hidden'); document.getElementById('terms-modal').classList.remove('flex'); }
+
+        const starRatingContainer = document.getElementById('star-rating');
+        let selectedRating = 4;
+        if (starRatingContainer) {
+            starRatingContainer.querySelectorAll('i').forEach(star => {
+                star.addEventListener('click', () => {
+                    selectedRating = parseInt(star.getAttribute('data-rating'));
+                    starRatingContainer.querySelectorAll('i').forEach((s, idx) => {
+                        if (idx < selectedRating) {
+                            s.className = "fa-solid fa-star text-amber-400";
+                        } else {
+                            s.className = "fa-solid fa-star text-slate-300";
+                        }
+                    });
+                });
             });
-        });
+        }
 
         document.querySelectorAll('.sentiment-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.sentiment-btn').forEach(b => b.classList.remove('border-blue-600', 'bg-blue-50'));
                 btn.classList.add('border-blue-600', 'bg-blue-50');
-                window.selectedSentiment = btn.dataset.value;
             });
         });
 
         async function sendFeedback() {
-            const feedbackText = document.getElementById('feedback-text').value.trim();
-            const fbType = document.querySelector('input[name="fb-type"]:checked')?.value || "Оценка анализа";
+            const text = document.getElementById('feedback-text').value.trim();
+            const sentimentBtn = document.querySelector('.sentiment-btn.border-blue-600');
+            const sentiment = sentimentBtn ? sentimentBtn.getAttribute('data-value') : "Полезно";
+            const fbType = document.querySelector('input[name="fb-type"]:checked').value;
+
+            if (!text) {
+                alert("Пожалуйста, введите текст отзыва.");
+                return;
+            }
+
             try {
-                const response = await fetch('/feedback', {
+                const payload = {
+                    type: fbType,
+                    rating: selectedRating,
+                    sentiment: sentiment,
+                    feedback: text,
+                    doc_type: selectedDocType,
+                    jurisdiction: selectedJurisdiction
+                };
+
+                const res = await fetch('/api/feedback', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type: fbType, rating: parseInt(window.selectedRating || 4), sentiment: window.selectedSentiment || "Полезно", feedback: feedbackText })
+                    body: JSON.stringify(payload)
                 });
-                if (response.ok) {
+
+                if (res.ok) {
                     alert("Спасибо! Ваш отзыв успешно отправлен.");
                     document.getElementById('feedback-text').value = '';
+                } else {
+                    throw new Error("Ошибка отправки");
                 }
-            } catch (err) {
-                alert("Ошибка сети при отправке отзыва.");
+            } catch (e) {
+                alert("Не удалось отправить отзыв: " + e.message);
             }
         }
     </script>
