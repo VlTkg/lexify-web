@@ -682,7 +682,7 @@
             return html;
         }
 
-        // --- ИДЕАЛЬНОЕ СКАЧИВАНИЕ ЧЕРЕЗ ОТПРАВКУ POST И ФОРМАТИРОВАНИЕ ФАЙЛА ---
+        // --- ЖЕЛЕЗОБЕТОННОЕ СКАЧИВАНИЕ ПРОТОКОЛА ЧЕРЕЗ ПРЯМОЙ URL ---
         async function generateProtocol() {
             if (!currentAnalysisResult) return;
             try {
@@ -702,7 +702,7 @@
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
                 
-                // Используем прямое создание ссылки с аттрибутом download для скачивания в обход WebApp ограничений
+                // Создаем элемент ссылки и симулируем клик для загрузки файла
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = "Protokol_raznoglasiy.docx";
