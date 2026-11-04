@@ -313,13 +313,13 @@
                             <button type="button" id="copy-doc-btn" onclick="copyDocumentOutput()" class="hidden bg-slate-200 hover:bg-slate-300 text-slate-800 font-medium px-2 py-1 rounded-lg text-[11px] transition-all flex items-center gap-1 shadow-xs">
                                 <i class="fa-regular fa-copy"></i> Копировать
                             </button>
-                            <a id="download-doc-btn" href="#" target="_blank" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-2 py-1 rounded-lg text-[11px] transition-all flex items-center gap-1 shadow-xs">
+                            <button type="button" id="download-doc-btn" onclick="downloadConstructorFile()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-2 py-1 rounded-lg text-[11px] transition-all flex items-center gap-1 shadow-xs">
                                 <i class="fa-solid fa-download"></i> Загрузить .docx
-                            </a>
-                            <a id="protocol-btn" href="#" target="_blank" class="hidden bg-slate-800 hover:bg-slate-900 text-white font-medium px-2 py-1 rounded-lg text-[11px] transition-all flex items-center gap-1 shadow-xs">
+                            </button>
+                            <button type="button" id="protocol-btn" onclick="generateProtocol()" class="hidden bg-slate-800 hover:bg-slate-900 text-white font-medium px-2 py-1 rounded-lg text-[11px] transition-all flex items-center gap-1 shadow-xs">
                                 <i class="fa-solid fa-file-word text-blue-400"></i>
-                                <span>Протокол</span>
-                            </a>
+                                <span>Протокол разногласий</span>
+                            </button>
                         </div>
                     </div>
                     <div class="flex-1 flex flex-col p-4 overflow-y-auto max-h-[500px]" id="results-container-wrapper">
@@ -498,7 +498,6 @@
                 if (currentGeneratedDocumentText) {
                     copyBtn.classList.remove('hidden');
                     downloadBtn.classList.remove('hidden');
-                    updateDownloadLink();
                 }
                 outputDiv.innerHTML = currentGeneratedDocumentText ? `<div class="whitespace-pre-wrap text-left">${marked.parse(currentGeneratedDocumentText)}</div>` : "Здесь появится текст сгенерированного документа после заполнения параметров.";
             }
@@ -539,7 +538,6 @@
                 btn.classList.add('active', 'bg-blue-600', 'text-white');
                 btn.classList.remove('bg-slate-200', 'text-slate-800');
                 selectedConstructorDocType = btn.getAttribute('data-value');
-                if (currentGeneratedDocumentText) updateDownloadLink();
             });
         });
 
@@ -609,7 +607,7 @@
             }
 
             const outputDiv = document.getElementById('analysis-output');
-            outputDiv.innerHTML = `<div class="text-center text-slate-500 py-8 my-auto"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2 text-blue-600"></i><p>ИИ-юрист анализирует договор...</p></div>`;
+            outputDiv.innerHTML = `<div class="text-center text-slate-500 py-8 my-auto"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2 text-blue-600"></i><p>Юрист анализирует договор...</p></div>`;
             scrollToResults();
 
             const telegramId = initDataUser ? initDataUser.id : 0;
@@ -638,17 +636,7 @@
                 const data = await response.json();
                 currentAnalysisResult = data;
                 outputDiv.innerHTML = renderAnalysisHTML(data);
-                
-                // Настраиваем ссылку протокола через GET-параметры или сохраняем данные в sessionStorage для скачивания
-                sessionStorage.setItem('last_risks', JSON.stringify(data.risks));
-                sessionStorage.setItem('last_doc_type', selectedDocType);
-                sessionStorage.setItem('last_jurisdiction', selectedJurisdiction);
-                sessionStorage.setItem('last_tg_id', telegramId);
-
-                const protocolBtn = document.getElementById('protocol-btn');
-                protocolBtn.href = `/api/download-protocol-get?telegram_id=${telegramId}&doc_type=${encodeURIComponent(selectedDocType)}`;
-                protocolBtn.classList.remove('hidden');
-
+                document.getElementById('protocol-btn').classList.remove('hidden');
                 document.getElementById('results-container-wrapper').scrollTop = 0;
                 scrollToResults();
                 fetchUserBalance(telegramId);
@@ -695,6 +683,37 @@
             return html;
         }
 
+        // --- НАДЕЖНОЕ СКАЧИВАНИЕ ПРОТОКОЛА (POST) ---
+        async function generateProtocol() {
+            if (!currentAnalysisResult) return;
+            try {
+                const response = await fetch('/api/generate-protocol', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        doc_type: selectedDocType,
+                        jurisdiction: selectedJurisdiction,
+                        telegram_id: initDataUser ? initDataUser.id : 0,
+                        risks: currentAnalysisResult.risks
+                    })
+                });
+
+                if (!response.ok) throw new Error('Не удалось сгенерировать протокол разногласий');
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = "Protokol_raznoglasiy.docx";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (e) {
+                alert(e.message);
+            }
+        }
+
         // --- КОНСТРУКТОР ДОКУМЕНТОВ ---
         async function generateConstructorDocument() {
             const outputDiv = document.getElementById('analysis-output');
@@ -726,12 +745,8 @@
                 const data = await response.json();
                 currentGeneratedDocumentText = data.document_text;
                 outputDiv.innerHTML = `<div class="whitespace-pre-wrap text-left pb-4">${marked.parse(currentGeneratedDocumentText)}</div>`;
-                
                 document.getElementById('copy-doc-btn').classList.remove('hidden');
-                const downloadBtn = document.getElementById('download-doc-btn');
-                downloadBtn.classList.remove('hidden');
-                updateDownloadLink();
-
+                document.getElementById('download-doc-btn').classList.remove('hidden');
                 document.getElementById('results-container-wrapper').scrollTop = 0;
                 scrollToResults();
             } catch (e) {
@@ -739,14 +754,33 @@
             }
         }
 
-        function updateDownloadLink() {
-            const downloadBtn = document.getElementById('download-doc-btn');
-            // Передаем текст документа через параметры GET либо сохраняем для серверного скачивания по прямой ссылке
-            sessionStorage.setItem('constructor_text', currentGeneratedDocumentText);
-            sessionStorage.setItem('constructor_type', selectedConstructorDocType);
-            sessionStorage.setItem('constructor_jurisdiction', selectedConstructorJurisdiction);
-            
-            downloadBtn.href = `/api/download-constructor-get?type=${selectedConstructorDocType}&jurisdiction=${encodeURIComponent(selectedConstructorJurisdiction)}`;
+        async function downloadConstructorFile() {
+            if (!currentGeneratedDocumentText) return;
+            try {
+                const response = await fetch('/api/download-constructor-file', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        document_text: currentGeneratedDocumentText,
+                        doc_type: selectedConstructorDocType,
+                        jurisdiction: selectedConstructorJurisdiction
+                    })
+                });
+
+                if (!response.ok) throw new Error('Ошибка скачивания файла');
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = selectedConstructorDocType === 'offer' ? "Oferta.docx" : "Dogovor.docx";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (e) {
+                alert(e.message);
+            }
         }
 
         function copyDocumentOutput() {
