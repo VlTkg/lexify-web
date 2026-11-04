@@ -59,18 +59,18 @@ def generate_disagreements_protocol(analysis_data: dict, contract_title: str = "
     sub_run.font.color.rgb = RGBColor(0x4B, 0x55, 0x63)
 
     # --- ТАБЛИЦА РАЗНОГЛАСИЙ ---
-    # Фильтруем только критические (red) и предупреждающие (yellow) риски
-    risks = [r for r in analysis_data.get("risks", []) if r.get("level") in ["red", "yellow"]]
+    # Берём все выявленные риски из результатов анализа
+    risks = analysis_data.get("risks", [])
 
     table = doc.add_table(rows=1, cols=4)
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
     table.style = 'Table Grid'
 
-    col_widths = [Inches(1.0), Inches(2.2), Inches(2.3), Inches(1.8)]
+    col_widths = [Inches(1.2), Inches(2.0), Inches(2.3), Inches(1.8)]
 
     # Заполняем шапку таблицы
     hdr_cells = table.rows[0].cells
-    headers = ["Пункт", "Редакция Заказчика", "Предлагаемая редакция Исполнителя", "Обоснование"]
+    headers = ["Категория / Риск", "Редакция Заказчика (Цитата)", "Предлагаемая редакция", "Обоснование"]
 
     for i, header_text in enumerate(headers):
         cell = hdr_cells[i]
@@ -101,19 +101,24 @@ def generate_disagreements_protocol(analysis_data: dict, contract_title: str = "
                 row_cells[i].width = col_widths[i]
                 set_cell_margins(row_cells[i], top=100, bottom=100, left=100, right=100)
 
-            # 1. Пункт
-            row_cells[0].text = risk.get("clause_num", "—")
-            row_cells[0].paragraphs[0].runs[0].bold = True
+            # 1. Категория и заголовок риска
+            category = risk.get("category", "Риск")
+            title = risk.get("title", "")
+            row_cells[0].text = f"[{category}]\n{title}"
+            if row_cells[0].paragraphs[0].runs:
+                row_cells[0].paragraphs[0].runs[0].bold = True
 
-            # 2. Описание риска / Редакция заказчика
-            row_cells[1].text = risk.get("description", "")
+            # 2. Редакция заказчика (цитата из договора)
+            quote = risk.get("quote", "—")
+            row_cells[1].text = quote
 
-            # 3. Предложенная правка
-            row_cells[2].text = risk.get("suggested_fix", "")
+            # 3. Предложенная редакция (рекомендация)
+            recommendation = risk.get("recommendation", "Привести в соответствие с законодательством.")
+            row_cells[2].text = recommendation
 
-            # 4. Обоснование
-            justification = risk.get("reasoning") or "Приведение условий договора к балансу интересов сторон и стандартной рыночной практике."
-            row_cells[3].text = justification
+            # 4. Обоснование (подробное объяснение)
+            explanation = risk.get("explanation", "Устранение правовой неопределенности и защита интересов стороны.")
+            row_cells[3].text = explanation
 
     doc.add_paragraph("\n")
 
