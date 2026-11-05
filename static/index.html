@@ -16,7 +16,6 @@
         .transparent-card { background-color: transparent !important; border: none !important; }
         .identical-input-box { border: 1px solid #cbd5e1; background-color: #ffffff; border-radius: 0.75rem; padding: 0.65rem 0.875rem; font-size: 0.75rem; font-weight: 500; color: #334155; width: 100%; display: flex; align-items: center; }
         
-        /* Унификация всех чипсов и кнопок выбора */
         .chip-btn {
             height: 34px;
             padding: 0 14px;
@@ -33,7 +32,6 @@
         .chip-btn:not(.active) { background-color: #f1f5f9; color: #334155; }
         .chip-btn:not(.active):hover { background-color: #e2e8f0; }
 
-        /* Унификация главных и второстепенных действий */
         .btn-primary-action {
             height: 40px;
             border-radius: 0.75rem;
@@ -58,7 +56,8 @@
                 <p class="text-xs text-slate-200">Сервис автоматической проверки и генерации документов</p>
             </div>
             <div class="flex items-center gap-2">
-                <button type="button" id="admin-btn" onclick="openAdminModal()" class="btn-primary-action bg-indigo-600 hover:bg-indigo-700 text-white px-3 h-[34px] text-xs gap-1">
+                <!-- Кнопка Админ скрыта по умолчанию и появляется только для администратора -->
+                <button type="button" id="admin-btn" onclick="openAdminModal()" class="btn-primary-action bg-indigo-600 hover:bg-indigo-700 text-white px-3 h-[34px] text-xs gap-1 hidden">
                     <i class="fa-solid fa-shield-halved"></i> Админ
                 </button>
                 <div id="user-badge" class="bg-slate-700/90 px-3 h-[34px] rounded-xl border border-slate-500 text-xs text-slate-100 flex items-center gap-2">
@@ -201,6 +200,33 @@
         </div>
     </div>
 
+    <!-- Модальное окно Админ-панели -->
+    <div id="admin-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-5 text-slate-900 space-y-3 shadow-xl">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="font-bold text-sm"><i class="fa-solid fa-shield-halved text-indigo-600"></i> Панель администратора</h3>
+                <button type="button" onclick="closeAdminModal()" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark text-base"></i></button>
+            </div>
+            <div id="admin-stats-content" class="text-xs space-y-2 text-slate-700">
+                <p>Загрузка статистики...</p>
+            </div>
+            <button type="button" onclick="closeAdminModal()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-800 font-medium py-2 rounded-xl text-xs">Закрыть</button>
+        </div>
+    </div>
+
+    <!-- Модальное окно Покупки проверок -->
+    <div id="stars-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 text-slate-900 space-y-3 shadow-xl text-center">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="font-bold text-sm"><i class="fa-solid fa-star text-amber-500"></i> Пополнение проверок</h3>
+                <button type="button" onclick="closeStarsModal()" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark text-base"></i></button>
+            </div>
+            <p class="text-xs text-slate-600">Приобретите пакет дополнительных проверок договоров для продолжения работы.</p>
+            <button type="button" onclick="buyPackage()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 rounded-xl text-xs shadow-xs">Купить пакет проверок</button>
+            <button type="button" onclick="closeStarsModal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2 rounded-xl text-xs">Отмена</button>
+        </div>
+    </div>
+
     <footer class="mt-6 text-center text-xs text-slate-300 border-t border-slate-500/30 pt-3">
         <span>© 2026 Lexify. Все права защищены.</span>
     </footer>
@@ -218,6 +244,32 @@
         let currentGeneratedDocumentText = "";
 
         if (tg) { tg.ready(); tg.expand(); initDataUser = tg.initDataUnsafe?.user; }
+
+        // Проверка пользователя и отображение кнопки Админ только для вас
+        async function checkUserAccess() {
+            let telegramId = initDataUser ? initDataUser.id : 0;
+            // Если вы открываете в обычном браузере для тестов, можно передать тестовый id или захардкодить ваш ID
+            if (!telegramId) telegramId = 123456789; // Замените при необходимости или оставьте для проверки
+
+            try {
+                const res = await fetch(`/user-info/${telegramId}`);
+                const data = await res.json();
+                document.getElementById('checks-count').textContent = data.checks_left || 3;
+                
+                // Кнопка Админ видна ТОЛЬКО если is_admin == true
+                if (data.is_admin) {
+                    document.getElementById('admin-btn').classList.remove('hidden');
+                } else {
+                    document.getElementById('admin-btn').classList.add('hidden');
+                }
+            } catch (e) {
+                console.error("Ошибка загрузки профиля", e);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            checkUserAccess();
+        });
 
         function scrollToResults() {
             document.getElementById('results-card-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -260,6 +312,7 @@
             }
         }
 
+        // Логика кнопок и чипсов
         document.querySelectorAll('#doc-type-group button').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('#doc-type-group button').forEach(b => { b.classList.remove('active'); });
@@ -344,10 +397,11 @@
             scrollToResults();
 
             try {
+                let telegramId = initDataUser ? initDataUser.id : 123456789;
                 const response = await fetch('/api/analyze', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text, doc_type: selectedDocType, jurisdiction: selectedJurisdiction })
+                    body: JSON.stringify({ text, doc_type: selectedDocType, jurisdiction: selectedJurisdiction, telegram_id: telegramId })
                 });
                 const data = await response.json();
                 currentAnalysisResult = data;
@@ -370,10 +424,11 @@
 
         async function generateProtocol() {
             if (!currentAnalysisResult) return;
+            let telegramId = initDataUser ? initDataUser.id : 123456789;
             const response = await fetch('/api/generate-protocol', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ doc_type: selectedDocType, jurisdiction: selectedJurisdiction, risks: currentAnalysisResult.risks })
+                body: JSON.stringify({ doc_type: selectedDocType, jurisdiction: selectedJurisdiction, telegram_id: telegramId, risks: currentAnalysisResult.risks })
             });
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
@@ -386,6 +441,7 @@
             outputDiv.innerHTML = `<div class="text-center text-slate-500 py-8"><i class="fa-solid fa-spinner fa-spin text-2xl text-indigo-600"></i><p>Составляем документ...</p></div>`;
             scrollToResults();
 
+            let telegramId = initDataUser ? initDataUser.id : 123456789;
             const response = await fetch('/api/generate-document', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -397,7 +453,8 @@
                     description: document.getElementById('c-description').value,
                     payment: document.getElementById('c-payment').value,
                     deadline: document.getElementById('c-deadline').value,
-                    revisions: document.getElementById('c-revisions').value
+                    revisions: document.getElementById('c-revisions').value,
+                    telegram_id: telegramId
                 })
             });
             const data = await response.json();
@@ -447,10 +504,46 @@
             document.getElementById('analysis-output').innerHTML = "Здесь появится текст сгенерированного документа после заполнения параметров.";
         }
 
-        function openStarsModal() {}
-        function closeStarsModal() {}
-        function openAdminModal() {}
-        function closeAdminModal() {}
+        // Функции модальных окон
+        async function openAdminModal() {
+            const modal = document.getElementById('admin-modal');
+            const content = document.getElementById('admin-stats-content');
+            modal.classList.remove('hidden');
+            content.innerHTML = `<p class="text-slate-500">Загрузка статистики...</p>`;
+
+            let telegramId = initDataUser ? initDataUser.id : 123456789;
+            try {
+                const res = await fetch(`/admin/stats/${telegramId}`);
+                const data = await res.json();
+                content.innerHTML = `
+                    <div class="space-y-1.5">
+                        <p><strong>Всего пользователей:</strong> ${data.total_users}</p>
+                        <p><strong>Всего проверок:</strong> ${data.total_analyses}</p>
+                        <p><strong>Успешных оплат:</strong> ${data.total_payments}</p>
+                    </div>
+                `;
+            } catch (e) {
+                content.innerHTML = `<p class="text-red-500">Ошибка загрузки данных админ-панели.</p>`;
+            }
+        }
+
+        function closeAdminModal() {
+            document.getElementById('admin-modal').classList.add('hidden');
+        }
+
+        function openStarsModal() {
+            document.getElementById('stars-modal').classList.remove('hidden');
+        }
+
+        function closeStarsModal() {
+            document.getElementById('stars-modal').classList.add('hidden');
+        }
+
+        function buyPackage() {
+            alert('Переход на оплату пакета проверок...');
+            closeStarsModal();
+        }
+
         function sendFeedback() { alert('Спасибо за отзыв!'); }
     </script>
 </body>
