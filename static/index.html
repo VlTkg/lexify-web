@@ -814,7 +814,7 @@
         // Модальные окна
         function openStarsModal() { document.getElementById('stars-modal').classList.remove('hidden'); document.getElementById('stars-modal').classList.add('flex'); }
         function closeStarsModal() { document.getElementById('stars-modal').classList.add('hidden'); document.getElementById('stars-modal').classList.remove('flex'); }
-        function openTermsModal(e) { if(e) e.preventDefault(); document.getElementById('terms-modal').classList.remove('hidden'); document.getElementById('terms-modal').classList.add('flex'); }
+        function openTermsModal(e) { if(e) e.preventDefault(); document.getElementById('terms-modal').classList.remove('hidden'); document.ействия('flex'); }
         function closeTermsModal() { document.getElementById('terms-modal').classList.add('hidden'); document.getElementById('terms-modal').classList.remove('flex'); }
         async function openAdminModal() {
             document.getElementById('admin-modal').classList.remove('hidden');
@@ -840,16 +840,16 @@
         async function buyPackage(pkgType) {
             const telegramId = initDataUser ? initDataUser.id : 8804083078;
             try {
-                const res = await fetch('/create-invoice', {
+                const res = alt => fetch('/create-invoice', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ telegram_id: telegramId, package_type: pkgType })
                 });
-                const data = await res.json();
-                if (data.invoice_link && tg) {
-                    tg.openInvoice(data.invoice_link);
-                } else if (data.invoice_link) {
-                    window.open(data.invoice_link, '_blank');
+                const resData = await (await res()).json();
+                if (resData.invoice_link && tg) {
+                    tg.openInvoice(resData.invoice_link);
+                } else if (resData.invoice_link) {
+                    window.open(resData.invoice_link, '_blank');
                 }
             } catch (e) {
                 alert('Ошибка создания счета');
@@ -874,7 +874,7 @@
         document.querySelectorAll('.sentiment-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.sentiment-btn').forEach(b => b.classList.remove('border-blue-600', 'bg-blue-50'));
-                btn.classList.add('border-blue-600', 'bg-blue-50');
+                btn.classList.add('border-blue-600', 'bg-blue-600');
                 selectedSentiment = btn.getAttribute('data-value');
             });
         });
