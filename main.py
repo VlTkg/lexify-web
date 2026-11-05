@@ -173,7 +173,6 @@ def api_generate_protocol(data: ProtocolRequest):
 
     title_p = doc.add_paragraph()
     title_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    title_p.paragraph_format.space_after = Pt(4)
     run_t = title_p.add_run("ПРОТОКОЛ РАЗНОГЛАСИЙ")
     run_t.bold = True
     run_t.font.name = "Times New Roman"
@@ -182,7 +181,6 @@ def api_generate_protocol(data: ProtocolRequest):
 
     sub_p = doc.add_paragraph()
     sub_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    sub_p.paragraph_format.space_after = Pt(14)
     run_sub = sub_p.add_run(f"к Договору оказания услуг ({data.doc_type})\nЮрисдикция: {data.jurisdiction}")
     run_sub.font.name = "Times New Roman"
     run_sub.font.size = Pt(11)
@@ -349,6 +347,15 @@ def api_download_constructor_file(data: ConstructorDownloadSchema):
             run.font.color.rgb = RGBColor(0, 0, 0)
         elif line.startswith('Исполнитель:') or line.startswith('Заказчик:'):
             p.paragraph_format.space_before = Pt(12)
+            p.paragraph_format.space_after = Pt(4)
+            run = p.add_run(line)
+            run.bold = True
+            run.font.name = "Times New Roman"
+            run.font.size = Pt(11)
+            run.font.color.rgb = RGBColor(0, 0, 0)
+        elif ':' in line or '_' in line:
+            # Делаем строки реквизитов плотными и выразительными
+            p.paragraph_format.space_before = Pt(2)
             p.paragraph_format.space_after = Pt(4)
             run = p.add_run(line)
             run.bold = True
