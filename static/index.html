@@ -16,8 +16,8 @@
         .transparent-card { background-color: transparent !important; border: none !important; }
         .identical-input-box { border: 1px solid #cbd5e1; background-color: #ffffff; border-radius: 0.75rem; padding: 0.65rem 0.875rem; font-size: 0.75rem; font-weight: 500; color: #334155; width: 100%; display: flex; align-items: center; }
         .chip-btn.active { background-color: #2563eb; color: #ffffff; border-color: #2563eb; }
-        /* Насыщенный черный цвет текста для превью сгенерированного документа */
-        #analysis-output { color: #000000 !important; }
+        /* Жесткий насыщенный черный цвет и плотный шрифт для превью документа */
+        #analysis-output, #analysis-output * { color: #000000 !important; font-weight: 500 !important; }
     </style>
 </head>
 <body class="min-h-screen pb-6 pt-2 px-3 md:px-6 flex flex-col justify-between">
@@ -226,7 +226,7 @@
                     copyBtn.classList.remove('hidden');
                     downloadBtn.classList.remove('hidden');
                 }
-                outputDiv.innerHTML = currentGeneratedDocumentText ? `<div class="whitespace-pre-wrap text-left break-words text-black">${marked.parse(currentGeneratedDocumentText)}</div>` : "Здесь появится текст сгенерированного документа после заполнения параметров.";
+                outputDiv.innerHTML = currentGeneratedDocumentText ? `<div class="whitespace-pre-wrap text-left break-words" style="color: #000000 !important; font-weight: 500;">${marked.parse(currentGeneratedDocumentText)}</div>` : "Здесь появится текст сгенерированного документа после заполнения параметров.";
             }
         }
 
@@ -331,9 +331,9 @@
 
         function renderAnalysisHTML(data) {
             let riskColor = "bg-red-100 text-red-800";
-            let html = `<div class="space-y-4 text-left pb-4 text-black"><div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border"><span class="font-bold text-slate-900">Общий уровень риска:</span><span class="px-3 py-1 rounded-lg font-bold text-xs ${riskColor}">${data.overall_risk_level}</span></div><div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100 space-y-1"><h3 class="font-bold text-slate-900">Резюме юриста:</h3><p class="text-slate-900">${data.summary}</p></div><div class="space-y-2"><h3 class="font-bold text-slate-900">Выявленные риски (${data.risks.length}):</h3><div class="space-y-3">`;
+            let html = `<div class="space-y-4 text-left pb-4" style="color: #000000 !important;"><div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border"><span class="font-bold text-black">Общий уровень риска:</span><span class="px-3 py-1 rounded-lg font-bold text-xs ${riskColor}">${data.overall_risk_level}</span></div><div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100 space-y-1"><h3 class="font-bold text-black">Резюме юриста:</h3><p class="text-black">${data.summary}</p></div><div class="space-y-2"><h3 class="font-bold text-black">Выявленные риски (${data.risks.length}):</h3><div class="space-y-3">`;
             data.risks.forEach(r => {
-                html += `<div class="bg-slate-50 p-3 rounded-xl border space-y-2"><div class="font-bold text-xs text-blue-600">${r.title}</div><div class="text-[11px] text-slate-800 italic bg-white p-2 rounded border">«${r.quote}»</div><p class="text-slate-900 text-xs"><strong>Опасность:</strong> ${r.explanation}</p><p class="text-slate-900 text-xs font-semibold text-emerald-800"><strong>Рекомендация:</strong> ${r.recommendation}</p></div>`;
+                html += `<div class="bg-slate-50 p-3 rounded-xl border space-y-2"><div class="font-bold text-xs text-blue-700">${r.title}</div><div class="text-[11px] text-black italic bg-white p-2 rounded border">«${r.quote}»</div><p class="text-black text-xs"><strong>Опасность:</strong> ${r.explanation}</p><p class="text-black text-xs font-semibold"><strong>Рекомендация:</strong> ${r.recommendation}</p></div>`;
             });
             return html + `</div></div></div>`;
         }
@@ -372,7 +372,7 @@
             });
             const data = await response.json();
             currentGeneratedDocumentText = data.document_text;
-            outputDiv.innerHTML = `<div class="whitespace-pre-wrap text-left pb-4 text-xs leading-relaxed text-black">${marked.parse(currentGeneratedDocumentText)}</div>`;
+            outputDiv.innerHTML = `<div class="whitespace-pre-wrap text-left pb-4 text-xs leading-relaxed" style="color: #000000 !important; font-weight: 500;">${marked.parse(currentGeneratedDocumentText)}</div>`;
             document.getElementById('copy-doc-btn').classList.remove('hidden');
             document.getElementById('download-doc-btn').classList.remove('hidden');
             scrollToResults();
