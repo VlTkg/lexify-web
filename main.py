@@ -327,7 +327,7 @@ def api_download_constructor_file(data: ConstructorDownloadSchema):
             run = p.add_run(line.replace('# ', ''))
             run.bold = True
             run.font.name = "Times New Roman"
-            run.font.size = Pt(14) # Солидный крупный заголовок
+            run.font.size = Pt(14)
             run.font.color.rgb = RGBColor(0, 0, 0)
         elif line.startswith('Юрисдикция:') or line.startswith('г. Москва'):
             p = doc.add_paragraph()
@@ -336,7 +336,7 @@ def api_download_constructor_file(data: ConstructorDownloadSchema):
             run = p.add_run(line)
             run.font.name = "Times New Roman"
             run.font.size = Pt(11)
-            run.font.color.rgb = RGBColor(0, 0, 0) # Четкий черный
+            run.font.color.rgb = RGBColor(0, 0, 0)
         elif line.startswith('Стороны:'):
             p = doc.add_paragraph()
             p.paragraph_format.line_spacing = 1.15
@@ -345,7 +345,7 @@ def api_download_constructor_file(data: ConstructorDownloadSchema):
             run = p.add_run(line)
             run.font.name = "Times New Roman"
             run.font.size = Pt(11)
-            run.font.color.rgb = RGBColor(0, 0, 0) # Четкий черный
+            run.font.color.rgb = RGBColor(0, 0, 0)
         elif any(line.startswith(f"{i}.") for i in range(1, 10)):
             p = doc.add_paragraph()
             p.paragraph_format.space_before = Pt(10)
@@ -363,6 +363,7 @@ def api_download_constructor_file(data: ConstructorDownloadSchema):
             run = p.add_run(line)
             run.font.name = "Times New Roman"
             run.font.size = Pt(11)
+            # Принудительно делаем основной текст глубокого черного цвета
             run.font.color.rgb = RGBColor(0, 0, 0)
 
     file_stream = io.BytesIO()
