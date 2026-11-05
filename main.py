@@ -8,6 +8,9 @@ from pydantic import BaseModel
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.oxml import parse_xml
+from docx.oxml.ns import nsdecls
 
 app = FastAPI()
 
@@ -82,13 +85,8 @@ def api_analyze(data: AnalysisRequest):
         raise HTTPException(status_code=400, detail="Текст договора пуст")
     
     risks = []
-    
-    # Интеллектуальный разбиатель текста: ищем вхождения вида "7.1.", "7.2" и т.д. по всему тексту
-    # Разделяем сплошной текст PDF на отдельные пункты
     raw_splits = re.split(r'(?=\b\d+\.\d+\.)', text)
-    
     if len(raw_splits) <= 1:
-        # Если точки с номерами не найдены через split, пробуем разбить по пробелам/строкам
         raw_splits = text.split('\n')
 
     for chunk in raw_splits:
@@ -97,12 +95,9 @@ def api_analyze(data: AnalysisRequest):
             continue
             
         lower_chunk = chunk_clean.lower()
-        
-        # Ищем номер пункта в данном куске
         num_match = re.search(r'(\d+\.\d+)', chunk_clean)
         point_num = f"Пункт {num_match.group(1)}" if num_match else "Пункт договора"
 
-        # Проверяем каждый кусок на конкретные юридические риски
         if "24 часа" in lower_chunk or "момента получения заявки" in lower_chunk:
             risks.append({
                 "point": point_num,
@@ -149,7 +144,6 @@ def api_analyze(data: AnalysisRequest):
                 "recommendation": "Сократить срок окончательного расчета до 5–10 рабочих дней после подписания Акта."
             })
 
-    # Если автоматический сплит не выделил пункты точечно, подстраховываемся базовым поиском
     if not risks:
         risks.append({
             "point": "Общие положения",
@@ -171,30 +165,75 @@ def api_analyze(data: AnalysisRequest):
 def api_generate_protocol(data: ProtocolRequest):
     doc = Document()
     
-    title = doc.add_heading("ПРОТОКОЛ РАЗНОГЛАСИЙ", level=1)
-    title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    # Настройка полей документа
+    sections = doc.sections
+    for section in sections:
+        section.top_margin = Inches(1)
+        section.bottom_margin = Inches(1)
+        section.left_margin = Inches(1)
+        section.right_margin = Inches(1)
+
+    # Заголовок протокола
+    title_p = doc.add_paragraph()
+    title_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run_t = title_p.add_run("ПРОТОКОЛ РАЗНОГЛАСИЙ")
+    run_t.bold = True
+    run_t.font.name = "Times New Roman"
+    run_t.font.size = Pt(14)
+    run_t.font.color.rgb = RGBColor(0, 0, 0)
+
+    sub_p = doc.add_paragraph()
+    sub_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run_sub = sub_p.add_run(f"к Договору оказания услуг ({data.doc_type})\nЮрисдикция: {data.jurisdiction}\n")
+    run_sub.font.name = "Times New Roman"
+    run_sub.font.size = Pt(11)
+    run_sub.font.color.rgb = RGBColor(50, 50, 50)
+
+    doc.add_paragraph() # Отступ
+
+    # Создаем красивую таблицу с протоколом
+    table = doc.add_table(rows=1, cols=4)
+    table.alignment = WD_TABLE_ALIGNMENT.CENTER
+    table.autofit = False
+
+    # Задаем ширину колонок
+    col_widths = [Inches(0.6), Inches(2.2), Inches(2.0), Inches(2.2)]
     
-    sub = doc.add_paragraph(f"к Договору оказания услуг ({data.doc_type})\nЮрисдикция: {data.jurisdiction}\n")
-    sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    hdr_cells = table.rows[0].cells
+    hdr_titles = ["№", "Редакция Заказчика", "Суть замечания / Риск", "Рекомендуемая редакция"]
+    
+    for i, title_text in enumerate(hdr_titles):
+        hdr_cells[i].text = title_text
+        hdr_cells[i].width = col_widths[i]
+        # Стилизация шапки таблицы
+        p = hdr_cells[i].paragraphs[0]
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        for run in p.runs:
+            run.bold = True
+            run.font.name = "Times New Roman"
+            run.font.size = Pt(10)
+            run.font.color.rgb = RGBColor(255, 255, 255)
+        # Заливка шапки темно-серым цветом
+        shading_xml = parse_xml(r'<w:shd {} w:fill="333333"/>'.format(nsdecls('w')))
+        hdr_cells[i]._tc.get_or_add_tcPr().append(shading_xml)
 
+    # Заполняем таблицу данными по каждому пункту
     for idx, risk in enumerate(data.risks, 1):
-        point_name = risk.get('point', f'Пункт {idx}')
+        row_cells = table.add_row().cells
         
-        doc.add_heading(f"{idx}. {point_name} — {risk.get('category', 'Замечание')}", level=2)
-        
-        p1 = doc.add_paragraph()
-        p1.add_run("Редакция Заказчика: ").bold = True
-        p1.add_run(f"«{risk.get('quote', '-')}»")
+        row_cells[0].text = str(idx)
+        row_cells[1].text = f"«{risk.get('quote', '-')}»"
+        row_cells[2].text = risk.get('explanation', '-')
+        row_cells[3].text = risk.get('recommendation', '-')
 
-        p2 = doc.add_paragraph()
-        p2.add_run("Суть замечания: ").bold = True
-        p2.add_run(risk.get('explanation', '-'))
-
-        p3 = doc.add_paragraph()
-        p3.add_run("Рекомендуемая редакция Исполнителя: ").bold = True
-        p3.add_run(risk.get('recommendation', '-'))
-
-        doc.add_paragraph()
+        for i, cell in enumerate(row_cells):
+            cell.width = col_widths[i]
+            for p in cell.paragraphs:
+                p.paragraph_format.line_spacing = 1.15
+                for run in p.runs:
+                    run.font.name = "Times New Roman"
+                    run.font.size = Pt(10)
+                    run.font.color.rgb = RGBColor(0, 0, 0)
 
     file_stream = io.BytesIO()
     doc.save(file_stream)
@@ -264,7 +303,7 @@ def api_download_constructor_file(data: ConstructorDownloadSchema):
             h = doc.add_heading(line.replace('# ', ''), level=1)
             h.alignment = WD_ALIGN_PARAGRAPH.CENTER
         elif line.startswith('## '):
-            doc.add_heading(line.replace('## ', ''), level=2)
+            doc.add_heading(line.replace('# ', ''), level=2)
         elif line.startswith('1.') or line.startswith('2.') or line.startswith('3.') or line.startswith('4.') or line.startswith('5.') or line.startswith('6.'):
             p = doc.add_paragraph()
             p.add_run(line).bold = True
