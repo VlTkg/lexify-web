@@ -82,11 +82,7 @@ def api_analyze(data: AnalysisRequest):
         raise HTTPException(status_code=400, detail="Текст договора пуст")
     
     risks = []
-    
-    # Ищем все абзацы или строки, содержащие нумерацию видов 7.1, 7.2 и т.д.
     lines = [l.strip() for l in text.split('\n') if l.strip()]
-    
-    # Регулярка для поиска номеров пунктов (например, 7.1, 7.2, 1.1 и т.д.)
     pattern = re.compile(r'(?:п\.|пункт)?\s*(\d+\.\d+)', re.IGNORECASE)
 
     for line in lines:
@@ -94,7 +90,6 @@ def api_analyze(data: AnalysisRequest):
         point_num = f"Пункт {match.group(1)}" if match else "Пункт договора"
         lower_line = line.lower()
 
-        # Анализируем каждый пункт индивидуально
         if "24 часа" in lower_line or "момента получения заявки" in lower_line:
             risks.append({
                 "point": point_num,
@@ -141,7 +136,6 @@ def api_analyze(data: AnalysisRequest):
                 "recommendation": "Сократить срок окончательного расчета до 5–10 рабочих дней после подписания Акта."
             })
 
-    # Если ничего точечно не нашлось, делаем базовый разбор
     if not risks:
         risks.append({
             "point": "Общие положения",
@@ -162,8 +156,6 @@ def api_analyze(data: AnalysisRequest):
 @app.post("/api/generate-protocol")
 def api_generate_protocol(data: ProtocolRequest):
     doc = Document()
-    
-    # Шапка протокола
     title = doc.add_heading("ПРОТОКОЛ РАЗНОГЛАСИЙ", level=1)
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     
@@ -172,7 +164,6 @@ def api_generate_protocol(data: ProtocolRequest):
 
     for idx, risk in enumerate(data.risks, 1):
         point_name = risk.get('point', f'Пункт {idx}')
-        
         doc.add_heading(f"{idx}. {point_name} — {risk.get('category', 'Замечание')}", level=2)
         
         p1 = doc.add_paragraph()
@@ -209,10 +200,7 @@ def api_generate_document(data: ConstructorRequest):
     deadline = data.deadline if data.deadline else "14 календарных дней"
     revisions = data.revisions if data.revisions else "2"
 
-    if data.doc_type == "offer":
-        doc_title = "ПУБЛИЧНАЯ ОФЕРТА НА ОКАЗАНИЕ УСЛУГ"
-    else:
-        doc_title = "ДОГОВОР ВОЗМЕЗДНОГО ОКАЗАНИЯ УСЛУГ"
+    doc_title = "ПУБЛИЧНАЯ ОФЕРТА НА ОКАЗАНИЕ УСЛУГ" if data.doc_type == "offer" else "ДОГОВОР ВОЗМЕЗДНОГО ОКАЗАНИЯ УСЛУГ"
 
     document_text = f"""# {doc_title}
 Юрисдикция: {data.jurisdiction}
@@ -255,7 +243,6 @@ ________________ / ______________
 @app.post("/api/download-constructor-file")
 def api_download_constructor_file(data: ConstructorDownloadSchema):
     doc = Document()
-    
     for line in data.document_text.split('\n'):
         if line.startswith('# '):
             h = doc.add_heading(line.replace('# ', ''), level=1)
@@ -273,7 +260,6 @@ def api_download_constructor_file(data: ConstructorDownloadSchema):
     file_stream.seek(0)
 
     filename = "Oferta.docx" if data.doc_type == "offer" else "Dogovor.docx"
-
     return Response(
         content=file_stream.getvalue(),
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -288,11 +274,7 @@ def api_feedback(data: FeedbackRequest):
 
 @app.get("/admin/stats/{telegram_id}")
 def admin_stats(telegram_id: int):
-    return {
-        "total_users": 15,
-        "total_analyses": 42,
-        "total_payments": 5
-    }
+    return {"total_users": 15, "total_analyses": 42, "total_payments": 5}
 
 
 @app.post("/create-invoice")
