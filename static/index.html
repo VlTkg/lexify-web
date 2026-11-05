@@ -15,7 +15,36 @@
         .tg-card { background-color: #ffffff; border-color: #cbd5e1; word-break: break-word; overflow-wrap: break-word; }
         .transparent-card { background-color: transparent !important; border: none !important; }
         .identical-input-box { border: 1px solid #cbd5e1; background-color: #ffffff; border-radius: 0.75rem; padding: 0.65rem 0.875rem; font-size: 0.75rem; font-weight: 500; color: #334155; width: 100%; display: flex; align-items: center; }
-        .chip-btn.active { background-color: #2563eb; color: #ffffff; border-color: #2563eb; }
+        
+        /* Унификация всех чипсов и кнопок выбора */
+        .chip-btn {
+            height: 34px;
+            padding: 0 14px;
+            border-radius: 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            border: 1px solid #cbd5e1;
+        }
+        .chip-btn.active { background-color: #2563eb; color: #ffffff; border-color: #2563eb; font-weight: 600; }
+        .chip-btn:not(.active) { background-color: #f1f5f9; color: #334155; }
+        .chip-btn:not(.active):hover { background-color: #e2e8f0; }
+
+        /* Унификация главных и второстепенных действий */
+        .btn-primary-action {
+            height: 40px;
+            border-radius: 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease;
+        }
+
         #analysis-output, #analysis-output * { color: #000000 !important; font-weight: 500 !important; }
         #analysis-output h1 { font-size: 1.1rem; font-weight: bold; text-align: center; margin-bottom: 0.75rem; }
         #analysis-output p { margin-bottom: 0.5rem; line-height: 1.4; }
@@ -29,12 +58,10 @@
                 <p class="text-xs text-slate-200">Сервис автоматической проверки и генерации документов</p>
             </div>
             <div class="flex items-center gap-2">
-                <!-- Возвращена кнопка Админ -->
-                <button type="button" id="admin-btn" onclick="openAdminModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-2.5 py-1.5 rounded-xl text-xs flex items-center gap-1">
+                <button type="button" id="admin-btn" onclick="openAdminModal()" class="btn-primary-action bg-indigo-600 hover:bg-indigo-700 text-white px-3 h-[34px] text-xs gap-1">
                     <i class="fa-solid fa-shield-halved"></i> Админ
                 </button>
-                <!-- Возвращен счетчик проверок -->
-                <div id="user-badge" class="bg-slate-700/90 px-3 py-1.5 rounded-xl border border-slate-500 text-xs text-slate-100 flex items-center gap-2">
+                <div id="user-badge" class="bg-slate-700/90 px-3 h-[34px] rounded-xl border border-slate-500 text-xs text-slate-100 flex items-center gap-2">
                     <span>Проверок: <span id="checks-count" class="font-bold text-amber-400">3</span></span>
                     <button type="button" onclick="openStarsModal()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-2 py-0.5 rounded-lg text-[11px]">
                         <i class="fa-solid fa-star"></i> Купить
@@ -44,8 +71,8 @@
         </header>
 
         <div class="flex space-x-2 border-b border-slate-500/40 pb-2">
-            <button id="tab-analysis" onclick="switchTab('analysis')" class="px-4 py-1.5 font-semibold text-xs text-white bg-blue-600 rounded-xl transition shadow-xs">🔍 Анализ договора</button>
-            <button id="tab-constructor" onclick="switchTab('constructor')" class="px-4 py-1.5 font-semibold text-xs text-slate-200 hover:text-white bg-slate-700/60 rounded-xl transition shadow-xs">📝 Конструктор документов</button>
+            <button id="tab-analysis" onclick="switchTab('analysis')" class="btn-primary-action px-4 h-[36px] text-xs text-white bg-blue-600 shadow-xs">🔍 Анализ договора</button>
+            <button id="tab-constructor" onclick="switchTab('constructor')" class="btn-primary-action px-4 h-[36px] text-xs text-slate-200 hover:text-white bg-slate-700/60 shadow-xs">📝 Конструктор документов</button>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
@@ -63,19 +90,19 @@
                         <div>
                             <label class="block text-xs font-bold text-white mb-1.5">Тип договора</label>
                             <div class="flex flex-wrap gap-1.5" id="doc-type-group">
-                                <button type="button" class="chip-btn active px-3 py-1.5 rounded-xl border border-slate-300" data-value="Общий">Общий</button>
-                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-800" data-value="Трудовой">Трудовой</button>
-                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-800" data-value="ГПХ/Услуги">ГПХ/Услуги</button>
-                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-800" data-value="Аренда">Аренда</button>
-                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-800" data-value="Поставка">Поставка</button>
+                                <button type="button" class="chip-btn active" data-value="Общий">Общий</button>
+                                <button type="button" class="chip-btn" data-value="Трудовой">Трудовой</button>
+                                <button type="button" class="chip-btn" data-value="ГПХ/Услуги">ГПХ/Услуги</button>
+                                <button type="button" class="chip-btn" data-value="Аренда">Аренда</button>
+                                <button type="button" class="chip-btn" data-value="Поставка">Поставка</button>
                             </div>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-white mb-1.5">Юрисдикция</label>
                             <div class="flex flex-wrap gap-1.5" id="jurisdiction-group">
-                                <button type="button" class="chip-btn active px-3 py-1.5 rounded-xl border border-slate-300" data-value="Россия (РФ)">Россия (РФ)</button>
-                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-800" data-value="Казахстан">Казахстан</button>
-                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-800" data-value="Беларусь">Беларусь</button>
+                                <button type="button" class="chip-btn active" data-value="Россия (РФ)">Россия (РФ)</button>
+                                <button type="button" class="chip-btn" data-value="Казахстан">Казахстан</button>
+                                <button type="button" class="chip-btn" data-value="Беларусь">Беларусь</button>
                             </div>
                         </div>
                         <div class="space-y-2">
@@ -96,8 +123,8 @@
                             </div>
                         </div>
                         <div class="flex gap-2 pt-0.5">
-                            <button type="button" onclick="startAnalysis()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl text-xs">Анализировать</button>
-                            <button type="button" onclick="resetForm()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2.5 px-4 rounded-xl text-xs">Новый анализ</button>
+                            <button type="button" onclick="startAnalysis()" class="btn-primary-action flex-1 bg-blue-600 hover:bg-blue-700 text-white">Анализировать</button>
+                            <button type="button" onclick="resetForm()" class="btn-primary-action px-5 bg-slate-200 hover:bg-slate-300 text-slate-700">Новый анализ</button>
                         </div>
                     </div>
                 </div>
@@ -115,16 +142,16 @@
                         <div>
                             <label class="block font-bold text-white mb-1.5">Тип документа</label>
                             <div class="flex gap-1.5" id="c-doc-type-group">
-                                <button type="button" class="chip-btn active px-3 py-1.5 rounded-xl border border-slate-300" data-value="contract">Договор оказания услуг</button>
-                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-800" data-value="offer">Публичная оферта</button>
+                                <button type="button" class="chip-btn active" data-value="contract">Договор оказания услуг</button>
+                                <button type="button" class="chip-btn" data-value="offer">Публичная оферта</button>
                             </div>
                         </div>
                         <div>
                             <label class="block font-bold text-white mb-1.5">Юрисдикция</label>
                             <div class="flex gap-1.5" id="c-jurisdiction-group">
-                                <button type="button" class="chip-btn active px-3 py-1.5 rounded-xl border border-slate-300" data-value="Россия (РФ)">Россия (РФ)</button>
-                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-800" data-value="Казахстан">Казахстан</button>
-                                <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-800" data-value="Беларусь">Беларусь</button>
+                                <button type="button" class="chip-btn active" data-value="Россия (РФ)">Россия (РФ)</button>
+                                <button type="button" class="chip-btn" data-value="Казахстан">Казахстан</button>
+                                <button type="button" class="chip-btn" data-value="Беларусь">Беларусь</button>
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
@@ -138,8 +165,8 @@
                             <div><label class="block font-bold text-white mb-1">Правки</label><input type="text" id="c-revisions" value="2" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white"></div>
                         </div>
                         <div class="flex gap-2 pt-1">
-                            <button type="button" onclick="generateConstructorDocument()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-4 rounded-xl text-xs">Сгенерировать документ</button>
-                            <button type="button" onclick="resetConstructorForm()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2.5 px-4 rounded-xl text-xs">Новый документ</button>
+                            <button type="button" onclick="generateConstructorDocument()" class="btn-primary-action flex-1 bg-indigo-600 hover:bg-indigo-700 text-white">Сгенерировать документ</button>
+                            <button type="button" onclick="resetConstructorForm()" class="btn-primary-action px-5 bg-slate-200 hover:bg-slate-300 text-slate-700">Новый документ</button>
                         </div>
                     </div>
                 </div>
@@ -161,9 +188,9 @@
                     <div class="border-b border-slate-100 pb-2 flex flex-wrap items-center justify-between gap-1">
                         <h2 id="results-title" class="font-bold text-xs text-slate-900">Результаты анализа</h2>
                         <div class="flex items-center gap-1">
-                            <button type="button" id="copy-doc-btn" onclick="copyDocumentOutput()" class="hidden bg-slate-200 hover:bg-slate-300 text-slate-800 font-medium px-2 py-1 rounded-lg text-[11px]"><i class="fa-regular fa-copy"></i> Копировать</button>
-                            <button type="button" id="download-doc-btn" onclick="downloadConstructorFile()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-2 py-1 rounded-lg text-[11px]"><i class="fa-solid fa-download"></i> Загрузить .docx</button>
-                            <button type="button" id="protocol-btn" onclick="generateProtocol()" class="hidden bg-slate-800 hover:bg-slate-900 text-white font-medium px-2 py-1 rounded-lg text-[11px]"><i class="fa-solid fa-file-word text-blue-400"></i> Протокол разногласий</button>
+                            <button type="button" id="copy-doc-btn" onclick="copyDocumentOutput()" class="hidden bg-slate-200 hover:bg-slate-300 text-slate-800 font-medium px-2.5 py-1.5 rounded-lg text-[11px]"><i class="fa-regular fa-copy"></i> Копировать</button>
+                            <button type="button" id="download-doc-btn" onclick="downloadConstructorFile()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-2.5 py-1.5 rounded-lg text-[11px]"><i class="fa-solid fa-download"></i> Загрузить .docx</button>
+                            <button type="button" id="protocol-btn" onclick="generateProtocol()" class="hidden bg-slate-800 hover:bg-slate-900 text-white font-medium px-2.5 py-1.5 rounded-lg text-[11px]"><i class="fa-solid fa-file-word text-blue-400"></i> Протокол разногласий</button>
                         </div>
                     </div>
                     <div class="flex-1 flex flex-col p-2 overflow-y-auto max-h-[500px]" id="results-container-wrapper">
@@ -209,8 +236,8 @@
             const outputDiv = document.getElementById('analysis-output');
 
             if (mode === 'analysis') {
-                tabAnalysis.className = "px-4 py-1.5 font-semibold text-xs text-white bg-blue-600 rounded-xl transition shadow-xs";
-                tabConstructor.className = "px-4 py-1.5 font-semibold text-xs text-slate-200 hover:text-white bg-slate-700/60 rounded-xl transition shadow-xs";
+                tabAnalysis.className = "btn-primary-action px-4 h-[36px] text-xs text-white bg-blue-600 shadow-xs";
+                tabConstructor.className = "btn-primary-action px-4 h-[36px] text-xs text-slate-200 hover:text-white bg-slate-700/60 shadow-xs";
                 analysisSec.classList.remove('hidden');
                 constructorSec.classList.add('hidden');
                 resultsTitle.textContent = "Результаты анализа";
@@ -219,8 +246,8 @@
                 if (currentAnalysisResult) protocolBtn.classList.remove('hidden');
                 outputDiv.innerHTML = currentAnalysisResult ? renderAnalysisHTML(currentAnalysisResult) : "Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».";
             } else {
-                tabConstructor.className = "px-4 py-1.5 font-semibold text-xs text-white bg-blue-600 rounded-xl transition shadow-xs";
-                tabAnalysis.className = "px-4 py-1.5 font-semibold text-xs text-slate-200 hover:text-white bg-slate-700/60 rounded-xl transition shadow-xs";
+                tabConstructor.className = "btn-primary-action px-4 h-[36px] text-xs text-white bg-blue-600 shadow-xs";
+                tabAnalysis.className = "btn-primary-action px-4 h-[36px] text-xs text-slate-200 hover:text-white bg-slate-700/60 shadow-xs";
                 constructorSec.classList.remove('hidden');
                 analysisSec.classList.add('hidden');
                 resultsTitle.textContent = "Сгенерированный документ";
@@ -235,32 +262,32 @@
 
         document.querySelectorAll('#doc-type-group button').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('#doc-type-group button').forEach(b => { b.classList.remove('active', 'bg-blue-600', 'text-white'); b.classList.add('bg-slate-200', 'text-slate-800'); });
-                btn.classList.add('active', 'bg-blue-600', 'text-white'); btn.classList.remove('bg-slate-200', 'text-slate-800');
+                document.querySelectorAll('#doc-type-group button').forEach(b => { b.classList.remove('active'); });
+                btn.classList.add('active');
                 selectedDocType = btn.getAttribute('data-value');
             });
         });
 
         document.querySelectorAll('#jurisdiction-group button').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('#jurisdiction-group button').forEach(b => { b.classList.remove('active', 'bg-blue-600', 'text-white'); b.classList.add('bg-slate-200', 'text-slate-800'); });
-                btn.classList.add('active', 'bg-blue-600', 'text-white'); btn.classList.remove('bg-slate-200', 'text-slate-800');
+                document.querySelectorAll('#jurisdiction-group button').forEach(b => { b.classList.remove('active'); });
+                btn.classList.add('active');
                 selectedJurisdiction = btn.getAttribute('data-value');
             });
         });
 
         document.querySelectorAll('#c-doc-type-group button').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('#c-doc-type-group button').forEach(b => { b.classList.remove('active', 'bg-blue-600', 'text-white'); b.classList.add('bg-slate-200', 'text-slate-800'); });
-                btn.classList.add('active', 'bg-blue-600', 'text-white'); btn.classList.remove('bg-slate-200', 'text-slate-800');
+                document.querySelectorAll('#c-doc-type-group button').forEach(b => { b.classList.remove('active'); });
+                btn.classList.add('active');
                 selectedConstructorDocType = btn.getAttribute('data-value');
             });
         });
 
         document.querySelectorAll('#c-jurisdiction-group button').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('#c-jurisdiction-group button').forEach(b => { b.classList.remove('active', 'bg-blue-600', 'text-white'); b.classList.add('bg-slate-200', 'text-slate-800'); });
-                btn.classList.add('active', 'bg-blue-600', 'text-white'); btn.classList.remove('bg-slate-200', 'text-slate-800');
+                document.querySelectorAll('#c-jurisdiction-group button').forEach(b => { b.classList.remove('active'); });
+                btn.classList.add('active');
                 selectedConstructorJurisdiction = btn.getAttribute('data-value');
             });
         });
