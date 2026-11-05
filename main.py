@@ -186,7 +186,7 @@ def api_generate_protocol(data: ProtocolRequest):
     run_sub = sub_p.add_run(f"к Договору оказания услуг ({data.doc_type})\nЮрисдикция: {data.jurisdiction}")
     run_sub.font.name = "Times New Roman"
     run_sub.font.size = Pt(11)
-    run_sub.font.color.rgb = RGBColor(60, 60, 60)
+    run_sub.font.color.rgb = RGBColor(0, 0, 0)
 
     table = doc.add_table(rows=1, cols=4)
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
@@ -208,7 +208,7 @@ def api_generate_protocol(data: ProtocolRequest):
             run.bold = True
             run.font.name = "Times New Roman"
             run.font.size = Pt(10)
-            run.font.color.rgb = RGBColor(30, 41, 59)
+            run.font.color.rgb = RGBColor(0, 0, 0)
         shading_xml = parse_xml(r'<w:shd {} w:fill="E2E8F0"/>'.format(nsdecls('w')))
         hdr_cells[i]._tc.get_or_add_tcPr().append(shading_xml)
 
@@ -315,18 +315,40 @@ def api_download_constructor_file(data: ConstructorDownloadSchema):
         section.right_margin = Inches(1)
 
     for line in data.document_text.split('\n'):
+        if not line.strip():
+            doc.add_paragraph()
+            continue
+            
         if line.startswith('# '):
             p = doc.add_paragraph()
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            p.paragraph_format.space_after = Pt(12)
+            p.paragraph_format.space_before = Pt(0)
+            p.paragraph_format.space_after = Pt(14)
             run = p.add_run(line.replace('# ', ''))
             run.bold = True
             run.font.name = "Times New Roman"
-            run.font.size = Pt(13)
+            run.font.size = Pt(14) # Солидный крупный заголовок
             run.font.color.rgb = RGBColor(0, 0, 0)
-        elif line.startswith('1.') or line.startswith('2.') or line.startswith('3.') or line.startswith('4.') or line.startswith('5.') or line.startswith('6.') or line.startswith('7.'):
+        elif line.startswith('Юрисдикция:') or line.startswith('г. Москва'):
             p = doc.add_paragraph()
-            p.paragraph_format.space_before = Pt(8)
+            p.paragraph_format.space_before = Pt(0)
+            p.paragraph_format.space_after = Pt(4)
+            run = p.add_run(line)
+            run.font.name = "Times New Roman"
+            run.font.size = Pt(11)
+            run.font.color.rgb = RGBColor(0, 0, 0) # Четкий черный
+        elif line.startswith('Стороны:'):
+            p = doc.add_paragraph()
+            p.paragraph_format.line_spacing = 1.15
+            p.paragraph_format.space_before = Pt(6)
+            p.paragraph_format.space_after = Pt(12)
+            run = p.add_run(line)
+            run.font.name = "Times New Roman"
+            run.font.size = Pt(11)
+            run.font.color.rgb = RGBColor(0, 0, 0) # Четкий черный
+        elif any(line.startswith(f"{i}.") for i in range(1, 10)):
+            p = doc.add_paragraph()
+            p.paragraph_format.space_before = Pt(10)
             p.paragraph_format.space_after = Pt(4)
             run = p.add_run(line)
             run.bold = True
