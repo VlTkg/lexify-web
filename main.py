@@ -363,7 +363,6 @@ def api_download_constructor_file(data: ConstructorDownloadSchema):
             run = p.add_run(line)
             run.font.name = "Times New Roman"
             run.font.size = Pt(11)
-            # Принудительно делаем основной текст глубокого черного цвета
             run.font.color.rgb = RGBColor(0, 0, 0)
 
     file_stream = io.BytesIO()
