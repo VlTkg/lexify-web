@@ -319,8 +319,10 @@ def api_download_constructor_file(data: ConstructorDownloadSchema):
             doc.add_paragraph()
             continue
             
+        p = doc.add_paragraph()
+        p.paragraph_format.line_spacing = 1.15
+        
         if line.startswith('# '):
-            p = doc.add_paragraph()
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
             p.paragraph_format.space_before = Pt(0)
             p.paragraph_format.space_after = Pt(14)
@@ -329,25 +331,16 @@ def api_download_constructor_file(data: ConstructorDownloadSchema):
             run.font.name = "Times New Roman"
             run.font.size = Pt(14)
             run.font.color.rgb = RGBColor(0, 0, 0)
-        elif line.startswith('Юрисдикция:') or line.startswith('г. Москва'):
-            p = doc.add_paragraph()
-            p.paragraph_format.space_before = Pt(0)
-            p.paragraph_format.space_after = Pt(4)
+        elif line.startswith('Юрисдикция:') or line.startswith('г. Москва') or line.startswith('Стороны:'):
+            # Делаем преамбулу визуально соразмерной, четкой и с правильными отступами
+            p.paragraph_format.space_before = Pt(4)
+            p.paragraph_format.space_after = Pt(6)
             run = p.add_run(line)
-            run.font.name = "Times New Roman"
-            run.font.size = Pt(11)
-            run.font.color.rgb = RGBColor(0, 0, 0)
-        elif line.startswith('Стороны:'):
-            p = doc.add_paragraph()
-            p.paragraph_format.line_spacing = 1.15
-            p.paragraph_format.space_before = Pt(6)
-            p.paragraph_format.space_after = Pt(12)
-            run = p.add_run(line)
+            run.bold = True  # Делаем шапку плотной и насыщенной
             run.font.name = "Times New Roman"
             run.font.size = Pt(11)
             run.font.color.rgb = RGBColor(0, 0, 0)
         elif any(line.startswith(f"{i}.") for i in range(1, 10)):
-            p = doc.add_paragraph()
             p.paragraph_format.space_before = Pt(10)
             p.paragraph_format.space_after = Pt(4)
             run = p.add_run(line)
@@ -356,12 +349,9 @@ def api_download_constructor_file(data: ConstructorDownloadSchema):
             run.font.size = Pt(11)
             run.font.color.rgb = RGBColor(0, 0, 0)
         else:
-            p = doc.add_paragraph()
-            p.paragraph_format.line_spacing = 1.15
             p.paragraph_format.space_before = Pt(2)
             p.paragraph_format.space_after = Pt(4)
             run = p.add_run(line)
-            # Убран флаг жирности для обычного текста, чтобы он не казался "жирным/серым"
             run.bold = False
             run.font.name = "Times New Roman"
             run.font.size = Pt(11)
