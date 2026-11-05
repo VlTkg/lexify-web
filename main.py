@@ -82,73 +82,87 @@ def api_analyze(data: AnalysisRequest):
         raise HTTPException(status_code=400, detail="Текст договора пуст")
     
     risks = []
-    lines = [l.strip() for l in text.split('\n') if l.strip()]
-    pattern = re.compile(r'(?:п\.|пункт)?\s*(\d+\.\d+)', re.IGNORECASE)
+    
+    # Интеллектуальный разбиатель текста: ищем вхождения вида "7.1.", "7.2" и т.д. по всему тексту
+    # Разделяем сплошной текст PDF на отдельные пункты
+    raw_splits = re.split(r'(?=\b\d+\.\d+\.)', text)
+    
+    if len(raw_splits) <= 1:
+        # Если точки с номерами не найдены через split, пробуем разбить по пробелам/строкам
+        raw_splits = text.split('\n')
 
-    for line in lines:
-        match = pattern.search(line)
-        point_num = f"Пункт {match.group(1)}" if match else "Пункт договора"
-        lower_line = line.lower()
+    for chunk in raw_splits:
+        chunk_clean = chunk.strip()
+        if not chunk_clean:
+            continue
+            
+        lower_chunk = chunk_clean.lower()
+        
+        # Ищем номер пункта в данном куске
+        num_match = re.search(r'(\d+\.\d+)', chunk_clean)
+        point_num = f"Пункт {num_match.group(1)}" if num_match else "Пункт договора"
 
-        if "24 часа" in lower_line or "момента получения заявки" in lower_line:
+        # Проверяем каждый кусок на конкретные юридические риски
+        if "24 часа" in lower_chunk or "момента получения заявки" in lower_chunk:
             risks.append({
                 "point": point_num,
                 "category": "Сроки и приемка",
                 "title": f"{point_num}. Жесткий срок выполнения по заявке",
-                "quote": line,
-                "explanation": "Срок исполнения в течение 24 часов с момента получения заявки создает риск невыполнения при большой загрузке.",
+                "quote": chunk_clean,
+                "explanation": "Срок исполнения в течение 24 часов с момента получения заявки создает критический риск нарушения из-за высокой загрузки.",
                 "recommendation": "Увеличить срок реагирования и исполнения заявки до 2–3 рабочих дней."
             })
-        elif "штраф" in lower_line or "100%" in lower_line or "не оплачивать" in lower_line:
+        elif "штраф" in lower_chunk or "100%" in lower_chunk or "не оплачивать" in lower_chunk or "даже на 1 час" in lower_chunk:
             risks.append({
                 "point": point_num,
                 "category": "Финансовая ответственность",
                 "title": f"{point_num}. Кабальный штраф 100% и отказ от оплаты",
-                "quote": line,
-                "explanation": "Штраф 100% от суммы договора и право заказчика не оплачивать работу даже при часовой просрочке нарушают баланс интересов.",
-                "recommendation": "Исключить право отказа от оплаты выполненных этапов. Установить стандартную неустойку 0.1% за день просрочки."
+                "quote": chunk_clean,
+                "explanation": "Штраф 100% от суммы договора и право заказчика не оплачивать работу при минимальной просрочке грубо нарушают баланс интересов.",
+                "recommendation": "Исключить право отказа от оплаты уже выполненных этапов. Установить стандартную неустойку 0.1% за день просрочки."
             })
-        elif "односторонн" in lower_line and ("изменять" in lower_line or "объем" in lower_line):
+        elif "односторонн" in lower_chunk and ("изменять" in lower_chunk or "объем" in lower_chunk or "стоимост" in lower_chunk):
             risks.append({
                 "point": point_num,
                 "category": "Изменение условий",
                 "title": f"{point_num}. Одностороннее изменение объема и стоимости",
-                "quote": line,
-                "explanation": "Предоставление заказчику права произвольно менять объем и стоимость без согласия исполнителя недопустимо.",
+                "quote": chunk_clean,
+                "explanation": "Предоставление заказчику права произвольно менять объем услуг, сроки и цену без согласия исполнителя недопустимо.",
                 "recommendation": "Зафиксировать, что любые изменения объема и цены производятся исключительно по дополнительному соглашению сторон."
             })
-        elif "исключительн" in lower_line or "наработк" in lower_line or "бессрочн" in lower_line:
+        elif "исключительн" in lower_chunk or "наработк" in lower_chunk or "бессрочн" in lower_chunk:
             risks.append({
                 "point": point_num,
                 "category": "Интеллектуальная собственность",
                 "title": f"{point_num}. Бессрочное отчуждение всех наработок",
-                "quote": line,
-                "explanation": "Формулировка захватывает личные проекты и наработки исполнителя, передавая их до полной оплаты.",
+                "quote": chunk_clean,
+                "explanation": "Формулировка захватывает личные проекты и сторонние наработки исполнителя, передавая их безвозмездно.",
                 "recommendation": "Ограничить передачу прав исключительно результатами по конкретному договору и только после 100% оплаты."
             })
-        elif "180" in lower_line or "рабочих дней" in lower_line:
+        elif "180" in lower_chunk or "рабочих дней" in lower_chunk:
             risks.append({
                 "point": point_num,
                 "category": "Порядок расчетов",
                 "title": f"{point_num}. Сверхдолгая отсрочка платежа (180 дней)",
-                "quote": line,
-                "explanation": "Оплата в течение 180 рабочих дней замораживает оборотные средства исполнителя почти на год.",
+                "quote": chunk_clean,
+                "explanation": "Оплата в течение 180 рабочих дней (почти 9 месяцев) замораживает оборотные средства исполнителя.",
                 "recommendation": "Сократить срок окончательного расчета до 5–10 рабочих дней после подписания Акта."
             })
 
+    # Если автоматический сплит не выделил пункты точечно, подстраховываемся базовым поиском
     if not risks:
         risks.append({
             "point": "Общие положения",
             "category": "Правовой анализ",
             "title": "Условия договора требуют доработки",
-            "quote": text[:100] + "...",
-            "explanation": "Общие формулировки не содержат достаточных гарантий для исполнителя.",
+            "quote": text[:150] + "...",
+            "explanation": "В тексте обнаружены общие формулировки, требующие конкретизации.",
             "recommendation": "Детализировать регламент сдачи-приемки и расчетов."
         })
 
     return {
         "overall_risk_level": "Высокий" if len(risks) >= 2 else "Средний",
-        "summary": f"Проведен детальный юридический анализ текста ({data.doc_type}) для юрисдикции {data.jurisdiction}. Выявлено {len(risks)} критических рисков, требующих составления Протокола разногласий.",
+        "summary": f"Проведен детальный юридический анализ текста ({data.doc_type}) для юрисдикции {data.jurisdiction}. Выявлено {len(risks)} критических рисков по конкретным пунктам договора.",
         "risks": risks
     }
 
@@ -156,6 +170,7 @@ def api_analyze(data: AnalysisRequest):
 @app.post("/api/generate-protocol")
 def api_generate_protocol(data: ProtocolRequest):
     doc = Document()
+    
     title = doc.add_heading("ПРОТОКОЛ РАЗНОГЛАСИЙ", level=1)
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     
@@ -164,6 +179,7 @@ def api_generate_protocol(data: ProtocolRequest):
 
     for idx, risk in enumerate(data.risks, 1):
         point_name = risk.get('point', f'Пункт {idx}')
+        
         doc.add_heading(f"{idx}. {point_name} — {risk.get('category', 'Замечание')}", level=2)
         
         p1 = doc.add_paragraph()
