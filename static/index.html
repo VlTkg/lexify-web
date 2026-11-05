@@ -16,7 +16,6 @@
         .transparent-card { background-color: transparent !important; border: none !important; }
         .identical-input-box { border: 1px solid #cbd5e1; background-color: #ffffff; border-radius: 0.75rem; padding: 0.65rem 0.875rem; font-size: 0.75rem; font-weight: 500; color: #334155; width: 100%; display: flex; align-items: center; }
         .chip-btn.active { background-color: #2563eb; color: #ffffff; border-color: #2563eb; }
-        /* Единый насыщенный черный цвет и плотный шрифт для всего превью */
         #analysis-output, #analysis-output * { color: #000000 !important; font-weight: 500 !important; }
         #analysis-output h1 { font-size: 1.1rem; font-weight: bold; text-align: center; margin-bottom: 0.75rem; }
         #analysis-output p { margin-bottom: 0.5rem; line-height: 1.4; }
@@ -30,10 +29,12 @@
                 <p class="text-xs text-slate-200">Сервис автоматической проверки и генерации документов</p>
             </div>
             <div class="flex items-center gap-2">
-                <button type="button" id="admin-btn" onclick="openAdminModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-2.5 py-1.5 rounded-xl text-xs hidden flex items-center gap-1">
+                <!-- Возвращена кнопка Админ -->
+                <button type="button" id="admin-btn" onclick="openAdminModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-2.5 py-1.5 rounded-xl text-xs flex items-center gap-1">
                     <i class="fa-solid fa-shield-halved"></i> Админ
                 </button>
-                <div id="user-badge" class="bg-slate-700/90 px-3 py-1.5 rounded-xl border border-slate-500 text-xs text-slate-100 hidden flex items-center gap-2">
+                <!-- Возвращен счетчик проверок -->
+                <div id="user-badge" class="bg-slate-700/90 px-3 py-1.5 rounded-xl border border-slate-500 text-xs text-slate-100 flex items-center gap-2">
                     <span>Проверок: <span id="checks-count" class="font-bold text-amber-400">3</span></span>
                     <button type="button" onclick="openStarsModal()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-2 py-0.5 rounded-lg text-[11px]">
                         <i class="fa-solid fa-star"></i> Купить
