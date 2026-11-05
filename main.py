@@ -165,14 +165,12 @@ def api_analyze(data: AnalysisRequest):
 def api_generate_protocol(data: ProtocolRequest):
     doc = Document()
     
-    # Поля страницы
     for section in doc.sections:
         section.top_margin = Inches(1)
         section.bottom_margin = Inches(1)
         section.left_margin = Inches(1)
         section.right_margin = Inches(1)
 
-    # Строгий заголовок без лишних эффектов
     title_p = doc.add_paragraph()
     title_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     title_p.paragraph_format.space_after = Pt(4)
@@ -190,7 +188,6 @@ def api_generate_protocol(data: ProtocolRequest):
     run_sub.font.size = Pt(11)
     run_sub.font.color.rgb = RGBColor(60, 60, 60)
 
-    # Таблица протокола
     table = doc.add_table(rows=1, cols=4)
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
     table.autofit = False
@@ -205,15 +202,15 @@ def api_generate_protocol(data: ProtocolRequest):
         hdr_cells[i].width = col_widths[i]
         p = hdr_cells[i].paragraphs[0]
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        p.paragraph_format.space_before = Pt(6)
-        p.paragraph_format.space_after = Pt(6)
+        p.paragraph_format.space_before = Pt(8)
+        p.paragraph_format.space_after = Pt(8)
         for run in p.runs:
             run.bold = True
             run.font.name = "Times New Roman"
             run.font.size = Pt(10)
-            run.font.color.rgb = RGBColor(255, 255, 255)
-        # Спокойный темно-серый фон шапки и внутренние отступы ячеек
-        shading_xml = parse_xml(r'<w:shd {} w:fill="4A5568"/>'.format(nsdecls('w')))
+            run.font.color.rgb = RGBColor(30, 41, 59)
+        # Светло-серый профессиональный фон шапки (#E2E8F0)
+        shading_xml = parse_xml(r'<w:shd {} w:fill="E2E8F0"/>'.format(nsdecls('w')))
         hdr_cells[i]._tc.get_or_add_tcPr().append(shading_xml)
 
     for idx, risk in enumerate(data.risks, 1):
@@ -227,8 +224,8 @@ def api_generate_protocol(data: ProtocolRequest):
             cell.width = col_widths[i]
             for p in cell.paragraphs:
                 p.paragraph_format.line_spacing = 1.15
-                p.paragraph_format.space_before = Pt(4)
-                p.paragraph_format.space_after = Pt(4)
+                p.paragraph_format.space_before = Pt(6)
+                p.paragraph_format.space_after = Pt(6)
                 for run in p.runs:
                     run.font.name = "Times New Roman"
                     run.font.size = Pt(10)
