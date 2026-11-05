@@ -165,39 +165,37 @@ def api_analyze(data: AnalysisRequest):
 def api_generate_protocol(data: ProtocolRequest):
     doc = Document()
     
-    # Настройка полей документа
-    sections = doc.sections
-    for section in sections:
+    # Поля страницы
+    for section in doc.sections:
         section.top_margin = Inches(1)
         section.bottom_margin = Inches(1)
         section.left_margin = Inches(1)
         section.right_margin = Inches(1)
 
-    # Заголовок протокола
+    # Строгий заголовок без лишних эффектов
     title_p = doc.add_paragraph()
     title_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    title_p.paragraph_format.space_after = Pt(4)
     run_t = title_p.add_run("ПРОТОКОЛ РАЗНОГЛАСИЙ")
     run_t.bold = True
     run_t.font.name = "Times New Roman"
-    run_t.font.size = Pt(14)
+    run_t.font.size = Pt(13)
     run_t.font.color.rgb = RGBColor(0, 0, 0)
 
     sub_p = doc.add_paragraph()
     sub_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run_sub = sub_p.add_run(f"к Договору оказания услуг ({data.doc_type})\nЮрисдикция: {data.jurisdiction}\n")
+    sub_p.paragraph_format.space_after = Pt(14)
+    run_sub = sub_p.add_run(f"к Договору оказания услуг ({data.doc_type})\nЮрисдикция: {data.jurisdiction}")
     run_sub.font.name = "Times New Roman"
     run_sub.font.size = Pt(11)
-    run_sub.font.color.rgb = RGBColor(50, 50, 50)
+    run_sub.font.color.rgb = RGBColor(60, 60, 60)
 
-    doc.add_paragraph() # Отступ
-
-    # Создаем красивую таблицу с протоколом
+    # Таблица протокола
     table = doc.add_table(rows=1, cols=4)
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
     table.autofit = False
 
-    # Задаем ширину колонок
-    col_widths = [Inches(0.6), Inches(2.2), Inches(2.0), Inches(2.2)]
+    col_widths = [Inches(0.5), Inches(2.3), Inches(2.1), Inches(2.1)]
     
     hdr_cells = table.rows[0].cells
     hdr_titles = ["№", "Редакция Заказчика", "Суть замечания / Риск", "Рекомендуемая редакция"]
@@ -205,22 +203,21 @@ def api_generate_protocol(data: ProtocolRequest):
     for i, title_text in enumerate(hdr_titles):
         hdr_cells[i].text = title_text
         hdr_cells[i].width = col_widths[i]
-        # Стилизация шапки таблицы
         p = hdr_cells[i].paragraphs[0]
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.paragraph_format.space_before = Pt(6)
+        p.paragraph_format.space_after = Pt(6)
         for run in p.runs:
             run.bold = True
             run.font.name = "Times New Roman"
             run.font.size = Pt(10)
             run.font.color.rgb = RGBColor(255, 255, 255)
-        # Заливка шапки темно-серым цветом
-        shading_xml = parse_xml(r'<w:shd {} w:fill="333333"/>'.format(nsdecls('w')))
+        # Спокойный темно-серый фон шапки и внутренние отступы ячеек
+        shading_xml = parse_xml(r'<w:shd {} w:fill="4A5568"/>'.format(nsdecls('w')))
         hdr_cells[i]._tc.get_or_add_tcPr().append(shading_xml)
 
-    # Заполняем таблицу данными по каждому пункту
     for idx, risk in enumerate(data.risks, 1):
         row_cells = table.add_row().cells
-        
         row_cells[0].text = str(idx)
         row_cells[1].text = f"«{risk.get('quote', '-')}»"
         row_cells[2].text = risk.get('explanation', '-')
@@ -230,6 +227,8 @@ def api_generate_protocol(data: ProtocolRequest):
             cell.width = col_widths[i]
             for p in cell.paragraphs:
                 p.paragraph_format.line_spacing = 1.15
+                p.paragraph_format.space_before = Pt(4)
+                p.paragraph_format.space_after = Pt(4)
                 for run in p.runs:
                     run.font.name = "Times New Roman"
                     run.font.size = Pt(10)
