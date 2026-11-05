@@ -332,16 +332,23 @@ def api_download_constructor_file(data: ConstructorDownloadSchema):
             run.font.size = Pt(14)
             run.font.color.rgb = RGBColor(0, 0, 0)
         elif line.startswith('Юрисдикция:') or line.startswith('г. Москва') or line.startswith('Стороны:'):
-            # Делаем преамбулу визуально соразмерной, четкой и с правильными отступами
             p.paragraph_format.space_before = Pt(4)
             p.paragraph_format.space_after = Pt(6)
             run = p.add_run(line)
-            run.bold = True  # Делаем шапку плотной и насыщенной
+            run.bold = True
             run.font.name = "Times New Roman"
             run.font.size = Pt(11)
             run.font.color.rgb = RGBColor(0, 0, 0)
-        elif any(line.startswith(f"{i}.") for i in range(1, 10)):
+        elif any(line.startswith(f"{i}.") for i in range(1, 10)) or line.startswith('7. РЕКВИЗИТЫ'):
             p.paragraph_format.space_before = Pt(10)
+            p.paragraph_format.space_after = Pt(4)
+            run = p.add_run(line)
+            run.bold = True
+            run.font.name = "Times New Roman"
+            run.font.size = Pt(11)
+            run.font.color.rgb = RGBColor(0, 0, 0)
+        elif line.startswith('Исполнитель:') or line.startswith('Заказчик:'):
+            p.paragraph_format.space_before = Pt(12)
             p.paragraph_format.space_after = Pt(4)
             run = p.add_run(line)
             run.bold = True
