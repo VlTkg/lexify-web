@@ -361,6 +361,8 @@ def api_download_constructor_file(data: ConstructorDownloadSchema):
             p.paragraph_format.space_before = Pt(2)
             p.paragraph_format.space_after = Pt(4)
             run = p.add_run(line)
+            # Убран флаг жирности для обычного текста, чтобы он не казался "жирным/серым"
+            run.bold = False
             run.font.name = "Times New Roman"
             run.font.size = Pt(11)
             run.font.color.rgb = RGBColor(0, 0, 0)
