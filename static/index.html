@@ -4,127 +4,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Lexify — Экспресс-анализ договоров и Конструктор</title>
-    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Marked.js for Markdown formatting -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <!-- pdf.js for client-side PDF parsing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <!-- mammoth.js for client-side DOCX parsing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-    <!-- FontAwesome icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --bg-color: #64748b;
-            --card-bg: #ffffff;
-            --text-color: #0f172a;
-            --border-color: #cbd5e1;
-        }
-
-        body {
-            background-color: #64748b !important;
-            color: #ffffff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .tg-card {
-            background-color: #ffffff;
-            border-color: #cbd5e1;
-            word-break: break-word;
-            overflow-wrap: break-word;
-        }
-
-        .transparent-card {
-            background-color: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-        }
-
-        .identical-input-box {
-            border: 1px solid #cbd5e1;
-            background-color: #ffffff;
-            border-radius: 0.75rem;
-            padding: 0.65rem 0.875rem;
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: #334155;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            transition: all 0.2s ease-in-out;
-        }
-
-        .identical-input-box:focus-within {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
-        }
-
-        .chip-btn {
-            transition: all 0.15s ease;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-
-        .chip-btn.active {
-            background-color: #2563eb;
-            color: #ffffff;
-            border-color: #2563eb;
-        }
+        body { background-color: #64748b !important; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        .tg-card { background-color: #ffffff; border-color: #cbd5e1; word-break: break-word; overflow-wrap: break-word; }
+        .transparent-card { background-color: transparent !important; border: none !important; }
+        .identical-input-box { border: 1px solid #cbd5e1; background-color: #ffffff; border-radius: 0.75rem; padding: 0.65rem 0.875rem; font-size: 0.75rem; font-weight: 500; color: #334155; width: 100%; display: flex; align-items: center; }
+        .chip-btn.active { background-color: #2563eb; color: #ffffff; border-color: #2563eb; }
     </style>
 </head>
 <body class="min-h-screen pb-6 pt-2 px-3 md:px-6 flex flex-col justify-between">
-
     <div class="max-w-7xl mx-auto space-y-3 w-full">
-        
-        <!-- Header -->
         <header class="mb-1 flex items-center justify-between">
             <div>
                 <h1 class="text-2xl font-bold tracking-tight text-white">Lexify</h1>
                 <p class="text-xs text-slate-200">Сервис автоматической проверки и генерации документов</p>
             </div>
-            <!-- Счетчик проверок и Админ-кнопка -->
             <div class="flex items-center gap-2">
-                <button type="button" id="admin-btn" onclick="openAdminModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-2.5 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1 shadow-xs hidden">
-                    <i class="fa-solid fa-shield-halved text-[11px]"></i> Админ
+                <button type="button" id="admin-btn" onclick="openAdminModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-2.5 py-1.5 rounded-xl text-xs hidden flex items-center gap-1">
+                    <i class="fa-solid fa-shield-halved"></i> Админ
                 </button>
-                <div id="user-badge" class="bg-slate-700/90 px-3 py-1.5 rounded-xl border border-slate-500 text-xs text-slate-100 hidden shadow-sm flex items-center gap-2">
+                <div id="user-badge" class="bg-slate-700/90 px-3 py-1.5 rounded-xl border border-slate-500 text-xs text-slate-100 hidden flex items-center gap-2">
                     <span>Проверок: <span id="checks-count" class="font-bold text-amber-400">3</span></span>
-                    <button type="button" onclick="openStarsModal()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-2 py-0.5 rounded-lg text-[11px] transition-all flex items-center gap-1 shadow-xs">
-                        <i class="fa-solid fa-star text-[10px]"></i> Купить
+                    <button type="button" onclick="openStarsModal()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-2 py-0.5 rounded-lg text-[11px]">
+                        <i class="fa-solid fa-star"></i> Купить
                     </button>
                 </div>
             </div>
         </header>
 
-        <!-- Навигация по вкладкам -->
         <div class="flex space-x-2 border-b border-slate-500/40 pb-2">
             <button id="tab-analysis" onclick="switchTab('analysis')" class="px-4 py-1.5 font-semibold text-xs text-white bg-blue-600 rounded-xl transition shadow-xs">🔍 Анализ договора</button>
             <button id="tab-constructor" onclick="switchTab('constructor')" class="px-4 py-1.5 font-semibold text-xs text-slate-200 hover:text-white bg-slate-700/60 rounded-xl transition shadow-xs">📝 Конструктор документов</button>
         </div>
 
-        <!-- Main Grid Layout -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-
-            <!-- LEFT COLUMN -->
             <main class="lg:col-span-7 flex flex-col justify-between space-y-3">
-
-                <!-- TAB 1: ANALYSIS SECTION -->
                 <div id="analysis-section" class="space-y-3">
                     <div class="transparent-card p-2.5">
                         <h2 class="text-xs font-bold text-white mb-1">Как это работает</h2>
-                        <ol class="text-xs text-slate-100 space-y-0.5 pl-4 list-decimal leading-snug">
+                        <ol class="text-xs text-slate-100 space-y-0.5 pl-4 list-decimal">
                             <li>Выберите тип договора и юрисдикцию</li>
                             <li>Загрузите файл или вставьте текст</li>
                             <li>Нажмите кнопку «Анализировать»</li>
                         </ol>
                     </div>
-
                     <div class="transparent-card p-0 space-y-3">
                         <div>
                             <label class="block text-xs font-bold text-white mb-1.5">Тип договора</label>
@@ -136,7 +65,6 @@
                                 <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-800" data-value="Поставка">Поставка</button>
                             </div>
                         </div>
-
                         <div>
                             <label class="block text-xs font-bold text-white mb-1.5">Юрисдикция</label>
                             <div class="flex flex-wrap gap-1.5" id="jurisdiction-group">
@@ -145,282 +73,106 @@
                                 <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-800" data-value="Беларусь">Беларусь</button>
                             </div>
                         </div>
-
                         <div class="space-y-2">
-                            <div>
-                                <div id="dropzone" class="identical-input-box justify-start cursor-pointer hover:bg-slate-50 transition-colors">
-                                    <input type="file" id="file-input" accept=".pdf,.docx,.odt,.txt" class="hidden">
-                                    
-                                    <div id="dropzone-prompt" class="flex items-center justify-start gap-2 w-full text-xs font-medium text-slate-700 pointer-events-none">
-                                        <i class="fa-solid fa-circle-plus text-blue-600 text-xs"></i>
-                                        <span>Перетащите файл</span>
+                            <div id="dropzone" class="identical-input-box justify-start cursor-pointer hover:bg-slate-50">
+                                <input type="file" id="file-input" accept=".pdf,.docx,.odt,.txt" class="hidden">
+                                <div id="dropzone-prompt" class="flex items-center gap-2 text-xs font-medium text-slate-700 pointer-events-none">
+                                    <i class="fa-solid fa-circle-plus text-blue-600"></i><span>Перетащите файл</span>
+                                </div>
+                                <div id="file-selected-info" class="hidden flex items-center justify-between bg-white w-full">
+                                    <div class="flex items-center gap-2 text-xs font-medium text-slate-700 pointer-events-none truncate">
+                                        <i class="fa-solid fa-file-contract text-blue-600"></i><span id="file-name" class="truncate"></span>
                                     </div>
-
-                                    <div id="file-selected-info" class="hidden flex items-center justify-between bg-white w-full">
-                                        <div class="flex items-center gap-2 overflow-hidden text-xs font-medium text-slate-700 pointer-events-none">
-                                            <i class="fa-solid fa-file-contract text-blue-600 text-xs"></i>
-                                            <span id="file-name" class="truncate">document.docx</span>
-                                        </div>
-                                        <button type="button" id="remove-file-btn" class="text-slate-400 hover:text-red-500 p-1 z-10">
-                                            <i class="fa-solid fa-xmark text-xs pointer-events-none"></i>
-                                        </button>
-                                    </div>
+                                    <button type="button" id="remove-file-btn" class="text-slate-400 hover:text-red-500 p-1 z-10"><i class="fa-solid fa-xmark"></i></button>
                                 </div>
                             </div>
-
-                            <div>
-                                <div id="text-input-container" class="identical-input-box justify-start bg-white cursor-text transition-all" onclick="document.getElementById('contract-text').focus()">
-                                    <div id="text-icon-wrapper" class="flex items-center justify-center text-blue-600 text-xs flex-shrink-0">
-                                        <i class="fa-solid fa-file-lines"></i>
-                                    </div>
-                                    <div class="flex-1 relative">
-                                        <textarea id="contract-text" rows="1" placeholder="Вставьте текст договора..."
-                                            class="w-full bg-transparent border-none focus:outline-none text-xs text-slate-900 font-medium resize-none overflow-hidden placeholder:text-slate-700 placeholder:font-medium text-left"
-                                            oninput="this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';"
-                                            onfocus="document.getElementById('text-input-container').style.borderColor='#2563eb';"
-                                            onblur="document.getElementById('text-input-container').style.borderColor='#cbd5e1';"></textarea>
-                                    </div>
-                                </div>
+                            <div id="text-input-container" class="identical-input-box bg-white cursor-text" onclick="document.getElementById('contract-text').focus()">
+                                <textarea id="contract-text" rows="1" placeholder="Вставьте текст договора..." class="w-full bg-transparent border-none focus:outline-none text-xs text-slate-900 resize-none placeholder:text-slate-700" oninput="this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';"></textarea>
                             </div>
                         </div>
-
-                        <div class="text-[10px] text-slate-200 text-center leading-tight">
-                            Нажимая «Анализировать», вы принимаете условия <a href="#" onclick="openTermsModal(event)" class="underline hover:text-white">Публичной оферты</a>.
-                        </div>
-
-                        <div class="flex flex-col sm:flex-row gap-2 pt-0.5">
-                            <button type="button" id="analyze-btn" onclick="startAnalysis()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow transition-all flex items-center justify-center gap-2 text-xs">
-                                <span>Анализировать</span>
-                            </button>
-                            <button type="button" id="reset-btn" onclick="resetForm()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 text-xs">
-                                <span>Новый анализ</span>
-                            </button>
+                        <div class="flex gap-2 pt-0.5">
+                            <button type="button" onclick="startAnalysis()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl text-xs">Анализировать</button>
+                            <button type="button" onclick="resetForm()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2.5 px-4 rounded-xl text-xs">Новый анализ</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- TAB 2: CONSTRUCTOR SECTION -->
                 <div id="constructor-section" class="hidden space-y-3">
                     <div class="transparent-card p-2.5">
                         <h2 class="text-xs font-bold text-white mb-1">Как это работает</h2>
-                        <ol class="text-xs text-slate-100 space-y-0.5 pl-4 list-decimal leading-snug">
+                        <ol class="text-xs text-slate-100 space-y-0.5 pl-4 list-decimal">
                             <li>Выберите тип, юрисдикцию и параметры</li>
                             <li>Заполните суть услуг и требования</li>
                             <li>Нажмите кнопку «Сгенерировать документ»</li>
                         </ol>
                     </div>
-
                     <div class="transparent-card p-0 space-y-2.5 text-xs">
                         <div>
                             <label class="block font-bold text-white mb-1.5">Тип документа</label>
-                            <div class="flex flex-wrap gap-1.5" id="c-doc-type-group">
+                            <div class="flex gap-1.5" id="c-doc-type-group">
                                 <button type="button" class="chip-btn active px-3 py-1.5 rounded-xl border border-slate-300" data-value="contract">Договор оказания услуг</button>
                                 <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-800" data-value="offer">Публичная оферта</button>
                             </div>
                         </div>
-                        
                         <div>
                             <label class="block font-bold text-white mb-1.5">Юрисдикция</label>
-                            <div class="flex flex-wrap gap-1.5" id="c-jurisdiction-group">
+                            <div class="flex gap-1.5" id="c-jurisdiction-group">
                                 <button type="button" class="chip-btn active px-3 py-1.5 rounded-xl border border-slate-300" data-value="Россия (РФ)">Россия (РФ)</button>
                                 <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-800" data-value="Казахстан">Казахстан</button>
                                 <button type="button" class="chip-btn px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-200 text-slate-800" data-value="Беларусь">Беларусь</button>
                             </div>
                         </div>
-
                         <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block font-bold text-white mb-1">Исполнитель</label>
-                                <input type="text" id="c-executor" value="Самозанятый" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white">
-                            </div>
-                            <div>
-                                <label class="block font-bold text-white mb-1">Заказчик</label>
-                                <input type="text" id="c-client" value="Заказчик" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white">
-                            </div>
+                            <div><label class="block font-bold text-white mb-1">Исполнитель</label><input type="text" id="c-executor" value="Самозанятый" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white"></div>
+                            <div><label class="block font-bold text-white mb-1">Заказчик</label><input type="text" id="c-client" value="Заказчик" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white"></div>
                         </div>
-                        <div>
-                            <label class="block font-bold text-white mb-1">Суть услуг и предмет</label>
-                            <textarea id="c-description" rows="2" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white resize-none" placeholder="Например: Разработка программного обеспечения и бэкенда на Python"></textarea>
-                        </div>
+                        <div><label class="block font-bold text-white mb-1">Суть услуг и предмет</label><textarea id="c-description" rows="2" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white resize-none" placeholder="Разработка ПО..."></textarea></div>
                         <div class="grid grid-cols-3 gap-2">
-                            <div>
-                                <label class="block font-bold text-white mb-1">Оплата</label>
-                                <input type="text" id="c-payment" value="Постоплата" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white">
-                            </div>
-                            <div>
-                                <label class="block font-bold text-white mb-1">Сроки</label>
-                                <input type="text" id="c-deadline" value="14 дней" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white">
-                            </div>
-                            <div>
-                                <label class="block font-bold text-white mb-1">Правки</label>
-                                <input type="text" id="c-revisions" value="2" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white">
-                            </div>
+                            <div><label class="block font-bold text-white mb-1">Оплата</label><input type="text" id="c-payment" value="Постоплата" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white"></div>
+                            <div><label class="block font-bold text-white mb-1">Сроки</label><input type="text" id="c-deadline" value="14 дней" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white"></div>
+                            <div><label class="block font-bold text-white mb-1">Правки</label><input type="text" id="c-revisions" value="2" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white"></div>
                         </div>
-                        <div class="flex flex-col sm:flex-row gap-2 pt-1">
-                            <button type="button" onclick="generateConstructorDocument()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-4 rounded-xl transition shadow text-xs flex items-center justify-center gap-2">
-                                <span>Сгенерировать документ</span>
-                            </button>
-                            <button type="button" onclick="resetConstructorForm()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2.5 px-4 rounded-xl transition shadow text-xs flex items-center justify-center gap-2">
-                                <span>Новый документ</span>
-                            </button>
+                        <div class="flex gap-2 pt-1">
+                            <button type="button" onclick="generateConstructorDocument()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-4 rounded-xl text-xs">Сгенерировать документ</button>
+                            <button type="button" onclick="resetConstructorForm()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2.5 px-4 rounded-xl text-xs">Новый документ</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Feedback Panel -->
-                <div class="tg-card bg-white p-3.5 rounded-2xl border shadow-sm space-y-2">
+                <div class="tg-card bg-white p-3.5 rounded-2xl shadow-sm space-y-2">
                     <div class="flex items-center justify-between">
                         <h2 class="font-bold text-slate-800 text-xs">Обратная связь</h2>
                         <div class="flex items-center gap-1 text-amber-400 text-sm cursor-pointer" id="star-rating">
-                            <i class="fa-solid fa-star" data-rating="1"></i>
-                            <i class="fa-solid fa-star" data-rating="2"></i>
-                            <i class="fa-solid fa-star" data-rating="3"></i>
-                            <i class="fa-solid fa-star" data-rating="4"></i>
-                            <i class="fa-solid fa-star text-slate-300" data-rating="5"></i>
+                            <i class="fa-solid fa-star" data-rating="1"></i><i class="fa-solid fa-star" data-rating="2"></i><i class="fa-solid fa-star" data-rating="3"></i><i class="fa-solid fa-star" data-rating="4"></i><i class="fa-solid fa-star text-slate-300" data-rating="5"></i>
                         </div>
                     </div>
-                    <div class="flex items-center gap-4 text-xs text-slate-600">
-                        <label class="flex items-center gap-1.5 cursor-pointer">
-                            <input type="radio" name="fb-type" id="fb-type-primary" value="Оценка анализа" checked class="accent-blue-600"> <span id="fb-type-label">Оценка анализа</span>
-                        </label>
-                        <label class="flex items-center gap-1.5 cursor-pointer">
-                            <input type="radio" name="fb-type" value="Баг / Ошибка" class="accent-blue-600"> Баг / Ошибка
-                        </label>
-                    </div>
-                    <div class="flex items-center gap-2 text-xs font-medium">
-                        <button type="button" class="sentiment-btn py-1 px-2.5 border rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1" data-value="Полезно">
-                            <i class="fa-regular fa-thumbs-up text-green-600 text-xs"></i> Полезно
-                        </button>
-                        <button type="button" class="sentiment-btn py-1 px-2.5 border rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1" data-value="Замечания">
-                            <i class="fa-regular fa-thumbs-down text-amber-600 text-xs"></i> Замечания
-                        </button>
-                    </div>
-                    <div class="space-y-1.5">
-                        <textarea id="feedback-text" rows="1" placeholder="Ваш отзыв или описание проблемы..." class="w-full p-2 text-xs text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
-                        <button type="button" id="send-fb-btn" onclick="sendFeedback()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-xl transition-all text-xs flex items-center justify-center gap-1.5 shadow-sm">
-                            <i class="fa-regular fa-paper-plane text-xs"></i>
-                            <span>Отправить отзыв</span>
-                        </button>
-                    </div>
+                    <textarea id="feedback-text" rows="1" placeholder="Ваш отзыв..." class="w-full p-2 text-xs text-slate-900 bg-slate-50 border border-slate-200 rounded-xl resize-none"></textarea>
+                    <button type="button" onclick="sendFeedback()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-xl text-xs">Отправить отзыв</button>
                 </div>
-
             </main>
 
-            <!-- RIGHT COLUMN: Results -->
             <aside class="lg:col-span-5 flex flex-col" id="results-card-container">
-                <div id="results-card" class="tg-card bg-white p-4 rounded-2xl border shadow-sm flex-1 flex flex-col min-h-[460px] overflow-hidden">
+                <div id="results-card" class="tg-card bg-white p-4 rounded-2xl shadow-sm flex-1 flex flex-col min-h-[460px] overflow-hidden">
                     <div class="border-b border-slate-100 pb-2 flex flex-wrap items-center justify-between gap-1">
                         <h2 id="results-title" class="font-bold text-xs text-slate-900">Результаты анализа</h2>
-                        <div class="flex items-center gap-1 flex-wrap justify-end">
-                            <button type="button" id="copy-doc-btn" onclick="copyDocumentOutput()" class="hidden bg-slate-200 hover:bg-slate-300 text-slate-800 font-medium px-2 py-1 rounded-lg text-[11px] transition-all flex items-center gap-1 shadow-xs">
-                                <i class="fa-regular fa-copy"></i> Копировать
-                            </button>
-                            <button type="button" id="download-doc-btn" onclick="downloadConstructorFile()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-2 py-1 rounded-lg text-[11px] transition-all flex items-center gap-1 shadow-xs">
-                                <i class="fa-solid fa-download"></i> Загрузить .docx
-                            </button>
-                            <button type="button" id="protocol-btn" onclick="generateProtocol()" class="hidden bg-slate-800 hover:bg-slate-900 text-white font-medium px-2 py-1 rounded-lg text-[11px] transition-all flex items-center gap-1 shadow-xs">
-                                <i class="fa-solid fa-file-word text-blue-400"></i>
-                                <span>Протокол разногласий</span>
-                            </button>
+                        <div class="flex items-center gap-1">
+                            <button type="button" id="copy-doc-btn" onclick="copyDocumentOutput()" class="hidden bg-slate-200 hover:bg-slate-300 text-slate-800 font-medium px-2 py-1 rounded-lg text-[11px]"><i class="fa-regular fa-copy"></i> Копировать</button>
+                            <button type="button" id="download-doc-btn" onclick="downloadConstructorFile()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-2 py-1 rounded-lg text-[11px]"><i class="fa-solid fa-download"></i> Загрузить .docx</button>
+                            <button type="button" id="protocol-btn" onclick="generateProtocol()" class="hidden bg-slate-800 hover:bg-slate-900 text-white font-medium px-2 py-1 rounded-lg text-[11px]"><i class="fa-solid fa-file-word text-blue-400"></i> Протокол разногласий</button>
                         </div>
                     </div>
-                    <div class="flex-1 flex flex-col p-2 overflow-y-auto max-h-[500px] w-full" id="results-container-wrapper">
-                        <div id="analysis-output" class="text-xs text-slate-700 leading-relaxed text-center w-full my-auto break-words overflow-hidden">
-                            Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».
-                        </div>
+                    <div class="flex-1 flex flex-col p-2 overflow-y-auto max-h-[500px]" id="results-container-wrapper">
+                        <div id="analysis-output" class="text-xs text-slate-700 leading-relaxed text-center my-auto">Здесь появятся результаты проверки договора после нажатия кнопки «Анализировать».</div>
                     </div>
                 </div>
             </aside>
-
         </div>
     </div>
 
-    <!-- Footer -->
     <footer class="mt-6 text-center text-xs text-slate-300 border-t border-slate-500/30 pt-3">
-        <span>© 2026 Lexify. Все права защищены. • </span>
-        <a href="#" onclick="openTermsModal(event)" class="underline hover:text-white transition-colors">Публичная оферта</a>
+        <span>© 2026 Lexify. Все права защищены.</span>
     </footer>
 
-    <!-- Modals -->
-    <div id="stars-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-2xl max-w-sm w-full p-5 space-y-4 text-slate-900 shadow-xl border border-slate-100">
-            <div class="flex items-center justify-between">
-                <h3 class="font-bold text-base flex items-center gap-2 text-slate-900">
-                    <i class="fa-solid fa-star text-amber-500"></i> Пакеты проверок
-                </h3>
-                <button type="button" onclick="closeStarsModal()" class="text-slate-400 hover:text-slate-600 p-1">
-                    <i class="fa-solid fa-xmark text-sm"></i>
-                </button>
-            </div>
-            <p class="text-xs text-slate-600 leading-snug">
-                Лимиты бесплатных проверок исчерпаны или заканчиваются. Выберите пакет и оплатите звёздами Telegram (Stars):
-            </p>
-            <div class="space-y-2.5">
-                <button type="button" onclick="buyPackage('5_checks')" class="w-full bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-400 p-3 rounded-xl transition-all flex items-center justify-between text-left group">
-                    <div>
-                        <div class="font-bold text-xs text-slate-900 group-hover:text-blue-600">5 проверок договора</div>
-                        <div class="text-[11px] text-slate-500">Для оперативных задач</div>
-                    </div>
-                    <div class="bg-amber-100 text-amber-800 font-bold px-2.5 py-1 rounded-lg text-xs flex items-center gap-1">
-                        <span>50</span> <i class="fa-solid fa-star text-[10px]"></i>
-                    </div>
-                </button>
-                <button type="button" onclick="buyPackage('15_checks')" class="w-full bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-400 p-3 rounded-xl transition-all flex items-center justify-between text-left group">
-                    <div>
-                        <div class="font-bold text-xs text-slate-900 group-hover:text-blue-600">15 проверок договора</div>
-                        <div class="text-[11px] text-slate-500">Выгодный пакет</div>
-                    </div>
-                    <div class="bg-amber-100 text-amber-800 font-bold px-2.5 py-1 rounded-lg text-xs flex items-center gap-1">
-                        <span>120</span> <i class="fa-solid fa-star text-[10px]"></i>
-                    </div>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Admin Modal -->
-    <div id="admin-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-5 space-y-4 text-slate-900 shadow-xl border border-slate-100 max-h-[90vh] flex flex-col">
-            <div class="flex items-center justify-between border-b pb-2 flex-shrink-0">
-                <h3 class="font-bold text-base flex items-center gap-2 text-slate-900">
-                    <i class="fa-solid fa-shield-halved text-indigo-600"></i> Админ-панель
-                </h3>
-                <button type="button" onclick="closeAdminModal()" class="text-slate-400 hover:text-slate-600 p-1">
-                    <i class="fa-solid fa-xmark text-sm"></i>
-                </button>
-            </div>
-            <div id="admin-stats-content" class="space-y-4 overflow-y-auto flex-1 pr-1 text-xs">
-                <div class="text-center text-slate-500 py-4"><i class="fa-solid fa-spinner fa-spin"></i> Загрузка...</div>
-            </div>
-            <button type="button" onclick="closeAdminModal()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-800 font-medium py-2 rounded-xl text-xs transition-all flex-shrink-0">
-                Закрыть
-            </button>
-        </div>
-    </div>
-
-    <!-- Terms Modal -->
-    <div id="terms-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-2xl max-w-2xl w-full p-5 space-y-4 text-slate-900 shadow-xl border border-slate-100 max-h-[85vh] flex flex-col">
-            <div class="flex items-center justify-between border-b pb-2 flex-shrink-0">
-                <h3 class="font-bold text-base flex items-center gap-2 text-slate-900">
-                    <i class="fa-solid fa-file-contract text-blue-600"></i> Публичная оферта
-                </h3>
-                <button type="button" onclick="closeTermsModal()" class="text-slate-400 hover:text-slate-600 p-1">
-                    <i class="fa-solid fa-xmark text-sm"></i>
-                </button>
-            </div>
-            <div class="space-y-3 overflow-y-auto flex-1 pr-2 text-xs text-slate-700 leading-relaxed">
-                <p class="font-bold text-slate-900">ПУБЛИЧНАЯ ОФЕРТА (ПОЛЬЗОВАТЕЛЬСКОЕ СОГЛАШЕНИЕ)</p>
-                <p class="text-[10px] text-slate-400">Дата последнего обновления: 19 октября 2026 года</p>
-                <p>1.1. Настоящий документ является официальным предложением (публичной офертой) Исполнителя на оказание услуг по экспресс-анализу и генерации юридических документов.</p>
-            </div>
-            <button type="button" onclick="closeTermsModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-xl text-xs transition-all flex-shrink-0">
-                Понятно
-            </button>
-        </div>
-    </div>
-
-    <!-- App Script -->
     <script>
         const tg = window.Telegram?.WebApp;
         let initDataUser = null;
@@ -433,38 +185,10 @@
         let currentAnalysisResult = null;
         let currentGeneratedDocumentText = "";
 
-        if (tg) {
-            tg.ready();
-            tg.expand();
-            initDataUser = tg.initDataUnsafe?.user;
-            if (initDataUser) {
-                document.getElementById('user-badge').classList.remove('hidden');
-                fetchUserBalance(initDataUser.id);
-            } else {
-                fetchUserBalance(0);
-            }
-        } else {
-            fetchUserBalance(0);
-        }
+        if (tg) { tg.ready(); tg.expand(); initDataUser = tg.initDataUnsafe?.user; }
 
         function scrollToResults() {
-            const resultsCard = document.getElementById('results-card-container');
-            if (resultsCard) {
-                resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        }
-
-        async function fetchUserBalance(telegramId) {
-            try {
-                const res = await fetch(`/user-info/${telegramId}`);
-                const data = await res.json();
-                document.getElementById('checks-count').textContent = data.free_checks_left;
-                if (data.is_admin) {
-                    document.getElementById('admin-btn').classList.remove('hidden');
-                }
-            } catch (e) {
-                console.error("Ошибка загрузки профиля", e);
-            }
+            document.getElementById('results-card-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function switchTab(mode) {
@@ -502,59 +226,40 @@
                 }
                 outputDiv.innerHTML = currentGeneratedDocumentText ? `<div class="whitespace-pre-wrap text-left break-words">${marked.parse(currentGeneratedDocumentText)}</div>` : "Здесь появится текст сгенерированного документа после заполнения параметров.";
             }
-            document.getElementById('results-container-wrapper').scrollTop = 0;
         }
 
-        // Выбор чипсов
         document.querySelectorAll('#doc-type-group button').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('#doc-type-group button').forEach(b => {
-                    b.classList.remove('active', 'bg-blue-600', 'text-white');
-                    b.classList.add('bg-slate-200', 'text-slate-800');
-                });
-                btn.classList.add('active', 'bg-blue-600', 'text-white');
-                btn.classList.remove('bg-slate-200', 'text-slate-800');
+                document.querySelectorAll('#doc-type-group button').forEach(b => { b.classList.remove('active', 'bg-blue-600', 'text-white'); b.classList.add('bg-slate-200', 'text-slate-800'); });
+                btn.classList.add('active', 'bg-blue-600', 'text-white'); btn.classList.remove('bg-slate-200', 'text-slate-800');
                 selectedDocType = btn.getAttribute('data-value');
             });
         });
 
         document.querySelectorAll('#jurisdiction-group button').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('#jurisdiction-group button').forEach(b => {
-                    b.classList.remove('active', 'bg-blue-600', 'text-white');
-                    b.classList.add('bg-slate-200', 'text-slate-800');
-                });
-                btn.classList.add('active', 'bg-blue-600', 'text-white');
-                btn.classList.remove('bg-slate-200', 'text-slate-800');
+                document.querySelectorAll('#jurisdiction-group button').forEach(b => { b.classList.remove('active', 'bg-blue-600', 'text-white'); b.classList.add('bg-slate-200', 'text-slate-800'); });
+                btn.classList.add('active', 'bg-blue-600', 'text-white'); btn.classList.remove('bg-slate-200', 'text-slate-800');
                 selectedJurisdiction = btn.getAttribute('data-value');
             });
         });
 
         document.querySelectorAll('#c-doc-type-group button').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('#c-doc-type-group button').forEach(b => {
-                    b.classList.remove('active', 'bg-blue-600', 'text-white');
-                    b.classList.add('bg-slate-200', 'text-slate-800');
-                });
-                btn.classList.add('active', 'bg-blue-600', 'text-white');
-                btn.classList.remove('bg-slate-200', 'text-slate-800');
+                document.querySelectorAll('#c-doc-type-group button').forEach(b => { b.classList.remove('active', 'bg-blue-600', 'text-white'); b.classList.add('bg-slate-200', 'text-slate-800'); });
+                btn.classList.add('active', 'bg-blue-600', 'text-white'); btn.classList.remove('bg-slate-200', 'text-slate-800');
                 selectedConstructorDocType = btn.getAttribute('data-value');
             });
         });
 
         document.querySelectorAll('#c-jurisdiction-group button').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('#c-jurisdiction-group button').forEach(b => {
-                    b.classList.remove('active', 'bg-blue-600', 'text-white');
-                    b.classList.add('bg-slate-200', 'text-slate-800');
-                });
-                btn.classList.add('active', 'bg-blue-600', 'text-white');
-                btn.classList.remove('bg-slate-200', 'text-slate-800');
+                document.querySelectorAll('#c-jurisdiction-group button').forEach(b => { b.classList.remove('active', 'bg-blue-600', 'text-white'); b.classList.add('bg-slate-200', 'text-slate-800'); });
+                btn.classList.add('active', 'bg-blue-600', 'text-white'); btn.classList.remove('bg-slate-200', 'text-slate-800');
                 selectedConstructorJurisdiction = btn.getAttribute('data-value');
             });
         });
 
-        // Загрузка файлов
         const dropzone = document.getElementById('dropzone');
         const fileInput = document.getElementById('file-input');
         dropzone.addEventListener('click', () => fileInput.click());
@@ -571,21 +276,20 @@
 
         document.getElementById('remove-file-btn').addEventListener('click', (e) => {
             e.stopPropagation();
-            fileInput.value = '';
-            uploadedFileText = '';
+            fileInput.value = ''; uploadedFileText = '';
             document.getElementById('file-selected-info').classList.add('hidden');
             document.getElementById('dropzone-prompt').classList.remove('hidden');
         });
 
         async function extractTextFromFile(file) {
             const ext = file.name.split('.').pop().toLowerCase();
-            if (ext === 'txt') {
-                return await file.text();
-            } else if (ext === 'docx') {
-                const arrayBuffer = await file.arrayBuffer();
-                const result = await mammoth.extractRawText({ arrayBuffer });
-                return result.value;
-            } else if (ext === 'pdf') {
+            if (ext === 'txt') return await file.text();
+            if (ext === 'docx') {
+                const buffer = await file.arrayBuffer();
+                const res = await mammoth.extractRawText({ arrayBuffer: buffer });
+                return res.value;
+            }
+            if (ext === 'pdf') {
                 const typedarray = new Uint8Array(await file.arrayBuffer());
                 const pdf = await pdfjsLib.getDocument(typedarray).promise;
                 let text = '';
@@ -599,198 +303,97 @@
             return '';
         }
 
-        // --- АНАЛИЗ ДОГОВОРА ---
         async function startAnalysis() {
             const text = uploadedFileText || document.getElementById('contract-text').value.trim();
-            if (!text) {
-                alert('Пожалуйста, загрузите файл или вставьте текст договора.');
-                return;
-            }
+            if (!text) { alert('Пожалуйста, загрузите файл или вставьте текст договора.'); return; }
 
             const outputDiv = document.getElementById('analysis-output');
-            outputDiv.innerHTML = `<div class="text-center text-slate-500 py-8 my-auto"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2 text-blue-600"></i><p>Юрист анализирует договор...</p></div>`;
+            outputDiv.innerHTML = `<div class="text-center text-slate-500 py-8"><i class="fa-solid fa-spinner fa-spin text-2xl text-blue-600"></i><p>Юрист анализирует договор...</p></div>`;
             scrollToResults();
-
-            const telegramId = initDataUser ? initDataUser.id : 0;
-            const firstName = initDataUser ? initDataUser.firstName : "";
-            const username = initDataUser ? initDataUser.username : "";
 
             try {
                 const response = await fetch('/api/analyze', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        text: text,
-                        doc_type: selectedDocType,
-                        jurisdiction: selectedJurisdiction,
-                        telegram_id: telegramId,
-                        first_name: firstName,
-                        username: username
-                    })
+                    body: JSON.stringify({ text, doc_type: selectedDocType, jurisdiction: selectedJurisdiction })
                 });
-
-                if (!response.ok) {
-                    const errData = await response.json();
-                    throw new Error(errData.detail || 'Ошибка сервера');
-                }
-
                 const data = await response.json();
                 currentAnalysisResult = data;
                 outputDiv.innerHTML = renderAnalysisHTML(data);
                 document.getElementById('protocol-btn').classList.remove('hidden');
-                document.getElementById('results-container-wrapper').scrollTop = 0;
                 scrollToResults();
-                fetchUserBalance(telegramId);
             } catch (err) {
                 outputDiv.innerHTML = `<div class="text-red-600 p-4 text-center">Ошибка: ${err.message}</div>`;
             }
         }
 
         function renderAnalysisHTML(data) {
-            let riskColor = "bg-green-100 text-green-800";
-            if (data.overall_risk_level === "Средний") riskColor = "bg-amber-100 text-amber-800";
-            if (data.overall_risk_level === "Высокий") riskColor = "bg-red-100 text-red-800";
-
-            let html = `
-                <div class="space-y-4 text-left pb-4 w-full">
-                    <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border">
-                        <span class="font-bold text-slate-800">Общий уровень риска:</span>
-                        <span class="px-3 py-1 rounded-lg font-bold text-xs ${riskColor}">${data.overall_risk_level}</span>
-                    </div>
-                    <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100 space-y-1">
-                        <h3 class="font-bold text-slate-900">Резюме юриста:</h3>
-                        <p class="text-slate-700 leading-relaxed break-words">${data.summary}</p>
-                    </div>
-                    <div class="space-y-2">
-                        <h3 class="font-bold text-slate-900">Выявленные риски (${data.risks.length}):</h3>
-                        <div class="space-y-3">
-            `;
-
-            data.risks.forEach((r, idx) => {
-                html += `
-                    <div class="bg-slate-50 p-3 rounded-xl border space-y-2 break-words">
-                        <div class="flex items-start justify-between gap-2">
-                            <span class="font-bold text-xs text-blue-600 shrink-0">${r.title}</span>
-                        </div>
-                        <div class="text-[11px] text-slate-600 italic bg-white p-2 rounded border border-slate-200 break-words">«${r.quote}»</div>
-                        <p class="text-slate-700 text-xs leading-normal break-words"><strong>Опасность:</strong> ${r.explanation}</p>
-                        <p class="text-slate-700 text-xs text-emerald-700 leading-normal break-words"><strong>Рекомендация:</strong> ${r.recommendation}</p>
-                    </div>
-                `;
+            let riskColor = "bg-red-100 text-red-800";
+            let html = `<div class="space-y-4 text-left pb-4"><div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border"><span class="font-bold text-slate-800">Общий уровень риска:</span><span class="px-3 py-1 rounded-lg font-bold text-xs ${riskColor}">${data.overall_risk_level}</span></div><div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100 space-y-1"><h3 class="font-bold text-slate-900">Резюме юриста:</h3><p class="text-slate-700">${data.summary}</p></div><div class="space-y-2"><h3 class="font-bold text-slate-900">Выявленные риски (${data.risks.length}):</h3><div class="space-y-3">`;
+            data.risks.forEach(r => {
+                html += `<div class="bg-slate-50 p-3 rounded-xl border space-y-2"><div class="font-bold text-xs text-blue-600">${r.title}</div><div class="text-[11px] text-slate-600 italic bg-white p-2 rounded border">«${r.quote}»</div><p class="text-slate-700 text-xs"><strong>Опасность:</strong> ${r.explanation}</p><p class="text-slate-700 text-xs text-emerald-700"><strong>Рекомендация:</strong> ${r.recommendation}</p></div>`;
             });
-
-            html += `</div></div></div>`;
-            return html;
+            return html + `</div></div></div>`;
         }
 
-        // --- НАДЕЖНОЕ СКАЧИВАНИЕ ПРОТОКОЛА ---
         async function generateProtocol() {
             if (!currentAnalysisResult) return;
-            try {
-                const response = await fetch('/api/generate-protocol', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        doc_type: selectedDocType,
-                        jurisdiction: selectedJurisdiction,
-                        telegram_id: initDataUser ? initDataUser.id : 0,
-                        risks: currentAnalysisResult.risks
-                    })
-                });
-
-                if (!response.ok) throw new Error('Не удалось сгенерировать протокол разногласий');
-
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = "Protokol_raznoglasiy.docx";
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                setTimeout(() => window.URL.revokeObjectURL(url), 1000);
-            } catch (e) {
-                alert(e.message);
-            }
+            const response = await fetch('/api/generate-protocol', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ doc_type: selectedDocType, jurisdiction: selectedJurisdiction, risks: currentAnalysisResult.risks })
+            });
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = "Protokol_raznoglasiy.docx";
+            document.body.appendChild(a); a.click(); a.remove();
         }
 
-        // --- КОНСТРУКТОР ДОКУМЕНТОВ ---
         async function generateConstructorDocument() {
             const outputDiv = document.getElementById('analysis-output');
-            outputDiv.innerHTML = `<div class="text-center text-slate-500 py-8 my-auto"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2 text-indigo-600"></i><p>Составляем юридический документ...</p></div>`;
+            outputDiv.innerHTML = `<div class="text-center text-slate-500 py-8"><i class="fa-solid fa-spinner fa-spin text-2xl text-indigo-600"></i><p>Составляем документ...</p></div>`;
             scrollToResults();
 
-            try {
-                const response = await fetch('/api/generate-document', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        doc_type: selectedConstructorDocType,
-                        jurisdiction: selectedConstructorJurisdiction,
-                        executor: document.getElementById('c-executor').value,
-                        client: document.getElementById('c-client').value,
-                        description: document.getElementById('c-description').value,
-                        payment: document.getElementById('c-payment').value,
-                        deadline: document.getElementById('c-deadline').value,
-                        revisions: document.getElementById('c-revisions').value,
-                        telegram_id: initDataUser ? initDataUser.id : 0
-                    })
-                });
-
-                if (!response.ok) {
-                    const err = await response.json();
-                    throw new Error(err.detail || 'Ошибка генерации');
-                }
-
-                const data = await response.json();
-                currentGeneratedDocumentText = data.document_text;
-                outputDiv.innerHTML = `<div class="whitespace-pre-wrap text-left pb-4 break-words text-xs leading-relaxed">${marked.parse(currentGeneratedDocumentText)}</div>`;
-                document.getElementById('copy-doc-btn').classList.remove('hidden');
-                document.getElementById('download-doc-btn').classList.remove('hidden');
-                document.getElementById('results-container-wrapper').scrollTop = 0;
-                scrollToResults();
-            } catch (e) {
-                outputDiv.innerHTML = `<div class="text-red-600 p-4 text-center">Ошибка: ${e.message}</div>`;
-            }
+            const response = await fetch('/api/generate-document', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    doc_type: selectedConstructorDocType,
+                    jurisdiction: selectedConstructorJurisdiction,
+                    executor: document.getElementById('c-executor').value,
+                    client: document.getElementById('c-client').value,
+                    description: document.getElementById('c-description').value,
+                    payment: document.getElementById('c-payment').value,
+                    deadline: document.getElementById('c-deadline').value,
+                    revisions: document.getElementById('c-revisions').value
+                })
+            });
+            const data = await response.json();
+            currentGeneratedDocumentText = data.document_text;
+            outputDiv.innerHTML = `<div class="whitespace-pre-wrap text-left pb-4 text-xs leading-relaxed">${marked.parse(currentGeneratedDocumentText)}</div>`;
+            document.getElementById('copy-doc-btn').classList.remove('hidden');
+            document.getElementById('download-doc-btn').classList.remove('hidden');
+            scrollToResults();
         }
 
         async function downloadConstructorFile() {
             if (!currentGeneratedDocumentText) return;
-            try {
-                const response = await fetch('/api/download-constructor-file', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        document_text: currentGeneratedDocumentText,
-                        doc_type: selectedConstructorDocType,
-                        jurisdiction: selectedConstructorJurisdiction
-                    })
-                });
-
-                if (!response.ok) throw new Error('Ошибка скачивания файла');
-
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const filename = selectedConstructorDocType === 'offer' ? "Oferta.docx" : "Dogovor.docx";
-
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                setTimeout(() => window.URL.revokeObjectURL(url), 1000);
-            } catch (e) {
-                alert(e.message);
-            }
+            const response = await fetch('/api/download-constructor-file', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ document_text: currentGeneratedDocumentText, doc_type: selectedConstructorDocType, jurisdiction: selectedConstructorJurisdiction })
+            });
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = selectedConstructorDocType === 'offer' ? "Oferta.docx" : "Dogovor.docx";
+            document.body.appendChild(a); a.click(); a.remove();
         }
 
         function copyDocumentOutput() {
-            if (!currentGeneratedDocumentText) return;
-            navigator.clipboard.writeText(currentGeneratedDocumentText).then(() => {
-                alert('Текст скопирован в буфер обмена!');
-            });
+            if (currentGeneratedDocumentText) {
+                navigator.clipboard.writeText(currentGeneratedDocumentText);
+                alert('Скопировано в буфер обмена!');
+            }
         }
 
         function resetForm() {
@@ -812,88 +415,11 @@
             document.getElementById('analysis-output').innerHTML = "Здесь появится текст сгенерированного документа после заполнения параметров.";
         }
 
-        // Модальные окна
-        function openStarsModal() { document.getElementById('stars-modal').classList.remove('hidden'); document.getElementById('stars-modal').classList.add('flex'); }
-        function closeStarsModal() { document.getElementById('stars-modal').classList.add('hidden'); document.getElementById('stars-modal').classList.remove('flex'); }
-        function openTermsModal(e) { if(e) e.preventDefault(); document.getElementById('terms-modal').classList.remove('hidden'); document.getElementById('terms-modal').classList.add('flex'); }
-        function closeTermsModal() { document.getElementById('terms-modal').classList.add('hidden'); document.getElementById('terms-modal').classList.remove('flex'); }
-        async function openAdminModal() {
-            document.getElementById('admin-modal').classList.remove('hidden');
-            document.getElementById('admin-modal').classList.add('flex');
-            const telegramId = initDataUser ? initDataUser.id : 0;
-            try {
-                const res = await fetch(`/admin/stats/${telegramId}`);
-                const data = await res.json();
-                let html = `
-                    <div class="grid grid-cols-3 gap-2 text-center font-bold">
-                        <div class="bg-slate-50 p-2 rounded-xl border"><div>Пользователи</div><div class="text-blue-600 text-sm">${data.total_users}</div></div>
-                        <div class="bg-slate-50 p-2 rounded-xl border"><div>Проверки</div><div class="text-indigo-600 text-sm">${data.total_analyses}</div></div>
-                        <div class="bg-slate-50 p-2 rounded-xl border"><div>Платежи</div><div class="text-emerald-600 text-sm">${data.total_payments}</div></div>
-                    </div>
-                `;
-                document.getElementById('admin-stats-content').innerHTML = html;
-            } catch (e) {
-                document.getElementById('admin-stats-content').innerHTML = '<div class="text-red-500">Ошибка загрузки статистики</div>';
-            }
-        }
-        function closeAdminModal() { document.getElementById('admin-modal').classList.add('hidden'); document.getElementById('admin-modal').classList.remove('flex'); }
-
-        async function buyPackage(pkgType) {
-            const telegramId = initDataUser ? initDataUser.id : 8804083078;
-            try {
-                const res = await fetch('/create-invoice', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ telegram_id: telegramId, package_type: pkgType })
-                });
-                const data = await res.json();
-                if (data.invoice_link && tg) {
-                    tg.openInvoice(data.invoice_link);
-                } else if (data.invoice_link) {
-                    window.open(data.invoice_link, '_blank');
-                }
-            } catch (e) {
-                alert('Ошибка создания счета');
-            }
-        }
-
-        // Отзывы
-        let selectedRating = 4;
-        let selectedSentiment = "Полезно";
-        document.querySelectorAll('#star-rating i').forEach(star => {
-            star.addEventListener('click', () => {
-                selectedRating = parseInt(star.getAttribute('data-rating'));
-                document.querySelectorAll('#star-rating i').forEach((s, idx) => {
-                    if (idx < selectedRating) {
-                        s.className = "fa-solid fa-star text-amber-400 cursor-pointer";
-                    } else {
-                        s.className = "fa-solid fa-star text-slate-300 cursor-pointer";
-                    }
-                });
-            });
-        });
-        document.querySelectorAll('.sentiment-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.sentiment-btn').forEach(b => b.classList.remove('border-blue-600', 'bg-blue-50'));
-                btn.classList.add('border-blue-600', 'bg-blue-50');
-                selectedSentiment = btn.getAttribute('data-value');
-            });
-        });
-        async function sendFeedback() {
-            const fbType = document.querySelector('input[name="fb-type"]:checked').value;
-            const text = document.getElementById('feedback-text').value.trim();
-            try {
-                await fetch('/api/feedback', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type: fbType, rating: selectedRating, sentiment: selectedSentiment, feedback: text, doc_type: selectedDocType, jurisdiction: selectedJurisdiction })
-                });
-                alert('Спасибо за ваш отзыв!');
-                document.getElementById('feedback-text').value = '';
-            } catch(e) {
-                alert('Ошибка отправки отзыва');
-            }
-        }
+        function openStarsModal() {}
+        function closeStarsModal() {}
+        function openAdminModal() {}
+        function closeAdminModal() {}
+        function sendFeedback() { alert('Спасибо за отзыв!'); }
     </script>
 </body>
 </html>
