@@ -254,7 +254,7 @@ def api_generate_protocol(data: ProtocolRequest):
     run_sub.font.size = Pt(11)
     run_sub.font.color.rgb = RGBColor(0, 0, 0)
 
-    # Строим стабильную таблицу ровно из 3 колонок
+    # Строим таблицу из 3 колонок, строго укладывающуюся в поля страницы (6.0 дюймов total)
     table = doc.add_table(rows=1, cols=3)
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
     table.autofit = False
@@ -263,9 +263,9 @@ def api_generate_protocol(data: ProtocolRequest):
     tblLayout = parse_xml(r'<w:tblLayout {} w:type="fixed"/>'.format(nsdecls('w')))
     tblPr.append(tblLayout)
 
-    # 3 равные колонки по 2.16 дюйма (3120 twips каждая, в сумме 6.5 дюймов — вся ширина страницы)
-    col_widths_twips = [3120, 3120, 3120]
-    tblGrid = parse_xml(r'<w:tblGrid {}><w:gridCol w:w="3120"/><w:gridCol w:w="3120"/><w:gridCol w:w="3120"/></w:tblGrid>'.format(nsdecls('w')))
+    # 3 колонки по 2.0 дюйма (2880 twips каждая, в сумме 6.0 дюймов — строго в пределах полей)
+    col_widths_twips = [2880, 2880, 2880]
+    tblGrid = parse_xml(r'<w:tblGrid {}><w:gridCol w:w="2880"/><w:gridCol w:w="2880"/><w:gridCol w:w="2880"/></w:tblGrid>'.format(nsdecls('w')))
     table._tbl.append(tblGrid)
 
     hdr_cells = table.rows[0].cells
@@ -291,7 +291,6 @@ def api_generate_protocol(data: ProtocolRequest):
 
     for idx, risk in enumerate(data.risks, 1):
         row_cells = table.add_row().cells
-        # Нумерация встраивается прямо в первую колонку
         row_cells[0].text = f"{idx}. «{risk.get('quote', '-')}»"
         row_cells[1].text = risk.get('explanation', '-')
         row_cells[2].text = risk.get('recommendation', '-')
