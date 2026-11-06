@@ -92,10 +92,14 @@ def user_info(telegram_id: int):
             "telegram_id": telegram_id,
             "name": "Владимир Ткаченко" if is_adm else f"Пользователь {telegram_id}",
             "username": "admin" if is_adm else f"user_{telegram_id}",
-            "checks_left": 3,
+            "checks_left": 999 if is_adm else 3,
             "is_admin": is_adm
         }
     user = DB_USERS[telegram_id]
+    # Если это админ, всегда держим проверки на максимуме для тестов
+    if user["is_admin"]:
+        user["checks_left"] = 999
+
     return {
         "free_checks_left": user["checks_left"],
         "is_admin": user["is_admin"]
@@ -137,12 +141,13 @@ def api_analyze(data: AnalysisRequest):
             "telegram_id": data.telegram_id,
             "name": data.first_name or f"Пользователь {data.telegram_id}",
             "username": data.username or f"user_{data.telegram_id}",
-            "checks_left": 3,
+            "checks_left": 999 if is_adm else 3,
             "is_admin": is_adm
         }
 
     user = DB_USERS[data.telegram_id]
-    if user["checks_left"] > 0:
+    # Списываем проверку только если пользователь не администратор
+    if not user["is_admin"] and user["checks_left"] > 0:
         user["checks_left"] -= 1
 
     text = data.text.strip()
@@ -255,7 +260,6 @@ def api_generate_protocol(data: ProtocolRequest):
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
     table.autofit = False
     
-    # Оптимизированная ширина: узкий номерной столбец и широкие колонки под текст
     col_widths = [Inches(0.6), Inches(2.3), Inches(2.3), Inches(2.3)]
     
     hdr_cells = table.rows[0].cells
