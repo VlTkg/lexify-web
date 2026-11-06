@@ -254,24 +254,22 @@ def api_generate_protocol(data: ProtocolRequest):
     run_sub.font.size = Pt(11)
     run_sub.font.color.rgb = RGBColor(0, 0, 0)
 
-    table = doc.add_table(rows=1, cols=4)
+    # Строим стабильную таблицу ровно из 3 колонок
+    table = doc.add_table(rows=1, cols=3)
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
     table.autofit = False
 
-    # 1. Жестко фиксируем макет таблицы (w:tblLayout type="fixed")
     tblPr = table._tbl.tblPr
     tblLayout = parse_xml(r'<w:tblLayout {} w:type="fixed"/>'.format(nsdecls('w')))
     tblPr.append(tblLayout)
 
-    # 2. Создаем обязательную сетку колонок (w:tblGrid), чтобы LibreOffice не пересчитывал ширину
-    # Ширина в twips: 720 (0.5 дюйма) для №, и по 3120 (2.16 дюйма) для текстовых колонок
-    col_widths_twips = [720, 3120, 3120, 3120]
-    tblGrid = parse_xml(r'<w:tblGrid {}><w:gridCol w:w="720"/><w:gridCol w:w="3120"/><w:gridCol w:w="3120"/><w:gridCol w:w="3120"/></w:tblGrid>'.format(nsdecls('w')))
+    # 3 равные колонки по 2.16 дюйма (3120 twips каждая, в сумме 6.5 дюймов — вся ширина страницы)
+    col_widths_twips = [3120, 3120, 3120]
+    tblGrid = parse_xml(r'<w:tblGrid {}><w:gridCol w:w="3120"/><w:gridCol w:w="3120"/><w:gridCol w:w="3120"/></w:tblGrid>'.format(nsdecls('w')))
     table._tbl.append(tblGrid)
 
-    # Заполняем заголовок
     hdr_cells = table.rows[0].cells
-    hdr_titles = ["№", "Редакция Заказчика", "Правовая квалификация / Риск", "Предлагаемая редакция"]
+    hdr_titles = ["Редакция Заказчика", "Правовая квалификация / Риск", "Предлагаемая редакция"]
     
     for i, title_text in enumerate(hdr_titles):
         hdr_cells[i].text = title_text
@@ -291,13 +289,12 @@ def api_generate_protocol(data: ProtocolRequest):
         shading_xml = parse_xml(r'<w:shd {} w:fill="E2E8F0"/>'.format(nsdecls('w')))
         tcPr.append(shading_xml)
 
-    # Заполняем строки данных
     for idx, risk in enumerate(data.risks, 1):
         row_cells = table.add_row().cells
-        row_cells[0].text = str(idx)
-        row_cells[1].text = f"«{risk.get('quote', '-')}»"
-        row_cells[2].text = risk.get('explanation', '-')
-        row_cells[3].text = risk.get('recommendation', '-')
+        # Нумерация встраивается прямо в первую колонку
+        row_cells[0].text = f"{idx}. «{risk.get('quote', '-')}»"
+        row_cells[1].text = risk.get('explanation', '-')
+        row_cells[2].text = risk.get('recommendation', '-')
 
         for i, cell in enumerate(row_cells):
             tcPr = cell._tc.get_or_add_tcPr()
@@ -305,10 +302,7 @@ def api_generate_protocol(data: ProtocolRequest):
             tcPr.append(tcW)
             
             for p in cell.paragraphs:
-                if i == 0:
-                    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                else:
-                    p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+                p.alignment = WD_ALIGN_PARAGRAPH.LEFT
                 p.paragraph_format.line_spacing = 1.15
                 p.paragraph_format.space_before = Pt(6)
                 p.paragraph_format.space_after = Pt(6)
