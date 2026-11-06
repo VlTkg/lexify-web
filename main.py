@@ -1,6 +1,7 @@
 import os
 import io
 import re
+from datetime import datetime
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -15,6 +16,23 @@ from docx.oxml.ns import nsdecls
 app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Простая база данных в памяти (можно расширить или заменить)
+DB_USERS = {
+    123456789: {"telegram_id": 123456789, "name": "Vladimir Tkachenko", "username": "admin", "checks_left": 3, "is_admin": True}
+}
+DB_PAYMENTS = [
+    {"user": "Vladimir Tkachenko (@admin)", "package": "10 проверок", "stars": 100, "date": "2026-11-01 14:20"},
+    {"user": "Иван Петров (@ivan_p)", "package": "5 проверок", "stars": 60, "date": "2026-11-02 10:15"},
+    {"user": "Анна Смирнова (@anna_s)", "package": "1 проверка", "stars": 15, "date": "2026-11-03 16:40"},
+    {"user": "Сергей Волков (@volkov)", "package": "10 проверок", "stars": 100, "date": "2026-11-04 11:05"},
+    {"user": "Ольга Кравцова (@olga_k)", "package": "5 проверок", "stars": 60, "date": "2026-11-05 09:30"}
+]
+DB_FEEDBACKS = [
+    {"user": "Vladimir Tkachenko", "rating": 5, "text": "Отличный сервис, очень помогает в работе!", "date": "2026-11-01"},
+    {"user": "Иван Петров", "rating": 4, "text": "Быстрый анализ, хотелось бы больше шаблонов.", "date": "2026-11-02"}
+]
+TOTAL_ANALYSES_COUNT = 42
 
 
 class AnalysisRequest(BaseModel):
@@ -52,12 +70,10 @@ class ConstructorDownloadSchema(BaseModel):
 
 
 class FeedbackRequest(BaseModel):
-    type: str
     rating: int
-    sentiment: str
     feedback: str = ""
-    doc_type: str = ""
-    jurisdiction: str = ""
+    telegram_id: int = 0
+    name: str = "Пользователь"
 
 
 @app.get("/")
@@ -72,14 +88,27 @@ def read_app():
 
 @app.get("/user-info/{telegram_id}")
 def user_info(telegram_id: int):
+    global DB_USERS
+    if telegram_id not in DB_USERS:
+        DB_USERS[telegram_id] = {
+            "telegram_id": telegram_id,
+            "name": f"Пользователь {telegram_id}",
+            "username": f"user_{telegram_id}",
+            "checks_left": 3,
+            "is_admin": (telegram_id == 123456789)
+        }
+    user = DB_USERS[telegram_id]
     return {
-        "free_checks_left": 3,
-        "is_admin": True
+        "free_checks_left": user["checks_left"],
+        "is_admin": user["is_admin"]
     }
 
 
 @app.post("/api/analyze")
 def api_analyze(data: AnalysisRequest):
+    global TOTAL_ANALYSES_COUNT
+    TOTAL_ANALYSES_COUNT += 1
+    
     text = data.text.strip()
     if not text:
         raise HTTPException(status_code=400, detail="Текст договора пуст")
@@ -164,7 +193,6 @@ def api_analyze(data: AnalysisRequest):
 @app.post("/api/generate-protocol")
 def api_generate_protocol(data: ProtocolRequest):
     doc = Document()
-    
     for section in doc.sections:
         section.top_margin = Inches(1)
         section.bottom_margin = Inches(1)
@@ -189,7 +217,6 @@ def api_generate_protocol(data: ProtocolRequest):
     table = doc.add_table(rows=1, cols=4)
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
     table.autofit = False
-
     col_widths = [Inches(0.5), Inches(2.3), Inches(2.1), Inches(2.1)]
     
     hdr_cells = table.rows[0].cells
@@ -305,7 +332,6 @@ def api_generate_document(data: ConstructorRequest):
 @app.post("/api/download-constructor-file")
 def api_download_constructor_file(data: ConstructorDownloadSchema):
     doc = Document()
-    
     for section in doc.sections:
         section.top_margin = Inches(1)
         section.bottom_margin = Inches(1)
@@ -354,7 +380,6 @@ def api_download_constructor_file(data: ConstructorDownloadSchema):
             run.font.size = Pt(11)
             run.font.color.rgb = RGBColor(0, 0, 0)
         elif ':' in line or '_' in line:
-            # Делаем строки реквизитов плотными и выразительными
             p.paragraph_format.space_before = Pt(2)
             p.paragraph_format.space_after = Pt(4)
             run = p.add_run(line)
@@ -385,14 +410,27 @@ def api_download_constructor_file(data: ConstructorDownloadSchema):
 
 @app.post("/api/feedback")
 def api_feedback(data: FeedbackRequest):
+    global DB_FEEDBACKS
+    DB_FEEDBACKS.insert(0, {
+        "user": data.name,
+        "rating": data.rating,
+        "text": data.feedback,
+        "date": datetime.now().strftime("%Y-%m-%d %H:%M")
+    })
     return {"status": "success", "message": "Отзыв успешно сохранен"}
 
 
 @app.get("/admin/stats/{telegram_id}")
 def admin_stats(telegram_id: int):
-    return {"total_users": 15, "total_analyses": 42, "total_payments": 5}
-
-
-@app.post("/create-invoice")
-def create_invoice(data: dict):
-    return {"invoice_link": "https://t.me/invoice_dummy_link"}
+    # Проверка прав администратора
+    if telegram_id != 123456789:
+        raise HTTPException(status_code=403, detail="Доступ запрещен")
+        
+    return {
+        "total_users": len(DB_USERS),
+        "total_analyses": TOTAL_ANALYSES_COUNT,
+        "total_payments": len(DB_PAYMENTS),
+        "users_list": list(DB_USERS.values()),
+        "payments_list": DB_PAYMENTS,
+        "feedbacks_list": DB_FEEDBACKS
+    }
