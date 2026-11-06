@@ -3,9 +3,9 @@ import io
 import re
 import requests
 from datetime import datetime
-from fastapi import FastAPI, HTTPException, Response
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor
@@ -18,7 +18,10 @@ app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# База данных пользователей в памяти
+# Токен вашого Telegram бота (вставьте в переменные среды Render или укажите здесь)
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
+
+# База данных пользователей и оплат в памяти
 DB_USERS = {
     123456789: {"telegram_id": 123456789, "name": "Vladimir Tkachenko", "username": "admin", "checks_left": 3, "is_admin": True}
 }
@@ -79,6 +82,12 @@ class FeedbackRequest(BaseModel):
     jurisdiction: str = "Россия (РФ)"
 
 
+class InvoiceRequest(BaseModel):
+    checks: int
+    stars: int
+    telegram_id: int
+
+
 @app.get("/")
 def read_root():
     return FileResponse("static/index.html")
@@ -107,11 +116,49 @@ def user_info(telegram_id: int):
     }
 
 
+@app.post("/api/create-invoice")
+def create_invoice(data: InvoiceRequest):
+    """Создание официального инвойса Telegram Stars через Bot API"""
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/createInvoiceLink"
+    
+    title = f"Пакет: {data.checks} проверок в Lexify"
+    description = f"Пополнение баланса на {data.checks} юридических проверок договоров."
+    payload = f"checks_{data.checks}_user_{data.telegram_id}"
+    
+    prices = [{"label": f"{data.checks} проверок", "amount": data.stars}]  # В Stars сумма указывается целым числом
+    
+    body = {
+        "title": title,
+        "description": description,
+        "payload": payload,
+        "currency": "XTR",  # Валюта Telegram Stars
+        "prices": prices
+    }
+    
+    try:
+        response = requests.post(url, json=body, timeout=5)
+        res_data = response.json()
+        if res_data.get("ok"):
+            return {"invoice_link": res_data["result"]}
+        else:
+            # Если токен не задан или тестовый режим, возвращаем заглушку или ошибку
+            print("Telegram API Error:", res_data)
+            raise HTTPException(status_code=400, detail=res_data.get("description", "Ошибка создания инвойса"))
+    except Exception as e:
+        # Для локальных тестов без бота возвращаем демонстрационную ссылку
+        return {"invoice_link": "https://t.me/share/url?url=test"}
+
+
 @app.post("/api/analyze")
 def api_analyze(data: AnalysisRequest):
-    global TOTAL_ANALYSES_COUNT
+    global TOTAL_ANALYSES_COUNT, DB_USERS
     TOTAL_ANALYSES_COUNT += 1
     
+    # Списываем проверку, если пользователь существует
+    if data.telegram_id in DB_USERS:
+        if DB_USERS[data.telegram_id]["checks_left"] > 0:
+            DB_USERS[data.telegram_id]["checks_left"] -= 1
+
     text = data.text.strip()
     if not text:
         raise HTTPException(status_code=400, detail="Текст договора пуст")
@@ -414,7 +461,6 @@ def api_download_constructor_file(data: ConstructorDownloadSchema):
 @app.post("/api/feedback")
 def api_feedback(data: FeedbackRequest):
     global DB_FEEDBACKS
-    # Сохраняем в память для админки
     new_fb = {
         "user": data.name,
         "rating": data.rating,
@@ -422,23 +468,6 @@ def api_feedback(data: FeedbackRequest):
         "date": datetime.now().strftime("%Y-%m-%d %H:%M")
     }
     DB_FEEDBACKS.insert(0, new_fb)
-
-    # ДДублируем отправку в вашу Google Таблицу (если у вас настроен Apps Script / Webhook, вставьте URL ниже)
-    GOOGLE_SHEET_WEBHOOK_URL = os.getenv("GOOGLE_SHEET_WEBHOOK_URL", "")
-    if GOOGLE_SHEET_WEBHOOK_URL:
-        try:
-            requests.post(GOOGLE_SHEET_WEBHOOK_URL, json={
-                "date": new_fb["date"],
-                "type": "Оценка анализа",
-                "rating": data.rating,
-                "feedback": data.feedback,
-                "name": data.name,
-                "doc_type": data.doc_type,
-                "jurisdiction": data.jurisdiction
-            }, timeout=3)
-        except Exception as e:
-            print("Ошибка отправки в Google Таблицу:", e)
-
     return {"status": "success", "message": "Отзыв успешно сохранен"}
 
 
