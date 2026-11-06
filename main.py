@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from docx import Document
-from docx.shared import Inches, Pt, RGBColor, WD_INCH
+from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.oxml import parse_xml
@@ -263,9 +263,7 @@ def api_generate_protocol(data: ProtocolRequest):
     tblLayout = parse_xml(r'<w:tblLayout {} w:type="fixed"/>'.format(nsdecls('w')))
     tblPr.append(tblLayout)
     
-    # Ширина в twips (1 дюйм = 1440 twips). 
-    # Колонка 1: 0.5 дюйма (720 twips) — узкая для номера
-    # Колонки 2, 3, 4: по 2.16 дюйма (3120 twips) — широкие для текста
+    # Ширина в twips (1 дюйм = 1440 twips).
     col_widths_twips = [720, 3120, 3120, 3120]
     
     hdr_cells = table.rows[0].cells
@@ -273,7 +271,6 @@ def api_generate_protocol(data: ProtocolRequest):
     
     for i, title_text in enumerate(hdr_titles):
         hdr_cells[i].text = title_text
-        # Жестко прописываем ширину через XML для каждой ячейки заголовка
         tcPr = hdr_cells[i]._tc.get_or_add_tcPr()
         tcW = parse_xml(r'<w:tcW {} w:w="{}" w:type="dxa"/>'.format(nsdecls('w'), col_widths_twips[i]))
         tcPr.append(tcW)
@@ -298,7 +295,6 @@ def api_generate_protocol(data: ProtocolRequest):
         row_cells[3].text = risk.get('recommendation', '-')
 
         for i, cell in enumerate(row_cells):
-            # Жестко прописываем ширину через XML для каждой ячейки строки данных
             tcPr = cell._tc.get_or_add_tcPr()
             tcW = parse_xml(r'<w:tcW {} w:w="{}" w:type="dxa"/>'.format(nsdecls('w'), col_widths_twips[i]))
             tcPr.append(tcW)
