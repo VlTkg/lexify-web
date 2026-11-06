@@ -258,14 +258,18 @@ def api_generate_protocol(data: ProtocolRequest):
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
     table.autofit = False
 
-    # Жесткая фиксация макета таблицы для LibreOffice и Word
+    # 1. Жестко фиксируем макет таблицы (w:tblLayout type="fixed")
     tblPr = table._tbl.tblPr
     tblLayout = parse_xml(r'<w:tblLayout {} w:type="fixed"/>'.format(nsdecls('w')))
     tblPr.append(tblLayout)
-    
-    # Ширина в twips (1 дюйм = 1440 twips).
+
+    # 2. Создаем обязательную сетку колонок (w:tblGrid), чтобы LibreOffice не пересчитывал ширину
+    # Ширина в twips: 720 (0.5 дюйма) для №, и по 3120 (2.16 дюйма) для текстовых колонок
     col_widths_twips = [720, 3120, 3120, 3120]
-    
+    tblGrid = parse_xml(r'<w:tblGrid {}><w:gridCol w:w="720"/><w:gridCol w:w="3120"/><w:gridCol w:w="3120"/><w:gridCol w:w="3120"/></w:tblGrid>'.format(nsdecls('w')))
+    table._tbl.append(tblGrid)
+
+    # Заполняем заголовок
     hdr_cells = table.rows[0].cells
     hdr_titles = ["№", "Редакция Заказчика", "Правовая квалификация / Риск", "Предлагаемая редакция"]
     
@@ -287,6 +291,7 @@ def api_generate_protocol(data: ProtocolRequest):
         shading_xml = parse_xml(r'<w:shd {} w:fill="E2E8F0"/>'.format(nsdecls('w')))
         tcPr.append(shading_xml)
 
+    # Заполняем строки данных
     for idx, risk in enumerate(data.risks, 1):
         row_cells = table.add_row().cells
         row_cells[0].text = str(idx)
