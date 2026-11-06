@@ -254,7 +254,9 @@ def api_generate_protocol(data: ProtocolRequest):
     table = doc.add_table(rows=1, cols=4)
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
     table.autofit = False
-    col_widths = [Inches(0.5), Inches(2.3), Inches(2.1), Inches(2.1)]
+    
+    # Оптимизированная ширина: узкий номерной столбец и широкие колонки под текст
+    col_widths = [Inches(0.6), Inches(2.3), Inches(2.3), Inches(2.3)]
     
     hdr_cells = table.rows[0].cells
     hdr_titles = ["№", "Редакция Заказчика", "Правовая квалификация / Риск", "Предлагаемая редакция"]
@@ -313,8 +315,8 @@ def api_generate_document(data: ConstructorRequest):
     executor_address = data.executor_address.strip() if data.executor_address else "_________________________"
     
     client = data.client.strip() if data.client else "Заказчик"
-    client_id = data.client_id.strip() if data.client else "_________________________"
-    client_address = data.client_address.strip() if data.client else "_________________________"
+    client_id = data.client_id.strip() if data.client_id else "_________________________"
+    client_address = data.client_address.strip() if data.client_address else "_________________________"
     
     payment = data.payment.strip() if data.payment else f"Постоплата в течение 5 (пяти) банковских дней в {details['currency']}"
     deadline = data.deadline.strip() if data.deadline else "14 (четырнадцать) календарных дней"
