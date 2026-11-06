@@ -96,7 +96,6 @@ def user_info(telegram_id: int):
             "is_admin": is_adm
         }
     user = DB_USERS[telegram_id]
-    # Если это админ, всегда держим проверки на максимуме для тестов
     if user["is_admin"]:
         user["checks_left"] = 999
 
@@ -146,7 +145,6 @@ def api_analyze(data: AnalysisRequest):
         }
 
     user = DB_USERS[data.telegram_id]
-    # Списываем проверку только если пользователь не администратор
     if not user["is_admin"] and user["checks_left"] > 0:
         user["checks_left"] -= 1
 
@@ -260,7 +258,8 @@ def api_generate_protocol(data: ProtocolRequest):
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
     table.autofit = False
     
-    col_widths = [Inches(0.6), Inches(2.3), Inches(2.3), Inches(2.3)]
+    # Жестко сужаем первый столбец для номера до 0.4 дюйма, а остальное отдаем под текст
+    col_widths = [Inches(0.4), Inches(2.4), Inches(2.4), Inches(2.4)]
     
     hdr_cells = table.rows[0].cells
     hdr_titles = ["№", "Редакция Заказчика", "Правовая квалификация / Риск", "Предлагаемая редакция"]
@@ -289,7 +288,12 @@ def api_generate_protocol(data: ProtocolRequest):
 
         for i, cell in enumerate(row_cells):
             cell.width = col_widths[i]
+            # Выравниваем номер по центру, а текст по левому краю
             for p in cell.paragraphs:
+                if i == 0:
+                    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                else:
+                    p.alignment = WD_ALIGN_PARAGRAPH.LEFT
                 p.paragraph_format.line_spacing = 1.15
                 p.paragraph_format.space_before = Pt(6)
                 p.paragraph_format.space_after = Pt(6)
