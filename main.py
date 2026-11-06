@@ -20,7 +20,6 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
 
-# Чистая база данных (реальные данные будут накапливаться по мере использования)
 DB_USERS = {}
 DB_PAYMENTS = []
 DB_FEEDBACKS = []
@@ -70,12 +69,6 @@ class FeedbackRequest(BaseModel):
     jurisdiction: str = "Россия (РФ)"
 
 
-class InvoiceRequest(BaseModel):
-    checks: int
-    stars: int
-    telegram_id: int
-
-
 @app.get("/")
 def read_root():
     return FileResponse("static/index.html")
@@ -90,7 +83,6 @@ def read_app():
 def user_info(telegram_id: int):
     global DB_USERS
     if telegram_id not in DB_USERS:
-        # Автоматическая регистрация нового пользователя с 3 бесплатными проверками
         is_adm = (telegram_id == 123456789)
         DB_USERS[telegram_id] = {
             "telegram_id": telegram_id,
@@ -106,33 +98,29 @@ def user_info(telegram_id: int):
     }
 
 
-@app.post("/api/create-invoice")
-def create_invoice(data: InvoiceRequest):
-    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/createInvoiceLink"
-    
-    title = f"Пакет: {data.checks} проверок в Lexify"
-    description = f"Пополнение баланса на {data.checks} юридических проверок договоров."
-    payload = f"checks_{data.checks}_user_{data.telegram_id}"
-    
-    prices = [{"label": f"{data.checks} проверок", "amount": data.stars}]
-    
-    body = {
-        "title": title,
-        "description": description,
-        "payload": payload,
-        "currency": "XTR",
-        "prices": prices
-    }
-    
-    try:
-        response = requests.post(url, json=body, timeout=5)
-        res_data = response.json()
-        if res_data.get("ok"):
-            return {"invoice_link": res_data["result"]}
-        else:
-            raise HTTPException(status_code=400, detail=res_data.get("description", "Ошибка создания инвойса"))
-    except Exception as e:
-        return {"invoice_link": "https://t.me/share/url?url=test"}
+def get_jurisdiction_details(jurisdiction_str: str):
+    """Определяет город, валюту и нормативные привязки для выбранной страны"""
+    if "Казахстан" in jurisdiction_str:
+        return {
+            "city": "г. Алматы",
+            "currency": "тенге (KZT)",
+            "law_ref": "Гражданским кодексом Республики Казахстан",
+            "code": "РК"
+        }
+    elif "Беларусь" in jurisdiction_str:
+        return {
+            "city": "г. Минск",
+            "currency": "белорусских рублях (BYN)",
+            "law_ref": "Гражданским кодексом Республики Беларусь",
+            "code": "РБ"
+        }
+    else:
+        return {
+            "city": "г. Москва",
+            "currency": "рублях РФ (RUB)",
+            "law_ref": "законодательством Российской Федерации",
+            "code": "РФ"
+        }
 
 
 @app.post("/api/analyze")
@@ -140,7 +128,6 @@ def api_analyze(data: AnalysisRequest):
     global TOTAL_ANALYSES_COUNT, DB_USERS
     TOTAL_ANALYSES_COUNT += 1
     
-    # Регистрируем пользователя, если его еще не было
     if data.telegram_id not in DB_USERS:
         is_adm = (data.telegram_id == 123456789)
         DB_USERS[data.telegram_id] = {
@@ -151,7 +138,6 @@ def api_analyze(data: AnalysisRequest):
             "is_admin": is_adm
         }
 
-    # Списываем проверку
     user = DB_USERS[data.telegram_id]
     if user["checks_left"] > 0:
         user["checks_left"] -= 1
@@ -187,7 +173,7 @@ def api_analyze(data: AnalysisRequest):
             risks.append({
                 "point": point_num,
                 "category": "Финансовая ответственность",
-                "title": f"{point_num}. Кабальный штраф 100% и отказ от оплаты",
+                "title": f"{point_num}. Неприемлемый штраф 100% и отказ от оплаты",
                 "quote": chunk_clean,
                 "explanation": "Штраф 100% от суммы договора и право заказчика не оплачивать работу при минимальной просрочке грубо нарушают баланс интересов.",
                 "recommendation": "Исключить право отказа от оплаты уже выполненных этапов. Установить стандартную неустойку 0.1% за день просрочки."
@@ -232,13 +218,14 @@ def api_analyze(data: AnalysisRequest):
 
     return {
         "overall_risk_level": "Высокий" if len(risks) >= 2 else "Средний",
-        "summary": f"Проведен детальный юридический анализ текста ({data.doc_type}) для юрисдикции {data.jurisdiction}. Выявлено {len(risks)} критических рисков по конкретным пунктам договора.",
+        "summary": f"Проведен детальный юридический анализ текста ({data.doc_type}) для юрисдикции {data.jurisdiction}. Выявлено {len(risks)} неприемлемых рисков по конкретным пунктам договора.",
         "risks": risks
     }
 
 
 @app.post("/api/generate-protocol")
 def api_generate_protocol(data: ProtocolRequest):
+    details = get_jurisdiction_details(data.jurisdiction)
     doc = Document()
     for section in doc.sections:
         section.top_margin = Inches(1)
@@ -256,7 +243,7 @@ def api_generate_protocol(data: ProtocolRequest):
 
     sub_p = doc.add_paragraph()
     sub_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run_sub = sub_p.add_run(f"к Договору оказания услуг ({data.doc_type})\nЮрисдикция: {data.jurisdiction}")
+    run_sub = sub_p.add_run(f"к Договору оказания услуг ({data.doc_type})\nПрименимое право: {details['law_ref']}")
     run_sub.font.name = "Times New Roman"
     run_sub.font.size = Pt(11)
     run_sub.font.color.rgb = RGBColor(0, 0, 0)
@@ -267,7 +254,7 @@ def api_generate_protocol(data: ProtocolRequest):
     col_widths = [Inches(0.5), Inches(2.3), Inches(2.1), Inches(2.1)]
     
     hdr_cells = table.rows[0].cells
-    hdr_titles = ["№", "Редакция Заказчика", "Суть замечания / Риск", "Рекомендуемая редакция"]
+    hdr_titles = ["№", "Редакция Заказчика", "Правовая квалификация / Риск", "Предлагаемая редакция"]
     
     for i, title_text in enumerate(hdr_titles):
         hdr_cells[i].text = title_text
@@ -315,61 +302,66 @@ def api_generate_protocol(data: ProtocolRequest):
 
 @app.post("/api/generate-document")
 def api_generate_document(data: ConstructorRequest):
-    desc = data.description.strip() if data.description else "Оказание профессиональных услуг"
-    executor = data.executor if data.executor else "Исполнитель"
-    client = data.client if data.client else "Заказчик"
-    payment = data.payment if data.payment else "Постоплата"
-    deadline = data.deadline if data.deadline else "14 календарных дней"
-    revisions = data.revisions if data.revisions else "2"
+    details = get_jurisdiction_details(data.jurisdiction)
+    
+    desc = data.description.strip() if data.description else "Оказание профессиональных консультационных и технических услуг"
+    executor = data.executor.strip() if data.executor else "Исполнитель"
+    client = data.client.strip() if data.client else "Заказчик"
+    payment = data.payment.strip() if data.payment else f"Постоплата в течение 5 (пяти) банковских дней в {details['currency']}"
+    deadline = data.deadline.strip() if data.deadline else "14 (четырнадцать) календарных дней"
+    revisions = data.revisions.strip() if data.revisions else "2 (две)"
+
+    # Формируем юридически корректное описание исполнителя
+    executor_legal = executor
+    if "самозанятый" in executor.lower():
+        executor_legal = f"Гражданин(-ка) {executor}, применяющий(-ая) специальный налоговый режим"
 
     doc_title = "ПУБЛИЧНАЯ ОФЕРТА НА ОКАЗАНИЕ УСЛУГ" if data.doc_type == "offer" else "ДОГОВОР ВОЗМЕЗДНОГО ОКАЗАНИЯ УСЛУГ"
 
     document_text = f"""# {doc_title}
-Юрисдикция: {data.jurisdiction}
-г. Москва                                                                          «___» _________ 2026 г.
 
-Стороны: {executor}, именуемый(-ая) в дальнейшем «Исполнитель», и {client}, именуемый(-ая) в дальнейшем «Заказчик», заключили настоящий Договор о нижеследующем:
+{details['city']}                                                                          «___» _________ 2026 г.
+
+{executor_legal}, именуемый(-ая) в дальнейшем «Исполнитель», с одной стороны, и {client}, именуемый(-ая) в дальнейшем «Заказчик», с другой стороны, совместно именуемые «Стороны», заключили настоящий Договор (далее — «Договор») о нижеследующем:
 
 1. ПРЕДМЕТ ДОГОВОРА
-1.1. Исполнитель обязуется по заданию Заказчика оказать следующие услуги: {desc}, а Заказчик обязуется принять и оплатить их в порядке и на условиях, предусмотренных настоящим Договором.
-1.2. Срок оказания услуг составляет: {deadline} с момента получения от Заказчика всех необходимых исходных данных и предоплаты (если применимо).
-1.3. Содержание, объем и требования к результату услуг определяются техническим заданием или согласованной перепиской Сторон.
+1.1. Исполнитель обязуется по заданию Заказчика оказать следующие услуги: {desc} (далее — «Услуги»), а Заказчик обязуется принять и оплатить оказанные Услуги в порядке и на условиях, предусмотренных настоящим Договором.
+1.2. Срок оказания Услуг: {deadline} с момента предоплаты (если предусмотрена) и предоставления Заказчиком всех исходных данных.
+1.3. Услуги оказываются Исполнителем лично либо с привлечением третьих лиц с согласия Заказчика, при этом ответственность за качество услуг перед Заказчиком несет Исполнитель.
 
-2. СТОИМОСТЬ И ПОРЯДОК РАСЧЕТОВ
-2.1. Стоимость услуг и порядок оплаты согласованы Сторонами следующим образом: {payment}.
-2.2. Оплата производится в валюте юрисдикции {data.jurisdiction} на основании выставленных счетов или актов.
-2.3. В случае задержки оплаты Заказчик уплачивает Исполнителю пени в размере 0.1% от суммы задолженности за каждый день просрочки.
+2. СТОИМОСТЬ УСЛУГ И ПОРЯДОК РАСЧЕТОВ
+2.1. Стоимость Услуг по настоящему Договору и порядок расчетов определяются Сторонами следующим образом: {payment}.
+2.2. Расчеты по Договору производятся в безналичном порядке в {details['currency']}.
+2.3. В случае просрочки оплаты Заказчик уплачивает Исполнителю неустойку в размере 0.1% от суммы задолженности за каждый день просрочки, но не более 10% от общей стоимости Услуг.
 
-3. ПОРЯДОК СДАЧИ-ПРИЕМКИ УСЛУГ
-3.1. По завершении оказания услуг Исполнитель передает Заказчику результат и Акт приема-передачи услуг.
-3.2. Заказчик в течение 3 (трех) рабочих дней с момента получения Акта обязан подписать его или предоставить мотивированный письменный отказ.
-3.3. В случае наличия замечаний Стороны согласовывают перечень доработок. В стоимость услуг входит до {revisions} итераций бесплатных правок. По истечении указанного срока без замечаний услуги считаются принятыми.
+3. ПОРЯДОК СДАЧИ И ПРИЕМКИ УСЛУГ
+3.1. По завершении оказания Услуг Исполнитель направляет Заказчику Акт приема-передачи оказанных услуг (далее — «Акт»).
+3.2. Заказчик в течение 3 (трех) рабочих дней с момента получения Акта обязан подписать его и вернуть один экземпляр Исполнителю либо направить мотивированный письменный отказ.
+3.3. В случае обоснованного отказа Исполнитель устраняет замечания в согласованный срок. В стоимость Услуг входит не более {revisions} итераций бесплатных доработок в рамках первоначального задания.
+3.4. Если в течение 3 (трех) рабочих дней Акт не подписан и мотивированный отказ не направлен, Услуги считаются оказанными надлежащим образом и принятыми Заказчиком в полном объеме.
 
-4. ИНТЕЛЛЕКТУАЛЬНЫЕ ПРАВА
-4.1. Исключительные права на результаты интеллектуальной деятельности, созданные Исполнителем в рамках настоящего Договора, переходят к Заказчику исключительно после полной оплаты стоимости оказанных услуг.
-4.2. До полной оплаты Исполнитель сохраняет за собой правообладание всеми разработанными материалами.
+4. ИНТЕЛЛЕКТУАЛЬНЫЕ ПРАВА И КОНФИДЕНЦИАЛЬНОСТЬ
+4.1. Исключительные права на результаты интеллектуальной деятельности, созданные Исполнителем в рамках настоящего Договора, переходят к Заказчику в полном объеме с момента их 100% (стопроцентной) оплаты.
+4.2. До момента полной оплаты Исполнитель сохраняет за собой авторские и исключительные права на все созданные материалы и наработки.
+4.3. Стороны обязуются сохранять конфиденциальность сведений, полученных в ходе исполнения настоящего Договора.
 
-5. ОТВЕТСТВЕННОСТЬ СТОРОН И ФОРС-МАЖОР
-5.1. Стороны несут ответственность за неисполнение или ненадлежащее исполнение обязательств в соответствии с законодательством {data.jurisdiction}.
-5.2. Стороны освобождаются от ответственности за частичное или полное неисполнение обязательств, если оно явилось следствием обстоятельств непреодолимой силы (форс-мажор).
+5. ОТВЕТСТВЕННОСТЬ СТОРОН И РАЗРЕШЕНИЕ СПОРОВ
+5.1. За неисполнение или ненадлежащее исполнение обязательств Стороны несут ответственность в соответствии с {details['law_ref']}.
+5.2. Все споры и разногласия разрешаются путем переговоров. Претензионный порядок урегулирования споров является обязательным (срок ответа на претензию — 10 рабочих дней).
 
-6. СРОК ДЕЙСТВИЯ, ИЗМЕНЕНИЕ И РАСТОРЖЕНИЕ ДОГОВОРА
-6.1. Настоящий Договор вступает в силу с момента подписания и действует до полного исполнения Сторонами своих обязательств.
-6.2. Все изменения и дополнения к Договору действительны лишь в том случае, если они совершены в письменной форме и подписаны уполномоченными представителями Сторон.
-
-7. РЕКВИЗИТЫ И ПОДПИСИ СТОРОН
+6. РЕКВИЗИТЫ И ПОДПИСИ СТОРОН
 
 Исполнитель:
-Наименование / ФИО: {executor}
-Юридический / почтовый адрес: ___________________________
-ИНН / ОГРНИП / Реф. номер: _______________________________
+Наименование / ФИО: {executor_legal}
+Адрес: __________________________________________________
+ИНН / БИН / УНП: ________________________________________
 Банковские реквизиты: ___________________________________
 Подпись: ________________ / ______________
 
 Заказчик:
 Наименование / ФИО: {client}
-Юридический / почтовый адрес: ___________________________
-ИНН / ОГРНИП / Реф. номер: _______________________________
+Адрес: __________________________________________________
+ИНН / БИН / УНП: ________________________________________
 Банковские реквизиты: ___________________________________
 Подпись: ________________ / ______________
 """
@@ -402,7 +394,7 @@ def api_download_constructor_file(data: ConstructorDownloadSchema):
             run.font.name = "Times New Roman"
             run.font.size = Pt(14)
             run.font.color.rgb = RGBColor(0, 0, 0)
-        elif line.startswith('Юрисдикция:') or line.startswith('г. Москва') or line.startswith('Стороны:'):
+        elif line.startswith('г.') or line.startswith('Стороны:'):
             p.paragraph_format.space_before = Pt(4)
             p.paragraph_format.space_after = Pt(6)
             run = p.add_run(line)
@@ -410,7 +402,7 @@ def api_download_constructor_file(data: ConstructorDownloadSchema):
             run.font.name = "Times New Roman"
             run.font.size = Pt(11)
             run.font.color.rgb = RGBColor(0, 0, 0)
-        elif any(line.startswith(f"{i}.") for i in range(1, 10)) or line.startswith('7. РЕКВИЗИТЫ'):
+        elif any(line.startswith(f"{i}.") for i in range(1, 10)) or line.startswith('6. РЕКВИЗИТЫ'):
             p.paragraph_format.space_before = Pt(10)
             p.paragraph_format.space_after = Pt(4)
             run = p.add_run(line)
@@ -420,14 +412,6 @@ def api_download_constructor_file(data: ConstructorDownloadSchema):
             run.font.color.rgb = RGBColor(0, 0, 0)
         elif line.startswith('Исполнитель:') or line.startswith('Заказчик:'):
             p.paragraph_format.space_before = Pt(12)
-            p.paragraph_format.space_after = Pt(4)
-            run = p.add_run(line)
-            run.bold = True
-            run.font.name = "Times New Roman"
-            run.font.size = Pt(11)
-            run.font.color.rgb = RGBColor(0, 0, 0)
-        elif ':' in line or '_' in line:
-            p.paragraph_format.space_before = Pt(2)
             p.paragraph_format.space_after = Pt(4)
             run = p.add_run(line)
             run.bold = True
