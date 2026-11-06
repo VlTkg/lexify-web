@@ -5,7 +5,7 @@ import requests
 from datetime import datetime
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor
@@ -18,25 +18,13 @@ app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Токен вашого Telegram бота (вставьте в переменные среды Render или укажите здесь)
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
 
-# База данных пользователей и оплат в памяти
-DB_USERS = {
-    123456789: {"telegram_id": 123456789, "name": "Vladimir Tkachenko", "username": "admin", "checks_left": 3, "is_admin": True}
-}
-DB_PAYMENTS = [
-    {"user": "Vladimir Tkachenko (@admin)", "package": "10 проверок", "stars": 100, "date": "2026-11-01 14:20"},
-    {"user": "Иван Петров (@ivan_p)", "package": "5 проверок", "stars": 60, "date": "2026-11-02 10:15"},
-    {"user": "Анна Смирнова (@anna_s)", "package": "1 проверка", "stars": 15, "date": "2026-11-03 16:40"},
-    {"user": "Сергей Волков (@volkov)", "package": "10 проверок", "stars": 100, "date": "2026-11-04 11:05"},
-    {"user": "Ольга Кравцова (@olga_k)", "package": "5 проверок", "stars": 60, "date": "2026-11-05 09:30"}
-]
-DB_FEEDBACKS = [
-    {"user": "Vladimir Tkachenko", "rating": 5, "text": "Отличный сервис, очень помогает в работе!", "date": "2026-11-01"},
-    {"user": "Иван Петров", "rating": 4, "text": "Быстрый анализ, хотелось бы больше шаблонов.", "date": "2026-11-02"}
-]
-TOTAL_ANALYSES_COUNT = 42
+# Чистая база данных (реальные данные будут накапливаться по мере использования)
+DB_USERS = {}
+DB_PAYMENTS = []
+DB_FEEDBACKS = []
+TOTAL_ANALYSES_COUNT = 0
 
 
 class AnalysisRequest(BaseModel):
@@ -102,12 +90,14 @@ def read_app():
 def user_info(telegram_id: int):
     global DB_USERS
     if telegram_id not in DB_USERS:
+        # Автоматическая регистрация нового пользователя с 3 бесплатными проверками
+        is_adm = (telegram_id == 123456789)
         DB_USERS[telegram_id] = {
             "telegram_id": telegram_id,
-            "name": f"Пользователь {telegram_id}",
-            "username": f"user_{telegram_id}",
+            "name": "Владимир Ткаченко" if is_adm else f"Пользователь {telegram_id}",
+            "username": "admin" if is_adm else f"user_{telegram_id}",
             "checks_left": 3,
-            "is_admin": (telegram_id == 123456789)
+            "is_admin": is_adm
         }
     user = DB_USERS[telegram_id]
     return {
@@ -118,20 +108,19 @@ def user_info(telegram_id: int):
 
 @app.post("/api/create-invoice")
 def create_invoice(data: InvoiceRequest):
-    """Создание официального инвойса Telegram Stars через Bot API"""
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/createInvoiceLink"
     
     title = f"Пакет: {data.checks} проверок в Lexify"
     description = f"Пополнение баланса на {data.checks} юридических проверок договоров."
     payload = f"checks_{data.checks}_user_{data.telegram_id}"
     
-    prices = [{"label": f"{data.checks} проверок", "amount": data.stars}]  # В Stars сумма указывается целым числом
+    prices = [{"label": f"{data.checks} проверок", "amount": data.stars}]
     
     body = {
         "title": title,
         "description": description,
         "payload": payload,
-        "currency": "XTR",  # Валюта Telegram Stars
+        "currency": "XTR",
         "prices": prices
     }
     
@@ -141,11 +130,8 @@ def create_invoice(data: InvoiceRequest):
         if res_data.get("ok"):
             return {"invoice_link": res_data["result"]}
         else:
-            # Если токен не задан или тестовый режим, возвращаем заглушку или ошибку
-            print("Telegram API Error:", res_data)
             raise HTTPException(status_code=400, detail=res_data.get("description", "Ошибка создания инвойса"))
     except Exception as e:
-        # Для локальных тестов без бота возвращаем демонстрационную ссылку
         return {"invoice_link": "https://t.me/share/url?url=test"}
 
 
@@ -154,10 +140,21 @@ def api_analyze(data: AnalysisRequest):
     global TOTAL_ANALYSES_COUNT, DB_USERS
     TOTAL_ANALYSES_COUNT += 1
     
-    # Списываем проверку, если пользователь существует
-    if data.telegram_id in DB_USERS:
-        if DB_USERS[data.telegram_id]["checks_left"] > 0:
-            DB_USERS[data.telegram_id]["checks_left"] -= 1
+    # Регистрируем пользователя, если его еще не было
+    if data.telegram_id not in DB_USERS:
+        is_adm = (data.telegram_id == 123456789)
+        DB_USERS[data.telegram_id] = {
+            "telegram_id": data.telegram_id,
+            "name": data.first_name or f"Пользователь {data.telegram_id}",
+            "username": data.username or f"user_{data.telegram_id}",
+            "checks_left": 3,
+            "is_admin": is_adm
+        }
+
+    # Списываем проверку
+    user = DB_USERS[data.telegram_id]
+    if user["checks_left"] > 0:
+        user["checks_left"] -= 1
 
     text = data.text.strip()
     if not text:
