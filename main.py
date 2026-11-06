@@ -451,9 +451,8 @@ async def generate_protocol(data: ProtocolRequest):
         filename="Protocol_Raznogasiy.docx"
     )
 
-# Конструктор документов (возвращает все возможные варианты ключей во избежание ошибки marked())
-@app.post("/api/generate-document")
-async def api_generate_document(data: ContractGenerationRequest):
+# Общая логика генерации документа для всех вариантов путей
+async def process_document_generation(data: ContractGenerationRequest):
     if not ai_client:
         raise HTTPException(status_code=500, detail="GEMINI_API_KEY не настроен.")
 
@@ -505,6 +504,7 @@ async def api_generate_document(data: ContractGenerationRequest):
             contents=prompt
         )
         doc_text = response.text
+        # Возвращаем все возможные ключи, чтобы фронтенд точно нашел нужный текст без ошибки marked()
         return {
             "status": "success", 
             "document": doc_text,
@@ -513,6 +513,14 @@ async def api_generate_document(data: ContractGenerationRequest):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка генерации документа через Gemini: {str(e)}")
+
+@app.post("/generate-document")
+async def generate_document_main(data: ContractGenerationRequest):
+    return await process_document_generation(data)
+
+@app.post("/api/generate-document")
+async def generate_document_api(data: ContractGenerationRequest):
+    return await process_document_generation(data)
 
 @app.post("/feedback")
 async def receive_feedback(data: FeedbackSchema):
@@ -529,6 +537,7 @@ async def receive_feedback(data: FeedbackSchema):
     except Exception as e:
         return {"status": "error", "detail": str(e)}
 
+# Общая логика анализа договоров для всех вариантов путей
 async def process_analysis(data: AnalyzeSchema):
     if not ai_client:
         raise HTTPException(status_code=500, detail="GEMINI_API_KEY не настроен.")
