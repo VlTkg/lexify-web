@@ -257,8 +257,13 @@ def api_generate_protocol(data: ProtocolRequest):
     table = doc.add_table(rows=1, cols=4)
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
     table.autofit = False
+
+    # Жесткая фиксация макета таблицы для корректного отображения в LibreOffice и Word
+    tblPr = table._tbl.tblPr
+    tblLayout = parse_xml(r'<w:tblLayout {} w:type="fixed"/>'.format(nsdecls('w')))
+    tblPr.append(tblLayout)
     
-    # Жестко сужаем первый столбец для номера до 0.4 дюйма, а остальное отдаем под текст
+    # Строго заданная ширина колонок (первая узкая для номера, остальные равные)
     col_widths = [Inches(0.4), Inches(2.4), Inches(2.4), Inches(2.4)]
     
     hdr_cells = table.rows[0].cells
@@ -288,7 +293,6 @@ def api_generate_protocol(data: ProtocolRequest):
 
         for i, cell in enumerate(row_cells):
             cell.width = col_widths[i]
-            # Выравниваем номер по центру, а текст по левому краю
             for p in cell.paragraphs:
                 if i == 0:
                     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
