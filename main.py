@@ -1,6 +1,7 @@
 import os
 import io
 import re
+import requests
 from datetime import datetime
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.staticfiles import StaticFiles
@@ -17,7 +18,7 @@ app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Простая база данных в памяти (можно расширить или заменить)
+# База данных пользователей в памяти
 DB_USERS = {
     123456789: {"telegram_id": 123456789, "name": "Vladimir Tkachenko", "username": "admin", "checks_left": 3, "is_admin": True}
 }
@@ -74,6 +75,8 @@ class FeedbackRequest(BaseModel):
     feedback: str = ""
     telegram_id: int = 0
     name: str = "Пользователь"
+    doc_type: str = "Общий"
+    jurisdiction: str = "Россия (РФ)"
 
 
 @app.get("/")
@@ -411,18 +414,36 @@ def api_download_constructor_file(data: ConstructorDownloadSchema):
 @app.post("/api/feedback")
 def api_feedback(data: FeedbackRequest):
     global DB_FEEDBACKS
-    DB_FEEDBACKS.insert(0, {
+    # Сохраняем в память для админки
+    new_fb = {
         "user": data.name,
         "rating": data.rating,
         "text": data.feedback,
         "date": datetime.now().strftime("%Y-%m-%d %H:%M")
-    })
+    }
+    DB_FEEDBACKS.insert(0, new_fb)
+
+    # ДДублируем отправку в вашу Google Таблицу (если у вас настроен Apps Script / Webhook, вставьте URL ниже)
+    GOOGLE_SHEET_WEBHOOK_URL = os.getenv("GOOGLE_SHEET_WEBHOOK_URL", "")
+    if GOOGLE_SHEET_WEBHOOK_URL:
+        try:
+            requests.post(GOOGLE_SHEET_WEBHOOK_URL, json={
+                "date": new_fb["date"],
+                "type": "Оценка анализа",
+                "rating": data.rating,
+                "feedback": data.feedback,
+                "name": data.name,
+                "doc_type": data.doc_type,
+                "jurisdiction": data.jurisdiction
+            }, timeout=3)
+        except Exception as e:
+            print("Ошибка отправки в Google Таблицу:", e)
+
     return {"status": "success", "message": "Отзыв успешно сохранен"}
 
 
 @app.get("/admin/stats/{telegram_id}")
 def admin_stats(telegram_id: int):
-    # Проверка прав администратора
     if telegram_id != 123456789:
         raise HTTPException(status_code=403, detail="Доступ запрещен")
         
