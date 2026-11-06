@@ -17,47 +17,23 @@
         .identical-input-box { border: 1px solid #cbd5e1; background-color: #ffffff; border-radius: 0.75rem; padding: 0.65rem 0.875rem; font-size: 0.75rem; font-weight: 500; color: #334155; width: 100%; display: flex; align-items: center; }
         
         .chip-btn {
-            height: 34px;
-            padding: 0 14px;
-            border-radius: 0.75rem;
-            font-size: 0.75rem;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            border: 1px solid #cbd5e1;
+            height: 34px; padding: 0 14px; border-radius: 0.75rem; font-size: 0.75rem; font-weight: 500;
+            display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease; border: 1px solid #cbd5e1;
         }
         .chip-btn.active { background-color: #2563eb; color: #ffffff; border-color: #2563eb; font-weight: 600; }
         .chip-btn:not(.active) { background-color: #f1f5f9; color: #334155; }
         .chip-btn:not(.active):hover { background-color: #e2e8f0; }
 
         .btn-primary-action {
-            height: 40px;
-            border-radius: 0.75rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.2s ease;
+            height: 40px; border-radius: 0.75rem; font-size: 0.75rem; font-weight: 600;
+            display: inline-flex; align-items: center; justify-content: center; transition: background-color 0.2s ease;
         }
 
         .tariff-card {
-            border: 2px solid #e2e8f0;
-            border-radius: 0.75rem;
-            padding: 0.65rem 0.875rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background-color: #f8fafc;
+            border: 2px solid #e2e8f0; border-radius: 0.75rem; padding: 0.65rem 0.875rem; cursor: pointer;
+            transition: all 0.2s ease; display: flex; align-items: center; justify-content: space-between; background-color: #f8fafc;
         }
-        .tariff-card.selected {
-            border-color: #2563eb;
-            background-color: #eff6ff;
-        }
+        .tariff-card.selected { border-color: #2563eb; background-color: #eff6ff; }
 
         #analysis-output, #analysis-output * { color: #000000 !important; font-weight: 500 !important; }
         #analysis-output h1 { font-size: 1.1rem; font-weight: bold; text-align: center; margin-bottom: 0.75rem; }
@@ -143,14 +119,11 @@
                     </div>
                 </div>
 
+                <!-- Конструктор документов -->
                 <div id="constructor-section" class="hidden space-y-3">
                     <div class="transparent-card p-2.5">
-                        <h2 class="text-xs font-bold text-white mb-1">Как это работает</h2>
-                        <ol class="text-xs text-slate-100 space-y-0.5 pl-4 list-decimal">
-                            <li>Выберите тип, юрисдикцию и параметры</li>
-                            <li>Заполните суть услуг и требования</li>
-                            <li>Нажмите кнопку «Сгенерировать документ»</li>
-                        </ol>
+                        <h2 class="text-xs font-bold text-white mb-1">Конструктор полного договора</h2>
+                        <p class="text-xs text-slate-200">Заполните реквизиты сторон для получения готового документа.</p>
                     </div>
                     <div class="transparent-card p-0 space-y-2.5 text-xs">
                         <div>
@@ -168,19 +141,36 @@
                                 <button type="button" class="chip-btn" data-value="Беларусь">Беларусь</button>
                             </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div><label class="block font-bold text-white mb-1">Исполнитель</label><input type="text" id="c-executor" value="Самозанятый" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white"></div>
-                            <div><label class="block font-bold text-white mb-1">Заказчик</label><input type="text" id="c-client" value="Заказчик" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white"></div>
+
+                        <!-- Исполнитель -->
+                        <div class="bg-slate-800/80 p-2.5 rounded-xl border border-slate-600 space-y-2">
+                            <div class="font-bold text-amber-400">Исполнитель</div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div><label class="block font-[500] text-white mb-1">ФИО / Название</label><input type="text" id="c-executor" value="Иванов И.И." class="w-full bg-slate-900 border border-slate-600 rounded-lg p-1.5 text-white"></div>
+                                <div><label class="block font-[500] text-white mb-1">ИНН / ИИН</label><input type="text" id="c-executor-id" value="123456789012" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-1.5 text-white"></div>
+                            </div>
+                            <div><label class="block font-[500] text-white mb-1">Адрес регистрации</label><input type="text" id="c-executor-address" value="г. Алматы, ул. Абая, д. 15" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-1.5 text-white"></div>
                         </div>
-                        <div><label class="block font-bold text-white mb-1">Суть услуг и предмет</label><textarea id="c-description" rows="2" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white resize-none" placeholder="Разработка ПО..."></textarea></div>
+
+                        <!-- Заказчик -->
+                        <div class="bg-slate-800/80 p-2.5 rounded-xl border border-slate-600 space-y-2">
+                            <div class="font-bold text-amber-400">Заказчик</div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div><label class="block font-[500] text-white mb-1">ФИО / Компания</label><input type="text" id="c-client" value="ТОО «Альфа Технологии»" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-1.5 text-white"></div>
+                                <div><label class="block font-[500] text-white mb-1">ИНН / БИН</label><input type="text" id="c-client-id" value="987654321098" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-1.5 text-white"></div>
+                            </div>
+                            <div><label class="block font-[500] text-white mb-1">Адрес регистрации / офиса</label><input type="text" id="c-client-address" value="г. Алматы, пр. Достык, д. 100" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-1.5 text-white"></div>
+                        </div>
+
+                        <div><label class="block font-bold text-white mb-1">Суть услуг и предмет договора</label><textarea id="c-description" rows="2" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white resize-none">Разработка программного модуля автоматизации бизнес-процессов</textarea></div>
                         <div class="grid grid-cols-3 gap-2">
-                            <div><label class="block font-bold text-white mb-1">Оплата</label><input type="text" id="c-payment" value="Постоплата" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white"></div>
-                            <div><label class="block font-bold text-white mb-1">Сроки</label><input type="text" id="c-deadline" value="14 дней" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white"></div>
+                            <div><label class="block font-bold text-white mb-1">Оплата</label><input type="text" id="c-payment" value="100% предоплата" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white"></div>
+                            <div><label class="block font-bold text-white mb-1">Сроки</label><input type="text" id="c-deadline" value="30 дней" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white"></div>
                             <div><label class="block font-bold text-white mb-1">Правки</label><input type="text" id="c-revisions" value="2" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white"></div>
                         </div>
                         <div class="flex gap-2 pt-1">
                             <button type="button" onclick="generateConstructorDocument()" class="btn-primary-action flex-1 bg-indigo-600 hover:bg-indigo-700 text-white">Сгенерировать документ</button>
-                            <button type="button" onclick="resetConstructorForm()" class="btn-primary-action px-5 bg-slate-200 hover:bg-slate-300 text-slate-700">Новый документ</button>
+                            <button type="button" onclick="resetConstructorForm()" class="btn-primary-action px-5 bg-slate-200 hover:bg-slate-300 text-slate-700">Очистить</button>
                         </div>
                     </div>
                 </div>
@@ -215,32 +205,27 @@
         </div>
     </div>
 
-    <!-- Детализированное модальное окно Админ-панели -->
+    <!-- Модалка Админки -->
     <div id="admin-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-2xl w-full p-5 text-slate-900 space-y-4 shadow-xl max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-center border-b pb-2">
-                <h3 class="font-bold text-sm"><i class="fa-solid fa-shield-halved text-indigo-600"></i> Детализированная панель администратора</h3>
+                <h3 class="font-bold text-sm"><i class="fa-solid fa-shield-halved text-indigo-600"></i> Панель администратора</h3>
                 <button type="button" onclick="closeAdminModal()" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark text-base"></i></button>
             </div>
-            
-            <!-- Вкладки админки -->
             <div class="flex gap-2 border-b pb-2 text-xs">
                 <button type="button" onclick="switchAdminTab('overview')" id="admin-tab-overview" class="px-3 py-1.5 font-semibold bg-indigo-600 text-white rounded-lg">Сводка</button>
                 <button type="button" onclick="switchAdminTab('users')" id="admin-tab-users" class="px-3 py-1.5 font-semibold bg-slate-100 text-slate-700 rounded-lg">Пользователи</button>
                 <button type="button" onclick="switchAdminTab('payments')" id="admin-tab-payments" class="px-3 py-1.5 font-semibold bg-slate-100 text-slate-700 rounded-lg">Оплаты</button>
                 <button type="button" onclick="switchAdminTab('feedbacks')" id="admin-tab-feedbacks" class="px-3 py-1.5 font-semibold bg-slate-100 text-slate-700 rounded-lg">Отзывы</button>
             </div>
-
-            <!-- Контент вкладок -->
             <div id="admin-content" class="flex-1 overflow-y-auto max-h-[350px] text-xs space-y-3 pr-1">
                 <p class="text-slate-500">Загрузка данных...</p>
             </div>
-
             <button type="button" onclick="closeAdminModal()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-800 font-medium py-2 rounded-xl text-xs">Закрыть</button>
         </div>
     </div>
 
-    <!-- Модальное окно Покупки проверок -->
+    <!-- Модалка Покупки -->
     <div id="stars-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-sm w-full p-5 text-slate-900 space-y-3 shadow-xl">
             <div class="flex justify-between items-center border-b pb-2">
@@ -249,24 +234,15 @@
             </div>
             <div class="space-y-2 text-xs">
                 <div class="tariff-card selected" onclick="selectTariff(1, 15, this)">
-                    <div>
-                        <div class="font-bold text-slate-900">1 проверка</div>
-                        <div class="text-[11px] text-slate-500">Для разовой задачи</div>
-                    </div>
+                    <div><div class="font-bold text-slate-900">1 проверка</div><div class="text-[11px] text-slate-500">Для разовой задачи</div></div>
                     <div class="font-bold text-indigo-600 text-sm">15 ⭐️</div>
                 </div>
                 <div class="tariff-card" onclick="selectTariff(5, 60, this)">
-                    <div>
-                        <div class="font-bold text-slate-900">5 проверок</div>
-                        <div class="text-[11px] text-slate-500">Экономичный пакет</div>
-                    </div>
+                    <div><div class="font-bold text-slate-900">5 проверок</div><div class="text-[11px] text-slate-500">Экономичный пакет</div></div>
                     <div class="font-bold text-indigo-600 text-sm">60 ⭐️</div>
                 </div>
                 <div class="tariff-card" onclick="selectTariff(10, 100, this)">
-                    <div>
-                        <div class="font-bold text-slate-900">10 проверок</div>
-                        <div class="text-[11px] text-slate-500">Максимальная выгода</div>
-                    </div>
+                    <div><div class="font-bold text-slate-900">10 проверок</div><div class="text-[11px] text-slate-500">Максимальная выгода</div></div>
                     <div class="font-bold text-indigo-600 text-sm">100 ⭐️</div>
                 </div>
             </div>
@@ -298,7 +274,6 @@
 
         if (tg) { tg.ready(); tg.expand(); initDataUser = tg.initDataUnsafe?.user; }
 
-        // Интерактив звезд отзыва
         document.querySelectorAll('#star-rating i').forEach((star, idx, stars) => {
             star.addEventListener('click', () => {
                 selectedRating = idx + 1;
@@ -320,20 +295,15 @@
                 const res = await fetch(`/user-info/${telegramId}`);
                 const data = await res.json();
                 document.getElementById('checks-count').textContent = data.free_checks_left || 3;
-                
                 if (data.is_admin) {
                     document.getElementById('admin-btn').classList.remove('hidden');
                 } else {
                     document.getElementById('admin-btn').classList.add('hidden');
                 }
-            } catch (e) {
-                console.error("Ошибка загрузки профиля", e);
-            }
+            } catch (e) { console.error(e); }
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            checkUserAccess();
-        });
+        window.addEventListener('DOMContentLoaded', () => { checkUserAccess(); });
 
         function scrollToResults() {
             document.getElementById('results-card-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -509,27 +479,35 @@
             scrollToResults();
 
             let telegramId = initDataUser ? initDataUser.id : 123456789;
-            const response = await fetch('/api/generate-document', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    doc_type: selectedConstructorDocType,
-                    jurisdiction: selectedConstructorJurisdiction,
-                    executor: document.getElementById('c-executor').value,
-                    client: document.getElementById('c-client').value,
-                    description: document.getElementById('c-description').value,
-                    payment: document.getElementById('c-payment').value,
-                    deadline: document.getElementById('c-deadline').value,
-                    revisions: document.getElementById('c-revisions').value,
-                    telegram_id: telegramId
-                })
-            });
-            const data = await response.json();
-            currentGeneratedDocumentText = data.document_text;
-            outputDiv.innerHTML = `<div class="whitespace-pre-wrap text-left pb-4 text-xs leading-relaxed" style="color: #000000 !important; font-weight: 500;">${marked.parse(currentGeneratedDocumentText)}</div>`;
-            document.getElementById('copy-doc-btn').classList.remove('hidden');
-            document.getElementById('download-doc-btn').classList.remove('hidden');
-            scrollToResults();
+            try {
+                const response = await fetch('/api/generate-document', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        doc_type: selectedConstructorDocType,
+                        jurisdiction: selectedConstructorJurisdiction,
+                        executor: document.getElementById('c-executor')?.value || "Иванов И.И.",
+                        executor_id: document.getElementById('c-executor-id')?.value || "123456789012",
+                        executor_address: document.getElementById('c-executor-address')?.value || "г. Алматы",
+                        client: document.getElementById('c-client')?.value || "Заказчик",
+                        client_id: document.getElementById('c-client-id')?.value || "987654321098",
+                        client_address: document.getElementById('c-client-address')?.value || "г. Алматы",
+                        description: document.getElementById('c-description')?.value || "Оказание услуг",
+                        payment: document.getElementById('c-payment')?.value || "Предоплата",
+                        deadline: document.getElementById('c-deadline')?.value || "14 дней",
+                        revisions: document.getElementById('c-revisions')?.value || "2",
+                        telegram_id: telegramId
+                    })
+                });
+                const data = await response.json();
+                currentGeneratedDocumentText = data.document_text;
+                outputDiv.innerHTML = `<div class="whitespace-pre-wrap text-left pb-4 text-xs leading-relaxed" style="color: #000000 !important; font-weight: 500;">${marked.parse(currentGeneratedDocumentText)}</div>`;
+                document.getElementById('copy-doc-btn').classList.remove('hidden');
+                document.getElementById('download-doc-btn').classList.remove('hidden');
+                scrollToResults();
+            } catch (err) {
+                outputDiv.innerHTML = `<div class="text-red-600 p-4 text-center">Ошибка генерации: ${err.message}</div>`;
+            }
         }
 
         async function downloadConstructorFile() {
@@ -571,35 +549,25 @@
             document.getElementById('analysis-output').innerHTML = "Здесь появится текст сгенерированного документа после заполнения параметров.";
         }
 
-        // Функции Админки с детализацией
         async function openAdminModal() {
             const modal = document.getElementById('admin-modal');
             modal.classList.remove('hidden');
             document.getElementById('admin-content').innerHTML = `<p class="text-slate-500">Загрузка детальной статистики...</p>`;
-
             let telegramId = initDataUser ? initDataUser.id : 123456789;
             try {
                 const res = await fetch(`/admin/stats/${telegramId}`);
                 adminDataCache = await res.json();
                 renderAdminTab();
-            } catch (e) {
-                document.getElementById('admin-content').innerHTML = `<p class="text-red-500">Ошибка загрузки данных админ-панели.</p>`;
-            }
+            } catch (e) { document.getElementById('admin-content').innerHTML = `<p class="text-red-500">Ошибка загрузки.</p>`; }
         }
 
-        function closeAdminModal() {
-            document.getElementById('admin-modal').classList.add('hidden');
-        }
+        function closeAdminModal() { document.getElementById('admin-modal').classList.add('hidden'); }
 
         function switchAdminTab(tab) {
             currentAdminTab = tab;
             ['overview', 'users', 'payments', 'feedbacks'].forEach(t => {
                 const btn = document.getElementById(`admin-tab-${t}`);
-                if (t === tab) {
-                    btn.className = "px-3 py-1.5 font-semibold bg-indigo-600 text-white rounded-lg";
-                } else {
-                    btn.className = "px-3 py-1.5 font-semibold bg-slate-100 text-slate-700 rounded-lg";
-                }
+                btn.className = t === tab ? "px-3 py-1.5 font-semibold bg-indigo-600 text-white rounded-lg" : "px-3 py-1.5 font-semibold bg-slate-100 text-slate-700 rounded-lg";
             });
             renderAdminTab();
         }
@@ -607,99 +575,64 @@
         function renderAdminTab() {
             if (!adminDataCache) return;
             const container = document.getElementById('admin-content');
-            
             if (currentAdminTab === 'overview') {
-                container.innerHTML = `
-                    <div class="grid grid-cols-3 gap-3">
-                        <div class="bg-slate-50 p-3 rounded-xl border text-center">
-                            <div class="text-lg font-bold text-indigo-600">${adminDataCache.total_users}</div>
-                            <div class="text-[11px] text-slate-500">Пользователей</div>
-                        </div>
-                        <div class="bg-slate-50 p-3 rounded-xl border text-center">
-                            <div class="text-lg font-bold text-blue-600">${adminDataCache.total_analyses}</div>
-                            <div class="text-[11px] text-slate-500">Проверок всего</div>
-                        </div>
-                        <div class="bg-slate-50 p-3 rounded-xl border text-center">
-                            <div class="text-lg font-bold text-amber-600">${adminDataCache.total_payments}</div>
-                            <div class="text-[11px] text-slate-500">Успешных оплат</div>
-                        </div>
-                    </div>
-                `;
+                container.innerHTML = `<div class="grid grid-cols-3 gap-3"><div class="bg-slate-50 p-3 rounded-xl border text-center"><div class="text-lg font-bold text-indigo-600">${adminDataCache.total_users}</div><div class="text-[11px] text-slate-500">Пользователей</div></div><div class="bg-slate-50 p-3 rounded-xl border text-center"><div class="text-lg font-bold text-blue-600">${adminDataCache.total_analyses}</div><div class="text-[11px] text-slate-500">Проверок всего</div></div><div class="bg-slate-50 p-3 rounded-xl border text-center"><div class="text-lg font-bold text-amber-600">${adminDataCache.total_payments}</div><div class="text-[11px] text-slate-500">Успешных оплат</div></div></div>`;
             } else if (currentAdminTab === 'users') {
-                let html = `<div class="space-y-2"><h4 class="font-bold text-slate-800">Список зарегистрированных пользователей:</h4><div class="divide-y border rounded-xl bg-slate-50 overflow-hidden">`;
-                adminDataCache.users_list.forEach(u => {
-                    html += `<div class="p-2.5 flex justify-between items-center text-xs"><div><strong>${u.name}</strong> <span class="text-slate-500">(@${u.username})</span><br><span class="text-[10px] text-slate-400">ID: ${u.telegram_id}</span></div><div class="text-right">Остаток: <span class="font-bold text-amber-600">${u.checks_left}</span></div></div>`;
-                });
+                let html = `<div class="space-y-2"><h4 class="font-bold text-slate-800">Пользователи:</h4><div class="divide-y border rounded-xl bg-slate-50 overflow-hidden">`;
+                adminDataCache.users_list.forEach(u => { html += `<div class="p-2.5 flex justify-between items-center text-xs"><div><strong>${u.name}</strong> (@${u.username})<br><span class="text-[10px] text-slate-400">ID: ${u.telegram_id}</span></div><div class="text-right">Остаток: <span class="font-bold text-amber-600">${u.checks_left}</span></div></div>`; });
                 container.innerHTML = html + `</div></div>`;
             } else if (currentAdminTab === 'payments') {
-                let html = `<div class="space-y-2"><h4 class="font-bold text-slate-800">Лог успешных оплат (Telegram Stars):</h4><div class="divide-y border rounded-xl bg-slate-50 overflow-hidden">`;
-                adminDataCache.payments_list.forEach(p => {
-                    html += `<div class="p-2.5 flex justify-between items-center text-xs"><div><strong>${p.user}</strong><br><span class="text-[10px] text-slate-400">${p.date}</span></div><div class="text-right"><span class="font-semibold text-slate-700">${p.package}</span><br><span class="font-bold text-amber-600">+${p.stars} ⭐️</span></div></div>`;
-                });
+                let html = `<div class="space-y-2"><h4 class="font-bold text-slate-800">Оплаты:</h4><div class="divide-y border rounded-xl bg-slate-50 overflow-hidden">`;
+                adminDataCache.payments_list.forEach(p => { html += `<div class="p-2.5 flex justify-between items-center text-xs"><div><strong>${p.user}</strong><br><span class="text-[10px] text-slate-400">${p.date}</span></div><div class="text-right">${p.package}<br><strong class="text-amber-600">+${p.stars} ⭐️</strong></div></div>`; });
                 container.innerHTML = html + `</div></div>`;
             } else if (currentAdminTab === 'feedbacks') {
-                let html = `<div class="space-y-2"><h4 class="font-bold text-slate-800">Отзывы пользователей:</h4><div class="divide-y border rounded-xl bg-slate-50 overflow-hidden">`;
-                if (adminDataCache.feedbacks_list.length === 0) {
-                    html += `<div class="p-3 text-center text-slate-500">Пока нет отзывов.</div>`;
-                } else {
-                    adminDataCache.feedbacks_list.forEach(f => {
-                        let starsHtml = '';
-                        for(let i=0; i<5; i++) {
-                            starsHtml += `<i class="fa-solid fa-star ${i < f.rating ? 'text-amber-400' : 'text-slate-300'}"></i>`;
-                        }
-                        html += `<div class="p-2.5 space-y-1 text-xs"><div class="flex justify-between"><strong>${f.user}</strong><span class="text-[10px] text-slate-400">${f.date}</span></div><div class="flex gap-0.5 text-[10px]">${starsHtml}</div><p class="text-slate-700">${f.text}</p></div>`;
-                    });
-                }
+                let html = `<div class="space-y-2"><h4 class="font-bold text-slate-800">Отзывы:</h4><div class="divide-y border rounded-xl bg-slate-50 overflow-hidden">`;
+                if (adminDataCache.feedbacks_list.length === 0) html += `<div class="p-3 text-center text-slate-500">Нет отзывов.</div>`;
+                else adminDataCache.feedbacks_list.forEach(f => {
+                    let stars = ''; for(let i=0; i<5; i++) stars += `<i class="fa-solid fa-star ${i < f.rating ? 'text-amber-400' : 'text-slate-300'}"></i>`;
+                    html += `<div class="p-2.5 space-y-1 text-xs"><div class="flex justify-between"><strong>${f.user}</strong><span class="text-[10px] text-slate-400">${f.date}</span></div><div class="flex gap-0.5 text-[10px]">${stars}</div><p class="text-slate-700">${f.text}</p></div>`;
+                });
                 container.innerHTML = html + `</div></div>`;
             }
         }
 
-        function openStarsModal() {
-            document.getElementById('stars-modal').classList.remove('hidden');
-        }
-
-        function closeStarsModal() {
-            document.getElementById('stars-modal').classList.add('hidden');
-        }
+        function openStarsModal() { document.getElementById('stars-modal').classList.remove('hidden'); }
+        function closeStarsModal() { document.getElementById('stars-modal').classList.add('hidden'); }
 
         function selectTariff(checks, price, element) {
-            selectedTariffChecks = checks;
-            selectedTariffPrice = price;
-            document.querySelectorAll('.tariff-card').forEach(card => card.classList.remove('selected'));
+            selectedTariffChecks = checks; selectedTariffPrice = price;
+            document.querySelectorAll('.tariff-card').forEach(c => c.classList.remove('selected'));
             element.classList.add('selected');
             document.getElementById('buy-btn').textContent = `Купить за ${price} ⭐️`;
         }
 
-        function buyPackage() {
-            alert(`Запрос на покупку ${selectedTariffChecks} проверок за ${selectedTariffPrice} Telegram Stars...`);
-            closeStarsModal();
+        async function buyPackage() {
+            let telegramId = initDataUser ? initDataUser.id : 123456789;
+            try {
+                const res = await fetch('/api/create-invoice', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ checks: selectedTariffChecks, stars: selectedTariffPrice, telegram_id: telegramId })
+                });
+                const data = await res.json();
+                if (data.invoice_link && tg && tg.openInvoice) {
+                    closeStarsModal();
+                    tg.openInvoice(data.invoice_link, (status) => { if (status === 'paid') { alert('Оплата прошла!'); checkUserAccess(); } });
+                } else if (data.invoice_link) { window.open(data.invoice_link, '_blank'); closeStarsModal(); }
+            } catch (e) { alert('Ошибка соединения.'); }
         }
 
         async function sendFeedback() {
             let feedbackText = document.getElementById('feedback-text').value.trim();
             let userName = initDataUser ? initDataUser.first_name : "Vladimir Tkachenko";
             let telegramId = initDataUser ? initDataUser.id : 123456789;
-
-            if (!feedbackText) {
-                alert('Пожалуйста, напишите текст отзыва.');
-                return;
-            }
-
+            if (!feedbackText) { alert('Введите отзыв.'); return; }
             try {
                 const res = await fetch('/api/feedback', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ rating: selectedRating, feedback: feedbackText, telegram_id: telegramId, name: userName })
                 });
-                if (res.ok) {
-                    alert('Спасибо! Ваш отзыв успешно отправлен.');
-                    document.getElementById('feedback-text').value = '';
-                } else {
-                    alert('Ошибка при отправке отзыва.');
-                }
-            } catch (e) {
-                alert('Ошибка соединения с сервером.');
-            }
+                if (res.ok) { alert('Спасибо за отзыв!'); document.getElementById('feedback-text').value = ''; }
+            } catch (e) { alert('Ошибка соединения.'); }
         }
     </script>
 </body>
