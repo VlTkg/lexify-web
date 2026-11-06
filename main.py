@@ -373,6 +373,7 @@ async def generate_protocol(data: ProtocolRequest):
     sub_run.italic = True
     sub_run.font.color.rgb = RGBColor(0x4B, 0x55, 0x63)
 
+    # Слово «законодательство» в именительном падеже
     law_p = doc.add_paragraph()
     law_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     law_run = law_p.add_run(f"Применимое право: законодательство ({clean_text(data.jurisdiction)})\n")
