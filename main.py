@@ -145,7 +145,9 @@ class ConstructorFileRequest(BaseModel):
 
 @app.get("/")
 async def serve_landing():
-    return FileResponse("static/landing.html")
+    if os.path.exists("static/landing.html"):
+        return FileResponse("static/landing.html")
+    return FileResponse("static/index.html")
 
 @app.get("/app")
 async def serve_app():
@@ -526,7 +528,6 @@ async def receive_feedback(data: FeedbackSchema):
     except Exception as e:
         return {"status": "error", "detail": str(e)}
 
-# ОСНОВНОЙ ЭНДПОИНТ АНАЛИЗА (поддерживает оба пути для полной надежности)
 async def process_analysis(data: AnalyzeSchema):
     if not ai_client:
         raise HTTPException(status_code=500, detail="GEMINI_API_KEY не настроен.")
