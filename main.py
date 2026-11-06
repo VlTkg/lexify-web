@@ -8,7 +8,7 @@ import tempfile
 from datetime import datetime
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, StreamingResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel
 from typing import Optional, List
 from google import genai
@@ -138,15 +138,9 @@ class ContractGenerationRequest(BaseModel):
     revisions: str = "2"
     telegram_id: Optional[int] = None
 
-class ConstructorFileRequest(BaseModel):
-    document_text: str
-    doc_type: str = "contract"
-    jurisdiction: str = "Россия (РФ)"
-
+# Роутинг: теперь и по корню "/", и по "/app" открывается само приложение в браузере
 @app.get("/")
-async def serve_landing():
-    if os.path.exists("static/landing.html"):
-        return FileResponse("static/landing.html")
+async def serve_root():
     return FileResponse("static/index.html")
 
 @app.get("/app")
@@ -344,6 +338,7 @@ def clean_text(val: Optional[str]) -> str:
     text_str = re.sub(r'[^\w\s\d.,!?;:()"\'-–—«»/%\\]', '', text_str)
     return text_str.strip()
 
+# Генерация протокола с исправленной версткой и словом "законодательство" в именительном падеже
 @app.post("/generate-protocol")
 async def generate_protocol(data: ProtocolRequest):
     doc = docx.Document()
@@ -373,7 +368,6 @@ async def generate_protocol(data: ProtocolRequest):
     sub_run.italic = True
     sub_run.font.color.rgb = RGBColor(0x4B, 0x55, 0x63)
 
-    # Слово «законодательство» в именительном падеже
     law_p = doc.add_paragraph()
     law_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     law_run = law_p.add_run(f"Применимое право: законодательство ({clean_text(data.jurisdiction)})\n")
@@ -458,6 +452,7 @@ async def generate_protocol(data: ProtocolRequest):
         filename="Protocol_Raznogasiy.docx"
     )
 
+# Конструктор договоров
 @app.post("/api/generate-document")
 async def api_generate_document(data: ContractGenerationRequest):
     if not ai_client:
@@ -529,6 +524,7 @@ async def receive_feedback(data: FeedbackSchema):
     except Exception as e:
         return {"status": "error", "detail": str(e)}
 
+# Логика анализа договоров (поддерживает оба варианта путей для полной надежности)
 async def process_analysis(data: AnalyzeSchema):
     if not ai_client:
         raise HTTPException(status_code=500, detail="GEMINI_API_KEY не настроен.")
