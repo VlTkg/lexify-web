@@ -138,7 +138,7 @@ class ContractGenerationRequest(BaseModel):
     revisions: str = "2"
     telegram_id: Optional[int] = None
 
-# Роутинг: теперь и по корню "/", и по "/app" открывается само приложение в браузере
+# Роутинг: приложение сразу открывается по корню и по /app
 @app.get("/")
 async def serve_root():
     return FileResponse("static/index.html")
@@ -338,7 +338,6 @@ def clean_text(val: Optional[str]) -> str:
     text_str = re.sub(r'[^\w\s\d.,!?;:()"\'-–—«»/%\\]', '', text_str)
     return text_str.strip()
 
-# Генерация протокола с исправленной версткой и словом "законодательство" в именительном падеже
 @app.post("/generate-protocol")
 async def generate_protocol(data: ProtocolRequest):
     doc = docx.Document()
@@ -452,7 +451,7 @@ async def generate_protocol(data: ProtocolRequest):
         filename="Protocol_Raznogasiy.docx"
     )
 
-# Конструктор договоров
+# Конструктор документов (возвращает все возможные варианты ключей во избежание ошибки marked())
 @app.post("/api/generate-document")
 async def api_generate_document(data: ContractGenerationRequest):
     if not ai_client:
@@ -505,7 +504,13 @@ async def api_generate_document(data: ContractGenerationRequest):
             model=model_name,
             contents=prompt
         )
-        return {"status": "success", "document": response.text}
+        doc_text = response.text
+        return {
+            "status": "success", 
+            "document": doc_text,
+            "text": doc_text,
+            "result": doc_text
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка генерации документа через Gemini: {str(e)}")
 
@@ -524,7 +529,6 @@ async def receive_feedback(data: FeedbackSchema):
     except Exception as e:
         return {"status": "error", "detail": str(e)}
 
-# Логика анализа договоров (поддерживает оба варианта путей для полной надежности)
 async def process_analysis(data: AnalyzeSchema):
     if not ai_client:
         raise HTTPException(status_code=500, detail="GEMINI_API_KEY не настроен.")
