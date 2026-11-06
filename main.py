@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from docx import Document
-from docx.shared import Inches, Pt, RGBColor
+from docx.shared import Inches, Pt, RGBColor, WD_INCH
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.oxml import parse_xml
@@ -258,20 +258,26 @@ def api_generate_protocol(data: ProtocolRequest):
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
     table.autofit = False
 
-    # Жесткая фиксация макета таблицы для корректного отображения в LibreOffice и Word
+    # Жесткая фиксация макета таблицы для LibreOffice и Word
     tblPr = table._tbl.tblPr
     tblLayout = parse_xml(r'<w:tblLayout {} w:type="fixed"/>'.format(nsdecls('w')))
     tblPr.append(tblLayout)
     
-    # Строго заданная ширина колонок (первая узкая для номера, остальные равные)
-    col_widths = [Inches(0.4), Inches(2.4), Inches(2.4), Inches(2.4)]
+    # Ширина в twips (1 дюйм = 1440 twips). 
+    # Колонка 1: 0.5 дюйма (720 twips) — узкая для номера
+    # Колонки 2, 3, 4: по 2.16 дюйма (3120 twips) — широкие для текста
+    col_widths_twips = [720, 3120, 3120, 3120]
     
     hdr_cells = table.rows[0].cells
     hdr_titles = ["№", "Редакция Заказчика", "Правовая квалификация / Риск", "Предлагаемая редакция"]
     
     for i, title_text in enumerate(hdr_titles):
         hdr_cells[i].text = title_text
-        hdr_cells[i].width = col_widths[i]
+        # Жестко прописываем ширину через XML для каждой ячейки заголовка
+        tcPr = hdr_cells[i]._tc.get_or_add_tcPr()
+        tcW = parse_xml(r'<w:tcW {} w:w="{}" w:type="dxa"/>'.format(nsdecls('w'), col_widths_twips[i]))
+        tcPr.append(tcW)
+        
         p = hdr_cells[i].paragraphs[0]
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p.paragraph_format.space_before = Pt(8)
@@ -282,7 +288,7 @@ def api_generate_protocol(data: ProtocolRequest):
             run.font.size = Pt(10)
             run.font.color.rgb = RGBColor(0, 0, 0)
         shading_xml = parse_xml(r'<w:shd {} w:fill="E2E8F0"/>'.format(nsdecls('w')))
-        hdr_cells[i]._tc.get_or_add_tcPr().append(shading_xml)
+        tcPr.append(shading_xml)
 
     for idx, risk in enumerate(data.risks, 1):
         row_cells = table.add_row().cells
@@ -292,7 +298,11 @@ def api_generate_protocol(data: ProtocolRequest):
         row_cells[3].text = risk.get('recommendation', '-')
 
         for i, cell in enumerate(row_cells):
-            cell.width = col_widths[i]
+            # Жестко прописываем ширину через XML для каждой ячейки строки данных
+            tcPr = cell._tc.get_or_add_tcPr()
+            tcW = parse_xml(r'<w:tcW {} w:w="{}" w:type="dxa"/>'.format(nsdecls('w'), col_widths_twips[i]))
+            tcPr.append(tcW)
+            
             for p in cell.paragraphs:
                 if i == 0:
                     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
