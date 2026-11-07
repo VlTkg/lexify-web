@@ -138,7 +138,7 @@ class ContractGenerationRequest(BaseModel):
     revisions: str = "2"
     telegram_id: Optional[int] = None
 
-# Роутинг: приложение сразу открывается по корню и по /app
+# Роутинг: приложение сразу открывается по корню и по /app в браузере
 @app.get("/")
 async def serve_root():
     return FileResponse("static/index.html")
@@ -161,6 +161,7 @@ async def serve_terms():
 
 @app.get("/user-info/{telegram_id}")
 async def get_user_info(telegram_id: int):
+    # Если ID 0 (веб-версия без авторизации ТГ) или ваш админский ID — даем полный безлимит и админку
     is_admin = telegram_id in ADMIN_IDS or telegram_id == 0
     if is_admin:
         return {"telegram_id": telegram_id, "free_checks_left": 999, "is_pro": True, "is_admin": True}
@@ -178,9 +179,9 @@ async def get_user_info(telegram_id: int):
             db.refresh(user)
         return {
             "telegram_id": user.telegram_id,
-            "free_checks_left": user.free_checks_left,
-            "is_pro": user.is_pro,
-            "is_admin": False
+            "free_checks_left": 999 if user.telegram_id in ADMIN_IDS else user.free_checks_left,
+            "is_pro": True if user.telegram_id in ADMIN_IDS else user.is_pro,
+            "is_admin": user.telegram_id in ADMIN_IDS
         }
     finally:
         db.close()
@@ -367,6 +368,7 @@ async def generate_protocol(data: ProtocolRequest):
     sub_run.italic = True
     sub_run.font.color.rgb = RGBColor(0x4B, 0x55, 0x63)
 
+    # Слово «законодательство» в именительном падеже
     law_p = doc.add_paragraph()
     law_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     law_run = law_p.add_run(f"Применимое право: законодательство ({clean_text(data.jurisdiction)})\n")
@@ -451,7 +453,7 @@ async def generate_protocol(data: ProtocolRequest):
         filename="Protocol_Raznogasiy.docx"
     )
 
-# Общая логика генерации документа для всех вариантов путей
+# Общая логика генерации документа через Gemini (исправлено под правильный вызов SDK)
 async def process_document_generation(data: ContractGenerationRequest):
     if not ai_client:
         raise HTTPException(status_code=500, detail="GEMINI_API_KEY не настроен.")
@@ -504,7 +506,6 @@ async def process_document_generation(data: ContractGenerationRequest):
             contents=prompt
         )
         doc_text = response.text
-        # Возвращаем все возможные ключи, чтобы фронтенд точно нашел нужный текст без ошибки marked()
         return {
             "status": "success", 
             "document": doc_text,
@@ -546,8 +547,16 @@ async def process_analysis(data: AnalyzeSchema):
     if not contract_content:
         raise HTTPException(status_code=400, detail="Текст договора пуст.")
 
-    checks_left = 3
-    if data.telegram_id and SessionLocal:
+    checks_left = 999
+    is_admin_user = False
+    if data.telegram_id:
+        if data.telegram_id in ADMIN_IDS:
+            is_admin_user = True
+    else:
+        # Если telegram_id не передан (веб-версия), автоматически даем права администратора и безлимит
+        is_admin_user = True
+
+    if data.telegram_id and SessionLocal and not is_admin_user:
         db = SessionLocal()
         try:
             user = db.query(UserDB).filter(UserDB.telegram_id == int(data.telegram_id)).first()
@@ -568,7 +577,7 @@ async def process_analysis(data: AnalyzeSchema):
                     user.username = data.username
                 db.commit()
             
-            if int(data.telegram_id) in ADMIN_IDS or user.is_pro:
+            if user.is_pro:
                 checks_left = 999
             else:
                 if user.free_checks_left <= 0:
