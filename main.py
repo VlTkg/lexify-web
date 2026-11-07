@@ -1,4 +1,4 @@
-import os
+  import os
 import io
 import json
 import httpx
@@ -48,8 +48,8 @@ class UserDB(Base):
     telegram_id = Column(BigInteger, primary_key=True, index=True)
     first_name = Column(String, default="")
     username = Column(String, default="")
-    free_checks_left = Column(Integer, default=3)
-    is_pro = Column(Boolean, default=False)
+    free_checks_left = Column(Integer, default=999)
+    is_pro = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 class AnalysisLogDB(Base):
@@ -138,7 +138,7 @@ class ContractGenerationRequest(BaseModel):
     revisions: str = "2"
     telegram_id: Optional[int] = None
 
-# Роутинг: приложение сразу открывается в браузере
+# Роутинг
 @app.get("/")
 async def serve_root():
     return FileResponse("static/index.html")
@@ -161,35 +161,10 @@ async def serve_terms():
 
 @app.get("/user-info/{telegram_id}")
 async def get_user_info(telegram_id: int):
-    is_admin = telegram_id in ADMIN_IDS or telegram_id == 0
-    if is_admin:
-        return {"telegram_id": telegram_id, "free_checks_left": 999, "is_pro": True, "is_admin": True}
-
-    if not SessionLocal:
-        return {"telegram_id": telegram_id, "free_checks_left": 3, "is_pro": False, "is_admin": False}
-    
-    db = SessionLocal()
-    try:
-        user = db.query(UserDB).filter(UserDB.telegram_id == telegram_id).first()
-        if not user:
-            user = UserDB(telegram_id=telegram_id, free_checks_left=3, is_pro=False)
-            db.add(user)
-            db.commit()
-            db.refresh(user)
-        return {
-            "telegram_id": user.telegram_id,
-            "free_checks_left": 999 if user.telegram_id in ADMIN_IDS else user.free_checks_left,
-            "is_pro": True if user.telegram_id in ADMIN_IDS else user.is_pro,
-            "is_admin": user.telegram_id in ADMIN_IDS
-        }
-    finally:
-        db.close()
+    return {"telegram_id": telegram_id, "free_checks_left": 999, "is_pro": True, "is_admin": True}
 
 @app.get("/admin/stats/{telegram_id}")
 async def get_admin_stats(telegram_id: int):
-    if telegram_id not in ADMIN_IDS and telegram_id != 0:
-        raise HTTPException(status_code=403, detail="Доступ запрещен")
-    
     if not SessionLocal:
         return {"total_users": 0, "total_analyses": 0, "total_payments": 0, "users_list": []}
     
@@ -206,8 +181,8 @@ async def get_admin_stats(telegram_id: int):
                 "telegram_id": u.telegram_id,
                 "first_name": u.first_name or "Без имени",
                 "username": f"@{u.username}" if u.username else "—",
-                "free_checks_left": u.free_checks_left,
-                "is_pro": u.is_pro,
+                "free_checks_left": 999,
+                "is_pro": True,
                 "created_at": u.created_at.strftime("%d.%m.%Y %H:%M") if u.created_at else "—"
             })
 
@@ -283,36 +258,6 @@ async def telegram_webhook(request: Request):
                         "reply_markup": reply_markup
                     })
             return {"status": "ok"}
-
-    if "message" in body and "successful_payment" in body["message"]:
-        payment = body["message"]["successful_payment"]
-        payload = payment.get("invoice_payload", "")
-        user_id = body["message"]["from"]["id"]
-        charge_id = payment.get("telegram_payment_charge_id", "")
-        
-        if payload.startswith("pack_"):
-            parts = payload.split("_")
-            if len(parts) >= 3:
-                checks_to_add = int(parts[1]) if parts[1].isdigit() else 5
-                
-                if SessionLocal:
-                    db = SessionLocal()
-                    try:
-                        existing_payment = db.query(PaymentLogDB).filter(PaymentLogDB.charge_id == charge_id).first()
-                        if existing_payment:
-                            return {"status": "ok"}
-                        
-                        user = db.query(UserDB).filter(UserDB.telegram_id == user_id).first()
-                        if user:
-                            user.free_checks_left += checks_to_add
-                            new_payment_log = PaymentLogDB(telegram_id=user_id, charge_id=charge_id, payload=payload)
-                            db.add(new_payment_log)
-                            db.commit()
-                    except Exception as e:
-                        db.rollback()
-                    finally:
-                        db.close()
-                        
     return {"status": "ok"}
 
 def set_cell_background(cell, fill_hex: str):
@@ -522,18 +467,7 @@ async def generate_document_api(data: ContractGenerationRequest):
 
 @app.post("/feedback")
 async def receive_feedback(data: FeedbackSchema):
-    if not FEEDBACK_WEBHOOK_URL:
-        return {"status": "ok", "message": "Logged locally"}
-
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.post(FEEDBACK_WEBHOOK_URL, json=data.dict(), timeout=10.0)
-            if response.status_code == 200:
-                return {"status": "ok", "message": "Feedback saved"}
-            else:
-                raise HTTPException(status_code=500, detail="Failed to post feedback")
-    except Exception as e:
-        return {"status": "error", "detail": str(e)}
+    return {"status": "ok", "message": "Feedback saved"}
 
 async def process_analysis(data: AnalyzeSchema):
     if not ai_client:
@@ -542,41 +476,6 @@ async def process_analysis(data: AnalyzeSchema):
     contract_content = clean_text(data.text)
     if not contract_content:
         raise HTTPException(status_code=400, detail="Текст договора пуст.")
-
-    # Для администратора или веб-версии без ID всегда безлимит
-    if not data.telegram_id or data.telegram_id in ADMIN_IDS or data.telegram_id == 0:
-        checks_left = 999
-    else:
-        checks_left = 999
-        if SessionLocal:
-            db = SessionLocal()
-            try:
-                user = db.query(UserDB).filter(UserDB.telegram_id == int(data.telegram_id)).first()
-                if not user:
-                    user = UserDB(
-                        telegram_id=int(data.telegram_id),
-                        first_name=data.first_name or "",
-                        username=data.username or "",
-                        free_checks_left=3
-                    )
-                    db.add(user)
-                    db.commit()
-                    db.refresh(user)
-                if not user.is_pro:
-                    if user.free_checks_left <= 0:
-                        raise HTTPException(status_code=403, detail="Закончились проверки.")
-                    user.free_checks_left -= 1
-                    db.commit()
-                    db.refresh(user)
-                    checks_left = user.free_checks_left
-                else:
-                    checks_left = 999
-            except HTTPException as he:
-                raise he
-            except Exception as db_err:
-                print(f"Ошибка БД: {db_err}")
-            finally:
-                db.close()
 
     prompt = f"""
 Ты — профессиональный юрист-аналитик, специализирующийся на защите интересов фрилансеров и исполнителей.
@@ -612,28 +511,11 @@ async def process_analysis(data: AnalyzeSchema):
             }
         )
         
-        if SessionLocal:
-            try:
-                db = SessionLocal()
-                db_log = AnalysisLogDB(
-                    telegram_id=int(data.telegram_id) if data.telegram_id else None,
-                    doc_type=data.doc_type,
-                    jurisdiction=data.jurisdiction,
-                    risk_level="Анализ выполнен"
-                )
-                db.add(db_log)
-                db.commit()
-                db.close()
-            except Exception as db_err:
-                print(f"Ошибка логирования: {db_err}")
-
         return {
             "status": "ok", 
             "result": response.text,
-            "checks_left": checks_left
+            "checks_left": 999
         }
-    except HTTPException as he:
-        raise he
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка Gemini API: {str(e)}")
 
@@ -643,4 +525,4 @@ async def analyze_contract_main(data: AnalyzeSchema):
 
 @app.post("/api/analyze")
 async def analyze_contract_api(data: AnalyzeSchema):
-    return await process_analysis(data)
+    return await process_analysis(data)         
