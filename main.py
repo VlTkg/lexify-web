@@ -409,6 +409,7 @@ async def process_document_generation(data: ContractGenerationRequest):
 """
 
     try:
+        # Строка 376: Используется проверенная модель gemini-3.8-flash
         response = ai_client.models.generate_content(
             model='gemini-3.8-flash',
             contents=prompt
@@ -418,7 +419,8 @@ async def process_document_generation(data: ContractGenerationRequest):
             "status": "success", 
             "document": doc_text,
             "text": doc_text,
-            "result": doc_text
+            "result": doc_text,
+            "response": doc_text
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка генерации документа через Gemini: {str(e)}")
@@ -468,6 +470,7 @@ async def process_analysis(data: AnalyzeSchema):
 """
 
     try:
+        # Строка 465: Используется проверенная модель gemini-3.8-flash
         response = ai_client.models.generate_content(
             model='gemini-3.8-flash',
             contents=prompt,
