@@ -138,7 +138,7 @@ class ContractGenerationRequest(BaseModel):
     revisions: str = "2"
     telegram_id: Optional[int] = None
 
-# Роутинг: приложение сразу открывается по корню и по /app в браузере
+# Роутинг: приложение сразу открывается в браузере
 @app.get("/")
 async def serve_root():
     return FileResponse("static/index.html")
@@ -161,7 +161,6 @@ async def serve_terms():
 
 @app.get("/user-info/{telegram_id}")
 async def get_user_info(telegram_id: int):
-    # Если ID 0 (веб-версия без авторизации ТГ) или ваш админский ID — даем полный безлимит и админку
     is_admin = telegram_id in ADMIN_IDS or telegram_id == 0
     if is_admin:
         return {"telegram_id": telegram_id, "free_checks_left": 999, "is_pro": True, "is_admin": True}
@@ -368,7 +367,6 @@ async def generate_protocol(data: ProtocolRequest):
     sub_run.italic = True
     sub_run.font.color.rgb = RGBColor(0x4B, 0x55, 0x63)
 
-    # Слово «законодательство» в именительном падеже
     law_p = doc.add_paragraph()
     law_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     law_run = law_p.add_run(f"Применимое право: законодательство ({clean_text(data.jurisdiction)})\n")
@@ -453,7 +451,6 @@ async def generate_protocol(data: ProtocolRequest):
         filename="Protocol_Raznogasiy.docx"
     )
 
-# Общая логика генерации документа через Gemini (исправлено под правильный вызов SDK)
 async def process_document_generation(data: ContractGenerationRequest):
     if not ai_client:
         raise HTTPException(status_code=500, detail="GEMINI_API_KEY не настроен.")
@@ -538,7 +535,6 @@ async def receive_feedback(data: FeedbackSchema):
     except Exception as e:
         return {"status": "error", "detail": str(e)}
 
-# Общая логика анализа договоров для всех вариантов путей
 async def process_analysis(data: AnalyzeSchema):
     if not ai_client:
         raise HTTPException(status_code=500, detail="GEMINI_API_KEY не настроен.")
@@ -547,51 +543,40 @@ async def process_analysis(data: AnalyzeSchema):
     if not contract_content:
         raise HTTPException(status_code=400, detail="Текст договора пуст.")
 
-    checks_left = 999
-    is_admin_user = False
-    if data.telegram_id:
-        if data.telegram_id in ADMIN_IDS:
-            is_admin_user = True
+    # Для администратора или веб-версии без ID всегда безлимит
+    if not data.telegram_id or data.telegram_id in ADMIN_IDS or data.telegram_id == 0:
+        checks_left = 999
     else:
-        # Если telegram_id не передан (веб-версия), автоматически даем права администратора и безлимит
-        is_admin_user = True
-
-    if data.telegram_id and SessionLocal and not is_admin_user:
-        db = SessionLocal()
-        try:
-            user = db.query(UserDB).filter(UserDB.telegram_id == int(data.telegram_id)).first()
-            if not user:
-                user = UserDB(
-                    telegram_id=int(data.telegram_id),
-                    first_name=data.first_name or "",
-                    username=data.username or "",
-                    free_checks_left=3
-                )
-                db.add(user)
-                db.commit()
-                db.refresh(user)
-            else:
-                if data.first_name and user.first_name != data.first_name:
-                    user.first_name = data.first_name
-                if data.username and user.username != data.username:
-                    user.username = data.username
-                db.commit()
-            
-            if user.is_pro:
-                checks_left = 999
-            else:
-                if user.free_checks_left <= 0:
-                    raise HTTPException(status_code=403, detail="Закончились проверки.")
-                user.free_checks_left -= 1
-                db.commit()
-                db.refresh(user)
-                checks_left = user.free_checks_left
-        except HTTPException as he:
-            raise he
-        except Exception as db_err:
-            print(f"Ошибка БД: {db_err}")
-        finally:
-            db.close()
+        checks_left = 999
+        if SessionLocal:
+            db = SessionLocal()
+            try:
+                user = db.query(UserDB).filter(UserDB.telegram_id == int(data.telegram_id)).first()
+                if not user:
+                    user = UserDB(
+                        telegram_id=int(data.telegram_id),
+                        first_name=data.first_name or "",
+                        username=data.username or "",
+                        free_checks_left=3
+                    )
+                    db.add(user)
+                    db.commit()
+                    db.refresh(user)
+                if not user.is_pro:
+                    if user.free_checks_left <= 0:
+                        raise HTTPException(status_code=403, detail="Закончились проверки.")
+                    user.free_checks_left -= 1
+                    db.commit()
+                    db.refresh(user)
+                    checks_left = user.free_checks_left
+                else:
+                    checks_left = 999
+            except HTTPException as he:
+                raise he
+            except Exception as db_err:
+                print(f"Ошибка БД: {db_err}")
+            finally:
+                db.close()
 
     prompt = f"""
 Ты — профессиональный юрист-аналитик, специализирующийся на защите интересов фрилансеров и исполнителей.
