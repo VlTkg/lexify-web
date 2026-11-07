@@ -409,7 +409,6 @@ async def process_document_generation(data: ContractGenerationRequest):
 """
 
     try:
-        # Строка 333: Используется проверенная модель gemini-3.8-flash
         response = ai_client.models.generate_content(
             model='gemini-3.8-flash',
             contents=prompt
@@ -469,7 +468,6 @@ async def process_analysis(data: AnalyzeSchema):
 """
 
     try:
-        # Строка 421: Используется проверенная модель gemini-3.8-flash
         response = ai_client.models.generate_content(
             model='gemini-3.8-flash',
             contents=prompt,
