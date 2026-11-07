@@ -138,7 +138,7 @@ class ContractGenerationRequest(BaseModel):
     revisions: str = "2"
     telegram_id: Optional[int] = None
 
-# Роутинг
+# Роутинг: веб-интерфейс открывается сразу по корню и по /app
 @app.get("/")
 async def serve_root():
     return FileResponse("static/index.html")
@@ -409,8 +409,9 @@ async def process_document_generation(data: ContractGenerationRequest):
 """
 
     try:
+        # Строка 333: Используется проверенная модель gemini-3.8-flash
         response = ai_client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-3.8-flash',
             contents=prompt
         )
         doc_text = response.text
@@ -468,8 +469,9 @@ async def process_analysis(data: AnalyzeSchema):
 """
 
     try:
+        # Строка 421: Используется проверенная модель gemini-3.8-flash
         response = ai_client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-3.8-flash',
             contents=prompt,
             config={
                 "response_mime_type": "application/json",
