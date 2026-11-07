@@ -226,38 +226,6 @@ async def create_invoice(data: InvoiceRequest):
 
 @app.post("/telegram-webhook")
 async def telegram_webhook(request: Request):
-    body = await request.json()
-    
-    if "message" in body and "text" in body["message"]:
-        text = body["message"]["text"]
-        chat_id = body["message"]["chat"]["id"]
-        
-        if text.startswith("/start"):
-            if BOT_TOKEN:
-                welcome_text = (
-                    "👋 **Привет! Я Lexify — ваш ИИ-юрист и конструктор документов.**\n\n"
-                    "Я помогу за 1 минуту выявить скрытые риски в договоре, сформировать Протокол разногласий в Word (.docx) или с нуля составить безопасный договор/оферту.\n\n"
-                    "🎁 **Вам доступно 3 бесплатные проверки!**"
-                )
-                reply_markup = {
-                    "inline_keyboard": [
-                        [
-                            {
-                                "text": "🛠️ Открыть Lexify (Анализ и Конструктор)",
-                                "web_app": {"url": "https://lexify-web.onrender.com/app"}
-                            }
-                        ]
-                    ]
-                }
-                url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-                async with httpx.AsyncClient() as client:
-                    await client.post(url, json={
-                        "chat_id": chat_id,
-                        "text": welcome_text,
-                        "parse_mode": "Markdown",
-                        "reply_markup": reply_markup
-                    })
-            return {"status": "ok"}
     return {"status": "ok"}
 
 def set_cell_background(cell, fill_hex: str):
@@ -440,11 +408,9 @@ async def process_document_generation(data: ContractGenerationRequest):
 Включи стандартные юридические разделы: акцепт оферты, предмет, права и обязанности сторон, финансовые условия, порядок сдачи-приемки, ограничение ответственности исполнителя и порядок расторжения с учетом законодательства ({jurisdiction}).
 """
 
-    model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
-    
     try:
         response = ai_client.models.generate_content(
-            model=model_name,
+            model='gemini-2.5-flash',
             contents=prompt
         )
         doc_text = response.text
@@ -503,7 +469,7 @@ async def process_analysis(data: AnalyzeSchema):
 
     try:
         response = ai_client.models.generate_content(
-            model="gemini-2.5-flash",
+            model='gemini-2.5-flash',
             contents=prompt,
             config={
                 "response_mime_type": "application/json",
@@ -525,4 +491,4 @@ async def analyze_contract_main(data: AnalyzeSchema):
 
 @app.post("/api/analyze")
 async def analyze_contract_api(data: AnalyzeSchema):
-    return await process_analysis(data)         
+    return await process_analysis(data)
