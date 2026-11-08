@@ -409,19 +409,18 @@ async def process_document_generation(data: ContractGenerationRequest):
 """
 
     try:
-        # Модель строго gemini-3.8-flash
         response = ai_client.models.generate_content(
             model='gemini-3.8-flash',
             contents=prompt
         )
         doc_text = response.text
-        # Точное соответствие: фронтенд ищет .document или .result или .text
         return {
             "status": "success", 
             "document": doc_text,
             "text": doc_text,
             "result": doc_text,
-            "response": doc_text
+            "response": doc_text,
+            "content": doc_text
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка генерации документа через Gemini: {str(e)}")
@@ -471,7 +470,6 @@ async def process_analysis(data: AnalyzeSchema):
 """
 
     try:
-        # Модель строго gemini-3.8-flash
         response = ai_client.models.generate_content(
             model='gemini-3.8-flash',
             contents=prompt,
