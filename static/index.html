@@ -14,40 +14,40 @@
         .identical-input-box { border: 1px solid #374151; background-color: #1f2937; border-radius: 0.75rem; padding: 0.65rem 0.875rem; font-size: 0.95rem; color: #ffffff; width: 100%; outline: none; }
         .identical-input-box:focus { border-color: #3b82f6; }
         .chip-btn {
-            height: 34px; padding: 0 14px; border-radius: 0.75rem; font-size: 0.75rem; font-weight: 500;
+            height: 34px; padding: 0 12px; border-radius: 0.75rem; font-size: 0.7rem; font-weight: 500;
             display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease; border: 1px solid #374151;
+            white-space: nowrap;
         }
         .chip-btn.active { background-color: #3b82f6; color: #ffffff; border-color: #3b82f6; font-weight: 600; }
         .chip-btn:not(.active) { background-color: #1f2937; color: #9ca3af; }
         .chip-btn:not(.active):hover { background-color: #374151; color: #ffffff; }
-        .btn-primary-action {
-            height: 40px; border-radius: 0.75rem; font-size: 0.75rem; font-weight: 600;
+        .btn-action {
+            height: 40px; border-radius: 0.75rem; font-size: 0.8rem; font-weight: 600;
             display: inline-flex; align-items: center; justify-content: center; transition: background-color 0.2s ease;
         }
     </style>
 </head>
 <body class="min-h-screen pb-12">
-    <div class="max-w-2xl mx-auto p-4 space-y-6">
-        <header class="text-center py-4 flex items-center justify-between">
-            <button onclick="goHome()" id="home-btn" class="hidden text-gray-400 hover:text-white text-xs px-3 py-1.5 bg-gray-800 rounded-lg border border-gray-700">
+    <div class="max-w-2xl mx-auto p-3 space-y-4">
+        <header class="text-center py-2 flex items-center justify-between">
+            <button onclick="goHome()" id="home-btn" class="hidden text-gray-300 hover:text-white text-xs px-2.5 py-1.5 bg-gray-800 rounded-lg border border-gray-700">
                 <i class="fa-solid fa-arrow-left mr-1"></i> На главную
             </button>
             <div class="mx-auto">
-                <h1 class="text-2xl font-bold tracking-tight text-white">Lexify</h1>
-                <p class="text-xs text-gray-400 mt-1">Интеллектуальный помощник для работы с договорами</p>
+                <h1 class="text-xl font-bold tracking-tight text-white">Lexify</h1>
             </div>
-            <div class="w-16"></div> <!-- пустой блок для баланса шапки -->
+            <div class="w-12"></div>
         </header>
 
         <!-- Конструктор полного договора -->
-        <div id="form-container" class="tg-card rounded-2xl p-5 border shadow-lg space-y-4">
-            <h2 class="text-base font-semibold text-white">Конструктор полного договора</h2>
+        <div id="form-container" class="tg-card rounded-2xl p-4 border shadow-lg space-y-3">
+            <h2 class="text-sm font-semibold text-white">Конструктор полного договора</h2>
             
             <div>
                 <label class="text-xs font-medium text-gray-300 block mb-1">Тип документа</label>
                 <div class="flex gap-2">
-                    <button type="button" class="chip-btn active" onclick="setDocType('contract', this)">Договор оказания услуг</button>
-                    <button type="button" class="chip-btn" onclick="setDocType('offer', this)">Публичная оферта</button>
+                    <button type="button" class="chip-btn active" onclick="setDocType('contract', this)">Договор услуг</button>
+                    <button type="button" class="chip-btn" onclick="setDocType('offer', this)">Оферта</button>
                 </div>
             </div>
 
@@ -60,42 +60,43 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                 <div>
-                    <label class="text-xs font-medium text-gray-300 block mb-1">Исполнитель (ФИО / Название)</label>
+                    <label class="text-xs font-medium text-gray-300 block mb-1">Исполнитель</label>
                     <input type="text" id="executor-input" class="identical-input-box" value="Иванов И.И.">
                 </div>
                 <div>
-                    <label class="text-xs font-medium text-gray-300 block mb-1">Заказчик (Компания / ФИО)</label>
+                    <label class="text-xs font-medium text-gray-300 block mb-1">Заказчик</label>
                     <input type="text" id="client-input" class="identical-input-box" value="ТОО «Альфа Технологии»">
                 </div>
             </div>
 
             <div>
                 <label class="text-xs font-medium text-gray-300 block mb-1">Суть услуг и предмет договора</label>
-                <textarea id="desc-input" rows="2" class="identical-input-box">Разработка программного модуля автоматизации бизнес-процессов</textarea>
+                <textarea id="desc-input" rows="2" class="identical-input-box">Разработка программного модуля автоматизации</textarea>
             </div>
 
-            <button onclick="generateDocument()" class="w-full btn-primary-action bg-blue-600 hover:bg-blue-500 text-white shadow-md">
-                <i class="fa-solid fa-file-contract mr-2"></i> Сгенерировать договор
-            </button>
+            <!-- Блок кнопок управления рядом -->
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <button onclick="generateDocument()" class="btn-action bg-blue-600 hover:bg-blue-500 text-white shadow-md">
+                    <i class="fa-solid fa-file-contract mr-1.5"></i> Сгенерировать
+                </button>
+                <button onclick="resetForm()" class="btn-action bg-gray-700 hover:bg-gray-600 text-gray-200 border border-gray-600">
+                    <i class="fa-solid fa-rotate-left mr-1.5"></i> Новый документ
+                </button>
+            </div>
         </div>
 
-        <!-- Результат генерации и кнопки скачивания/возврата -->
-        <div id="result-wrapper" class="hidden tg-card rounded-2xl p-5 border shadow-lg space-y-4">
+        <!-- Результат генерации -->
+        <div id="result-wrapper" class="hidden tg-card rounded-2xl p-4 border shadow-lg space-y-3">
             <div class="flex items-center justify-between">
-                <h3 class="text-sm font-semibold text-gray-200">Сгенерированный документ</h3>
-                <div class="flex gap-2">
-                    <button onclick="downloadWord()" class="chip-btn bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500">
-                        <i class="fa-solid fa-file-word mr-1.5"></i> Скачать .docx
-                    </button>
-                    <button onclick="goHome()" class="chip-btn bg-gray-700 hover:bg-gray-600 text-white border-gray-600">
-                        <i class="fa-solid fa-rotate-left mr-1.5"></i> Новый документ
-                    </button>
-                </div>
+                <h3 class="text-xs font-semibold text-gray-300">Готовый документ</h3>
+                <button onclick="downloadWord()" class="chip-btn bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500">
+                    <i class="fa-solid fa-file-word mr-1"></i> Скачать .docx
+                </button>
             </div>
             
-            <div id="result-container" class="bg-gray-900 p-4 rounded-xl text-sm text-gray-300 min-h-[200px] max-h-[500px] overflow-y-auto border border-gray-800 prose prose-invert">
+            <div id="result-container" class="bg-gray-900 p-3 rounded-xl text-xs text-gray-300 min-h-[220px] max-h-[450px] overflow-y-auto border border-gray-800 prose prose-invert">
                 Результат появится здесь...
             </div>
         </div>
@@ -178,7 +179,6 @@
             };
 
             try {
-                // Если генерация документа как ворда идет через эндпоинт протокола или отдельный метод
                 const response = await fetch('/generate-protocol', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -207,6 +207,13 @@
             document.getElementById('result-wrapper').classList.add('hidden');
             document.getElementById('home-btn').classList.add('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            goHome();
+            document.getElementById('executor-input').value = "Иванов И.И.";
+            document.getElementById('client-input').value = "ТОО «Альфа Технологии»";
+            document.getElementById('desc-input').value = "Разработка программного модуля автоматизации";
         }
     </script>
 </body>
