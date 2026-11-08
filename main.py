@@ -415,15 +415,13 @@ async def process_document_generation(data: ContractGenerationRequest):
             contents=prompt
         )
         doc_text = response.text
-        # Отдаем текст под всеми возможными ключами, чтобы фронтенд в Telegram точно его подхватил
+        # Точное соответствие: фронтенд ищет .document или .result или .text
         return {
             "status": "success", 
             "document": doc_text,
             "text": doc_text,
             "result": doc_text,
-            "response": doc_text,
-            "content": doc_text,
-            "html": doc_text
+            "response": doc_text
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка генерации документа через Gemini: {str(e)}")
