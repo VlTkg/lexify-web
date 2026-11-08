@@ -409,13 +409,13 @@ async def process_document_generation(data: ContractGenerationRequest):
 """
 
     try:
-        # Строка 376: Модель зафиксирована на gemini-3.8-flash
+        # Модель строго gemini-3.8-flash
         response = ai_client.models.generate_content(
             model='gemini-3.8-flash',
             contents=prompt
         )
         doc_text = response.text
-        # Возвращаем все возможные ключи, чтобы фронтенд в Telegram точно нашел текст
+        # Отдаем текст под всеми возможными ключами, чтобы фронтенд в Telegram точно его подхватил
         return {
             "status": "success", 
             "document": doc_text,
@@ -473,7 +473,7 @@ async def process_analysis(data: AnalyzeSchema):
 """
 
     try:
-        # Строка 465: Модель зафиксирована на gemini-3.8-flash
+        # Модель строго gemini-3.8-flash
         response = ai_client.models.generate_content(
             model='gemini-3.8-flash',
             contents=prompt,
