@@ -22,34 +22,38 @@
         .chip-btn:not(.active) { background-color: #1f2937; color: #9ca3af; }
         .chip-btn:not(.active):hover { background-color: #374151; color: #ffffff; }
         .btn-action {
-            height: 42px; border-radius: 0.75rem; font-size: 0.85rem; font-weight: 600;
+            height: 42px; border-radius: 0.75rem; font-size: 0.8rem; font-weight: 600;
             display: inline-flex; align-items: center; justify-content: center; transition: background-color 0.2s ease;
+        }
+        .top-badge-item {
+            height: 30px; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600;
         }
     </style>
 </head>
 <body class="min-h-screen pb-12">
     <div class="max-w-2xl mx-auto p-3 space-y-4">
         
-        <!-- 1. СВЕРХУ ВНИЗ: ПРИВЕТСТВИЕ И ОПИСАНИЕ -->
-        <header class="text-center py-3 space-y-1 relative">
-            <div id="top-admin-badge" class="hidden absolute top-2 right-0 flex items-center gap-1.5">
-                <div id="admin-panel-btn" class="hidden">
-                    <button onclick="openAdminPanel()" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-semibold shadow">
-                        <i class="fa-solid fa-shield-halved mr-1"></i> Админ
-                    </button>
-                </div>
-                <div class="px-2.5 py-1 bg-blue-600/30 border border-blue-500/40 text-blue-300 rounded-lg text-xs font-medium">
-                    Счетчик: <span id="checks-counter-val">∞</span> (Безлимит)
-                </div>
+        <!-- ВЕРХНЯЯ ПАНЕЛЬ С КНОПКАМИ АДМИН И СЧЕТЧИК -->
+        <div class="flex items-center justify-end gap-2 pt-1">
+            <div id="admin-panel-btn" class="hidden">
+                <button onclick="openAdminPanel()" class="top-badge-item bg-amber-600 hover:bg-amber-500 text-white shadow">
+                    <i class="fa-solid fa-shield-halved mr-1"></i> Админ
+                </button>
             </div>
+            <div id="top-admin-badge" class="hidden top-badge-item bg-blue-600/30 border border-blue-500/40 text-blue-300 font-medium">
+                Счетчик: ∞ (Безлимит)
+            </div>
+        </div>
 
+        <!-- ПРИВЕТСТВИЕ И ОПИСАНИЕ -->
+        <header class="text-center space-y-1">
             <h1 class="text-xl font-bold tracking-tight text-white">Lexify</h1>
-            <p class="text-xs text-gray-400 max-w-md mx-auto">
-                Ваш юридический ИИ-помощник. Выявляю скрытые риски в договорах за 1 минуту и формирую безопасные документы и протоколы разногласий.
+            <p class="text-xs text-gray-400 max-w-md mx-auto pt-1">
+                Сервис правовой поддержки, предназначенный для поиска скрытых рисков в договорах, подготовки безопасных документов и разработки протоколов разногласий.
             </p>
         </header>
 
-        <!-- 2. НИЖЕ: ВЫБОР ЮРИСДИКЦИИ -->
+        <!-- ВЫБОР ЮРИСДИКЦИИ -->
         <div class="tg-card rounded-2xl p-4 border shadow-lg space-y-2">
             <label class="text-xs font-medium text-gray-300 block">Применимое право (юрисдикция)</label>
             <div class="flex gap-2">
@@ -59,18 +63,18 @@
             </div>
         </div>
 
-        <!-- 3. НИЖЕ: ОСНОВНЫЕ КНОПКИ ВЫБОРА РЕЖИМОВ -->
+        <!-- ОСНОВНЫЕ КНОПКИ ВЫБОРА РЕЖИМОВ -->
         <div class="grid grid-cols-2 gap-3">
             <button onclick="switchTab('analyze')" id="tab-btn-analyze" class="btn-action bg-blue-600 text-white shadow-md">
-                <i class="fa-solid fa-magnifying-glass-chart mr-2"></i> Анализировать
+                <i class="fa-solid fa-magnifying-glass-chart mr-2"></i> Анализировать договор
             </button>
             <button onclick="switchTab('generate')" id="tab-btn-generate" class="btn-action bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700">
-                <i class="fa-solid fa-file-contract mr-2"></i> Сгенерировать
+                <i class="fa-solid fa-file-contract mr-2"></i> Сгенерировать документ
             </button>
         </div>
 
-        <!-- РЕЖИМ 1: АНАЛИЗ ДОГОВОРА -->
-        <div id="section-analyze" class="tg-card rounded-2xl p-4 border shadow-lg space-y-3">
+        <!-- РЕЖИМ 1: АНАЛИЗ ДОГОВОРА (СКРЫТ ПО УМОЛЧАНИЮ) -->
+        <div id="section-analyze" class="hidden tg-card rounded-2xl p-4 border shadow-lg space-y-3">
             <h2 class="text-sm font-semibold text-white">Экспресс-анализ договора на риски</h2>
             <div>
                 <label class="text-xs font-medium text-gray-300 block mb-1">Текст договора или выдержки из него</label>
@@ -81,8 +85,8 @@
             </button>
         </div>
 
-        <!-- РЕЖИМ 2: ГЕНЕРАЦИЯ ДОКУМЕНТА -->
-        <div id="section-generate" class="hidden tg-card rounded-2xl p-4 border shadow-lg space-y-3">
+        <!-- РЕЖИМ 2: ГЕНЕРАЦИЯ ДОКУМЕНТА (ОТКРЫТ ПО УМОЛЧАНИЮ ИЛИ ПО КНОПКЕ) -->
+        <div id="section-generate" class="tg-card rounded-2xl p-4 border shadow-lg space-y-3">
             <h2 class="text-sm font-semibold text-white">Конструктор полного договора / оферты</h2>
             
             <div>
@@ -133,7 +137,7 @@
             </div>
         </div>
 
-        <!-- 4. НИЖЕ: ПОДВАЛ / ДИСКЛЕЙМЕР -->
+        <!-- ПОДВАЛ / ДИСКЛЕЙМЕР -->
         <footer class="text-center py-4 text-[11px] text-gray-500 space-y-1">
             <p>© 2026 Lexify. Все права защищены.</p>
             <p>Сервис носит информационный характер и не заменяет очную юридическую консультацию.</p>
