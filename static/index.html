@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lexify — Экспресс-анализ договоров и Конструктор</title>
+    <title>Lexify — Проверка договоров и юридических рисков</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -22,39 +22,74 @@
         .chip-btn:not(.active) { background-color: #1f2937; color: #9ca3af; }
         .chip-btn:not(.active):hover { background-color: #374151; color: #ffffff; }
         .btn-action {
-            height: 40px; border-radius: 0.75rem; font-size: 0.8rem; font-weight: 600;
+            height: 42px; border-radius: 0.75rem; font-size: 0.85rem; font-weight: 600;
             display: inline-flex; align-items: center; justify-content: center; transition: background-color 0.2s ease;
         }
     </style>
 </head>
 <body class="min-h-screen pb-12">
     <div class="max-w-2xl mx-auto p-3 space-y-4">
-        <header class="text-center py-2 flex items-center justify-between">
-            <div class="w-12"></div>
-            <div class="mx-auto">
-                <h1 class="text-xl font-bold tracking-tight text-white">Lexify</h1>
+        
+        <!-- 1. СВЕРХУ ВНИЗ: ПРИВЕТСТВИЕ И ОПИСАНИЕ -->
+        <header class="text-center py-3 space-y-1 relative">
+            <div id="top-admin-badge" class="hidden absolute top-2 right-0 flex items-center gap-1.5">
+                <div id="admin-panel-btn" class="hidden">
+                    <button onclick="openAdminPanel()" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-semibold shadow">
+                        <i class="fa-solid fa-shield-halved mr-1"></i> Админ
+                    </button>
+                </div>
+                <div class="px-2.5 py-1 bg-blue-600/30 border border-blue-500/40 text-blue-300 rounded-lg text-xs font-medium">
+                    Счетчик: <span id="checks-counter-val">∞</span> (Безлимит)
+                </div>
             </div>
-            <div class="w-12"></div>
+
+            <h1 class="text-xl font-bold tracking-tight text-white">Lexify</h1>
+            <p class="text-xs text-gray-400 max-w-md mx-auto">
+                Ваш юридический ИИ-помощник. Выявляю скрытые риски в договорах за 1 минуту и формирую безопасные документы и протоколы разногласий.
+            </p>
         </header>
 
-        <!-- Конструктор полного договора -->
-        <div id="form-container" class="tg-card rounded-2xl p-4 border shadow-lg space-y-3">
-            <h2 class="text-sm font-semibold text-white">Конструктор полного договора</h2>
+        <!-- 2. НИЖЕ: ВЫБОР ЮРИСДИКЦИИ -->
+        <div class="tg-card rounded-2xl p-4 border shadow-lg space-y-2">
+            <label class="text-xs font-medium text-gray-300 block">Применимое право (юрисдикция)</label>
+            <div class="flex gap-2">
+                <button type="button" class="chip-btn active" onclick="setJurisdiction('Россия (РФ)', this)">Россия (РФ)</button>
+                <button type="button" class="chip-btn" onclick="setJurisdiction('Казахстан', this)">Казахстан</button>
+                <button type="button" class="chip-btn" onclick="setJurisdiction('Беларусь', this)">Беларусь</button>
+            </div>
+        </div>
+
+        <!-- 3. НИЖЕ: ОСНОВНЫЕ КНОПКИ ВЫБОРА РЕЖИМОВ -->
+        <div class="grid grid-cols-2 gap-3">
+            <button onclick="switchTab('analyze')" id="tab-btn-analyze" class="btn-action bg-blue-600 text-white shadow-md">
+                <i class="fa-solid fa-magnifying-glass-chart mr-2"></i> Анализировать
+            </button>
+            <button onclick="switchTab('generate')" id="tab-btn-generate" class="btn-action bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700">
+                <i class="fa-solid fa-file-contract mr-2"></i> Сгенерировать
+            </button>
+        </div>
+
+        <!-- РЕЖИМ 1: АНАЛИЗ ДОГОВОРА -->
+        <div id="section-analyze" class="tg-card rounded-2xl p-4 border shadow-lg space-y-3">
+            <h2 class="text-sm font-semibold text-white">Экспресс-анализ договора на риски</h2>
+            <div>
+                <label class="text-xs font-medium text-gray-300 block mb-1">Текст договора или выдержки из него</label>
+                <textarea id="analyze-text-input" rows="5" class="identical-input-box" placeholder="Вставьте текст договора сюда..."></textarea>
+            </div>
+            <button onclick="runAnalysis()" class="w-full btn-action bg-blue-600 hover:bg-blue-500 text-white shadow-md">
+                <i class="fa-solid fa-shield-cat mr-2"></i> Проверить договор
+            </button>
+        </div>
+
+        <!-- РЕЖИМ 2: ГЕНЕРАЦИЯ ДОКУМЕНТА -->
+        <div id="section-generate" class="hidden tg-card rounded-2xl p-4 border shadow-lg space-y-3">
+            <h2 class="text-sm font-semibold text-white">Конструктор полного договора / оферты</h2>
             
             <div>
                 <label class="text-xs font-medium text-gray-300 block mb-1">Тип документа</label>
                 <div class="flex gap-2">
                     <button type="button" class="chip-btn active" onclick="setDocType('contract', this)">Договор услуг</button>
                     <button type="button" class="chip-btn" onclick="setDocType('offer', this)">Оферта</button>
-                </div>
-            </div>
-
-            <div>
-                <label class="text-xs font-medium text-gray-300 block mb-1">Юрисдикция</label>
-                <div class="flex gap-2">
-                    <button type="button" class="chip-btn active" onclick="setJurisdiction('Россия (РФ)', this)">Россия (РФ)</button>
-                    <button type="button" class="chip-btn" onclick="setJurisdiction('Казахстан', this)">Казахстан</button>
-                    <button type="button" class="chip-btn" onclick="setJurisdiction('Беларусь', this)">Беларусь</button>
                 </div>
             </div>
 
@@ -79,16 +114,16 @@
                     <i class="fa-solid fa-file-contract mr-1.5"></i> Сгенерировать
                 </button>
                 <button onclick="resetForm()" class="btn-action bg-gray-700 hover:bg-gray-600 text-gray-200 border border-gray-600">
-                    <i class="fa-solid fa-rotate-left mr-1.5"></i> Новый документ
+                    <i class="fa-solid fa-rotate-left mr-1.5"></i> Сбросить
                 </button>
             </div>
         </div>
 
-        <!-- Результат генерации -->
+        <!-- БЛОК РЕЗУЛЬТАТА -->
         <div id="result-wrapper" class="hidden tg-card rounded-2xl p-4 border shadow-lg space-y-3">
             <div class="flex items-center justify-between">
-                <h3 class="text-xs font-semibold text-gray-300">Готовый документ</h3>
-                <button onclick="downloadWord()" class="chip-btn bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500">
+                <h3 id="result-title" class="text-xs font-semibold text-gray-300">Результат</h3>
+                <button id="download-docx-btn" onclick="downloadWord()" class="hidden chip-btn bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500">
                     <i class="fa-solid fa-file-word mr-1"></i> Скачать .docx
                 </button>
             </div>
@@ -97,16 +132,65 @@
                 Результат появится здесь...
             </div>
         </div>
+
+        <!-- 4. НИЖЕ: ПОДВАЛ / ДИСКЛЕЙМЕР -->
+        <footer class="text-center py-4 text-[11px] text-gray-500 space-y-1">
+            <p>© 2026 Lexify. Все права защищены.</p>
+            <p>Сервис носит информационный характер и не заменяет очную юридическую консультацию.</p>
+        </footer>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО АДМИНКИ -->
+    <div id="admin-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+        <div class="tg-card rounded-2xl p-5 border shadow-2xl max-w-lg w-full space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-sm font-bold text-white"><i class="fa-solid fa-shield-halved mr-1.5 text-amber-500"></i> Админ-панель</h3>
+                <button onclick="closeAdminPanel()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div id="admin-stats-content" class="text-xs text-gray-300 space-y-2">
+                Загрузка статистики...
+            </div>
+            <button onclick="closeAdminPanel()" class="w-full py-2 bg-gray-700 rounded-xl text-xs font-semibold text-white">Закрыть</button>
+        </div>
     </div>
 
     <script>
-        let currentDocType = 'contract';
         let currentJurisdiction = 'Россия (РФ)';
+        let currentDocType = 'contract';
+        let currentTelegramId = 8804083078; // Ваш ID по умолчанию для проверки
 
-        function setDocType(type, btn) {
-            currentDocType = type;
-            document.querySelectorAll('button[onclick^="setDocType"]').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
+                const user = window.Telegram.WebApp.initDataUnsafe.user;
+                if (user && user.id) {
+                    currentTelegramId = user.id;
+                }
+            }
+
+            // Проверка на админа (строго ваш ID: 8804083078)
+            if (currentTelegramId === 8804083078) {
+                document.getElementById('top-admin-badge').classList.remove('hidden');
+                document.getElementById('admin-panel-btn').classList.remove('hidden');
+            }
+        });
+
+        function switchTab(tab) {
+            const btnAnalyze = document.getElementById('tab-btn-analyze');
+            const btnGenerate = document.getElementById('tab-btn-generate');
+            const secAnalyze = document.getElementById('section-analyze');
+            const secGenerate = document.getElementById('section-generate');
+
+            if (tab === 'analyze') {
+                btnAnalyze.className = "btn-action bg-blue-600 text-white shadow-md";
+                btnGenerate.className = "btn-action bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700";
+                secAnalyze.classList.remove('hidden');
+                secGenerate.classList.add('hidden');
+            } else {
+                btnGenerate.className = "btn-action bg-blue-600 text-white shadow-md";
+                btnAnalyze.className = "btn-action bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700";
+                secGenerate.classList.remove('hidden');
+                secAnalyze.classList.add('hidden');
+            }
         }
 
         function setJurisdiction(jur, btn) {
@@ -115,11 +199,55 @@
             btn.classList.add('active');
         }
 
+        function setDocType(type, btn) {
+            currentDocType = type;
+            document.querySelectorAll('button[onclick^="setDocType"]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        async function runAnalysis() {
+            const text = document.getElementById('analyze-text-input').value.trim();
+            const container = document.getElementById('result-container');
+            const resultWrapper = document.getElementById('result-wrapper');
+            const downloadBtn = document.getElementById('download-docx-btn');
+
+            if (!text) {
+                alert("Пожалуйста, введите текст договора для анализа.");
+                return;
+            }
+
+            resultWrapper.classList.remove('hidden');
+            downloadBtn.classList.add('hidden');
+            document.getElementById('result-title').innerText = "Результат анализа рисков";
+            container.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Идет анализ договора...';
+
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: text,
+                        jurisdiction: currentJurisdiction,
+                        telegram_id: currentTelegramId
+                    })
+                });
+
+                const data = await response.json();
+                let resText = data.result || data.summary || JSON.stringify(data);
+                container.innerHTML = marked.parse(resText);
+            } catch (e) {
+                container.innerHTML = "Ошибка анализа: " + e.message;
+            }
+        }
+
         async function generateDocument() {
             const container = document.getElementById('result-container');
             const resultWrapper = document.getElementById('result-wrapper');
+            const downloadBtn = document.getElementById('download-docx-btn');
 
             resultWrapper.classList.remove('hidden');
+            downloadBtn.classList.remove('hidden');
+            document.getElementById('result-title').innerText = "Сгенерированный документ";
             container.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Идет генерация документа...';
 
             const payload = {
@@ -130,7 +258,8 @@
                 description: document.getElementById('desc-input').value,
                 payment: "100% предоплата",
                 deadline: "30 дней",
-                revisions: "2"
+                revisions: "2",
+                telegram_id: currentTelegramId
             };
 
             try {
@@ -141,7 +270,6 @@
                 });
 
                 const data = await response.json();
-
                 let markdownText = "";
                 if (typeof data === 'string') {
                     markdownText = data;
@@ -149,13 +277,8 @@
                     markdownText = data.document || data.result || data.text || data.response || data.content || "";
                 }
 
-                if (!markdownText) {
-                    markdownText = "Ошибка: получен пустой ответ от сервера.";
-                }
-
                 container.innerHTML = marked.parse(markdownText);
             } catch (error) {
-                console.error("Ошибка:", error);
                 container.innerHTML = "Ошибка генерации: " + error.message;
             }
         }
@@ -170,6 +293,7 @@
                 payment: "100% предоплата",
                 deadline: "30 дней",
                 revisions: "2",
+                telegram_id: currentTelegramId,
                 risks: []
             };
 
@@ -183,14 +307,11 @@
                 if (response.ok) {
                     const blob = await response.blob();
                     const url = window.URL.createObjectURL(blob);
-                    
-                    // Создаем временную ссылку для скачивания файла
                     const a = document.createElement('a');
                     a.href = url;
                     a.download = "Lexify_Document.docx";
                     document.body.appendChild(a);
                     a.click();
-                    
                     setTimeout(() => {
                         window.URL.revokeObjectURL(url);
                         a.remove();
@@ -199,9 +320,32 @@
                     alert("Не удалось сформировать файл на сервере.");
                 }
             } catch (e) {
-                console.error("Ошибка скачивания:", e);
                 alert("Ошибка при скачивании файла: " + e.message);
             }
+        }
+
+        async function openAdminPanel() {
+            document.getElementById('admin-modal').classList.remove('hidden');
+            const content = document.getElementById('admin-stats-content');
+            content.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Загрузка статистики...';
+
+            try {
+                const resp = await fetch(`/admin/stats/${currentTelegramId}`);
+                const stats = await resp.json();
+                content.innerHTML = `
+                    <p><b>Всего пользователей:</b> ${stats.total_users || 0}</p>
+                    <p><b>Всего анализов:</b> ${stats.total_analyses || 0}</p>
+                    <p><b>Всего платежей:</b> ${stats.total_payments || 0}</p>
+                    <hr class="border-gray-700 my-2">
+                    <p class="text-gray-400 text-[11px]">Административный доступ подтвержден (ID: ${currentTelegramId})</p>
+                `;
+            } catch (err) {
+                content.innerHTML = "Ошибка загрузки статистики админ-панели.";
+            }
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('admin-modal').classList.add('hidden');
         }
 
         function resetForm() {
@@ -209,7 +353,6 @@
             document.getElementById('client-input').value = "ТОО «Альфа Технологии»";
             document.getElementById('desc-input').value = "Разработка программного модуля автоматизации";
             document.getElementById('result-wrapper').classList.add('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     </script>
 </body>
