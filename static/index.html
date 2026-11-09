@@ -23,7 +23,7 @@
         .chip-btn:not(.active):hover { background-color: #374151; color: #ffffff; }
         .btn-action {
             height: 42px; border-radius: 0.75rem; font-size: 0.8rem; font-weight: 600;
-            display: inline-flex; align-items: center; justify-content: center; transition: background-color 0.2s ease;
+            display: inline-flex; align-items: center; justify-content: flex-start; padding-left: 1rem; transition: background-color 0.2s ease;
         }
         .top-badge-item {
             height: 30px; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600;
@@ -63,13 +63,13 @@
             </div>
         </div>
 
-        <!-- ОСНОВНЫЕ КНОПКИ ВЫБОРА РЕЖИМОВ -->
+        <!-- ОСНОВНЫЕ КНОПКИ ВЫБОРА РЕЖИМОВ (ЗНАЧКИ СМЕЩЕНЫ ВПРАВО) -->
         <div class="grid grid-cols-2 gap-3">
             <button onclick="switchTab('analyze')" id="tab-btn-analyze" class="btn-action bg-blue-600 text-white shadow-md">
-                <i class="fa-solid fa-magnifying-glass-chart mr-2"></i> Анализировать договор
+                <i class="fa-solid fa-magnifying-glass-chart mr-2.5 ml-1"></i> Анализировать договор
             </button>
             <button onclick="switchTab('generate')" id="tab-btn-generate" class="btn-action bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700">
-                <i class="fa-solid fa-file-contract mr-2"></i> Сгенерировать документ
+                <i class="fa-solid fa-file-contract mr-2.5 ml-1"></i> Сгенерировать документ
             </button>
         </div>
 
@@ -80,13 +80,13 @@
                 <label class="text-xs font-medium text-gray-300 block mb-1">Текст договора или выдержки из него</label>
                 <textarea id="analyze-text-input" rows="5" class="identical-input-box" placeholder="Вставьте текст договора сюда..."></textarea>
             </div>
-            <button onclick="runAnalysis()" class="w-full btn-action bg-blue-600 hover:bg-blue-500 text-white shadow-md">
+            <button onclick="runAnalysis()" class="w-full btn-action justify-center bg-blue-600 hover:bg-blue-500 text-white shadow-md">
                 <i class="fa-solid fa-shield-cat mr-2"></i> Проверить договор
             </button>
         </div>
 
-        <!-- РЕЖИМ 2: ГЕНЕРАЦИЯ ДОКУМЕНТА (ОТКРЫТ ПО УМОЛЧАНИЮ ИЛИ ПО КНОПКЕ) -->
-        <div id="section-generate" class="tg-card rounded-2xl p-4 border shadow-lg space-y-3">
+        <!-- РЕЖИМ 2: ГЕНЕРАЦИЯ ДОКУМЕНТА (СКРЫТ ПО УМОЛЧАНИЮ) -->
+        <div id="section-generate" class="hidden tg-card rounded-2xl p-4 border shadow-lg space-y-3">
             <h2 class="text-sm font-semibold text-white">Конструктор полного договора / оферты</h2>
             
             <div>
@@ -114,10 +114,10 @@
             </div>
 
             <div class="grid grid-cols-2 gap-2 pt-1">
-                <button onclick="generateDocument()" class="btn-action bg-blue-600 hover:bg-blue-500 text-white shadow-md">
+                <button onclick="generateDocument()" class="btn-action justify-center bg-blue-600 hover:bg-blue-500 text-white shadow-md">
                     <i class="fa-solid fa-file-contract mr-1.5"></i> Сгенерировать
                 </button>
-                <button onclick="resetForm()" class="btn-action bg-gray-700 hover:bg-gray-600 text-gray-200 border border-gray-600">
+                <button onclick="resetForm()" class="btn-action justify-center bg-gray-700 hover:bg-gray-600 text-gray-200 border border-gray-600">
                     <i class="fa-solid fa-rotate-left mr-1.5"></i> Сбросить
                 </button>
             </div>
