@@ -11,10 +11,10 @@
     <style>
         body { background-color: #111827; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         .tg-card { background-color: #1f2937; border-color: #374151; word-break: break-word; overflow-wrap: break-word; }
-        .identical-input-box { border: 1px solid #374151; background-color: #1f2937; border-radius: 0.75rem; padding: 0.65rem 0.875rem; font-size: 0.95rem; color: #ffffff; width: 100%; outline: none; }
+        .identical-input-box { border: 1px solid #374151; background-color: #1f2937; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.9rem; color: #ffffff; width: 100%; outline: none; }
         .identical-input-box:focus { border-color: #3b82f6; }
         .chip-btn {
-            height: 34px; padding: 0 12px; border-radius: 0.75rem; font-size: 0.7rem; font-weight: 500;
+            height: 32px; padding: 0 10px; border-radius: 0.5rem; font-size: 0.7rem; font-weight: 500;
             display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease; border: 1px solid #374151;
             white-space: nowrap;
         }
@@ -22,19 +22,19 @@
         .chip-btn:not(.active) { background-color: #1f2937; color: #9ca3af; }
         .chip-btn:not(.active):hover { background-color: #374151; color: #ffffff; }
         .btn-action {
-            height: 42px; border-radius: 0.75rem; font-size: 0.8rem; font-weight: 600;
-            display: inline-flex; align-items: center; justify-content: flex-start; padding-left: 1rem; transition: background-color 0.2s ease;
+            height: 38px; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600;
+            display: inline-flex; align-items: center; justify-content: flex-start; padding-left: 0.8rem; transition: background-color 0.2s ease;
         }
         .top-badge-item {
-            height: 30px; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600;
+            height: 28px; padding: 0 8px; display: inline-flex; align-items: center; justify-content: center; border-radius: 0.4rem; font-size: 0.7rem; font-weight: 600;
         }
     </style>
 </head>
-<body class="min-h-screen pb-12">
-    <div class="max-w-2xl mx-auto p-3 space-y-4">
+<body class="min-h-screen pb-6">
+    <div class="max-w-2xl mx-auto p-2.5 space-y-2.5">
         
         <!-- ВЕРХНЯЯ ПАНЕЛЬ С КНОПКАМИ АДМИН И СЧЕТЧИК -->
-        <div class="flex items-center justify-end gap-2 pt-1">
+        <div class="flex items-center justify-end gap-2">
             <div id="admin-panel-btn" class="hidden">
                 <button onclick="openAdminPanel()" class="top-badge-item bg-amber-600 hover:bg-amber-500 text-white shadow">
                     <i class="fa-solid fa-shield-halved mr-1"></i> Админ
@@ -46,52 +46,52 @@
         </div>
 
         <!-- ПРИВЕТСТВИЕ И ОПИСАНИЕ -->
-        <header class="text-center space-y-1">
-            <h1 class="text-xl font-bold tracking-tight text-white">Lexify</h1>
-            <p class="text-xs text-gray-400 max-w-md mx-auto pt-1">
+        <header class="text-center space-y-0.5">
+            <h1 class="text-lg font-bold tracking-tight text-white">Lexify</h1>
+            <p class="text-[11px] text-gray-400 max-w-md mx-auto">
                 Сервис правовой поддержки, предназначенный для поиска скрытых рисков в договорах, подготовки безопасных документов и разработки протоколов разногласий.
             </p>
         </header>
 
         <!-- ВЫБОР ЮРИСДИКЦИИ -->
-        <div class="tg-card rounded-2xl p-4 border shadow-lg space-y-2">
-            <label class="text-xs font-medium text-gray-300 block">Применимое право (юрисдикция)</label>
-            <div class="flex gap-2">
+        <div class="tg-card rounded-xl p-3 border shadow-sm space-y-1.5">
+            <label class="text-[11px] font-medium text-gray-300 block">Применимое право (юрисдикция)</label>
+            <div class="flex gap-1.5">
                 <button type="button" class="chip-btn active" onclick="setJurisdiction('Россия (РФ)', this)">Россия (РФ)</button>
                 <button type="button" class="chip-btn" onclick="setJurisdiction('Казахстан', this)">Казахстан</button>
                 <button type="button" class="chip-btn" onclick="setJurisdiction('Беларусь', this)">Беларусь</button>
             </div>
         </div>
 
-        <!-- ОСНОВНЫЕ КНОПКИ ВЫБОРА РЕЖИМОВ (ЗНАЧКИ СМЕЩЕНЫ ВПРАВО) -->
-        <div class="grid grid-cols-2 gap-3">
-            <button onclick="switchTab('analyze')" id="tab-btn-analyze" class="btn-action bg-blue-600 text-white shadow-md">
-                <i class="fa-solid fa-magnifying-glass-chart mr-2.5 ml-1"></i> Анализировать договор
+        <!-- ОСНОВНЫЕ КНОПКИ ВЫБОРА РЕЖИМОВ -->
+        <div class="grid grid-cols-2 gap-2">
+            <button onclick="switchTab('analyze')" id="tab-btn-analyze" class="btn-action bg-blue-600 text-white shadow-sm">
+                <i class="fa-solid fa-magnifying-glass-chart mr-2 ml-0.5"></i> Анализировать договор
             </button>
             <button onclick="switchTab('generate')" id="tab-btn-generate" class="btn-action bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700">
-                <i class="fa-solid fa-file-contract mr-2.5 ml-1"></i> Сгенерировать документ
+                <i class="fa-solid fa-file-contract mr-2 ml-0.5"></i> Сгенерировать документ
             </button>
         </div>
 
         <!-- РЕЖИМ 1: АНАЛИЗ ДОГОВОРА (СКРЫТ ПО УМОЛЧАНИЮ) -->
-        <div id="section-analyze" class="hidden tg-card rounded-2xl p-4 border shadow-lg space-y-3">
-            <h2 class="text-sm font-semibold text-white">Экспресс-анализ договора на риски</h2>
+        <div id="section-analyze" class="hidden tg-card rounded-xl p-3 border shadow-sm space-y-2">
+            <h2 class="text-xs font-semibold text-white">Экспресс-анализ договора на риски</h2>
             <div>
-                <label class="text-xs font-medium text-gray-300 block mb-1">Текст договора или выдержки из него</label>
-                <textarea id="analyze-text-input" rows="5" class="identical-input-box" placeholder="Вставьте текст договора сюда..."></textarea>
+                <label class="text-[11px] font-medium text-gray-300 block mb-1">Текст договора или выдержки из него</label>
+                <textarea id="analyze-text-input" rows="4" class="identical-input-box text-xs" placeholder="Вставьте текст договора сюда..."></textarea>
             </div>
-            <button onclick="runAnalysis()" class="w-full btn-action justify-center bg-blue-600 hover:bg-blue-500 text-white shadow-md">
-                <i class="fa-solid fa-shield-cat mr-2"></i> Проверить договор
+            <button onclick="runAnalysis()" class="w-full btn-action justify-center bg-blue-600 hover:bg-blue-500 text-white shadow-sm">
+                <i class="fa-solid fa-shield-cat mr-1.5"></i> Проверить договор
             </button>
         </div>
 
         <!-- РЕЖИМ 2: ГЕНЕРАЦИЯ ДОКУМЕНТА (СКРЫТ ПО УМОЛЧАНИЮ) -->
-        <div id="section-generate" class="hidden tg-card rounded-2xl p-4 border shadow-lg space-y-3">
-            <h2 class="text-sm font-semibold text-white">Конструктор полного договора / оферты</h2>
+        <div id="section-generate" class="hidden tg-card rounded-xl p-3 border shadow-sm space-y-2">
+            <h2 class="text-xs font-semibold text-white">Конструктор полного договора / оферты</h2>
             
             <div>
-                <label class="text-xs font-medium text-gray-300 block mb-1">Тип документа</label>
-                <div class="flex gap-2">
+                <label class="text-[11px] font-medium text-gray-300 block mb-1">Тип документа</label>
+                <div class="flex gap-1.5">
                     <button type="button" class="chip-btn active" onclick="setDocType('contract', this)">Договор услуг</button>
                     <button type="button" class="chip-btn" onclick="setDocType('offer', this)">Оферта</button>
                 </div>
@@ -99,32 +99,32 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                 <div>
-                    <label class="text-xs font-medium text-gray-300 block mb-1">Исполнитель</label>
-                    <input type="text" id="executor-input" class="identical-input-box" value="Иванов И.И.">
+                    <label class="text-[11px] font-medium text-gray-300 block mb-0.5">Исполнитель</label>
+                    <input type="text" id="executor-input" class="identical-input-box text-xs py-1.5" value="Иванов И.И.">
                 </div>
                 <div>
-                    <label class="text-xs font-medium text-gray-300 block mb-1">Заказчик</label>
-                    <input type="text" id="client-input" class="identical-input-box" value="ТОО «Альфа Технологии»">
+                    <label class="text-[11px] font-medium text-gray-300 block mb-0.5">Заказчик</label>
+                    <input type="text" id="client-input" class="identical-input-box text-xs py-1.5" value="ТОО «Альфа Технологии»">
                 </div>
             </div>
 
             <div>
-                <label class="text-xs font-medium text-gray-300 block mb-1">Суть услуг и предмет договора</label>
-                <textarea id="desc-input" rows="2" class="identical-input-box">Разработка программного модуля автоматизации</textarea>
+                <label class="text-[11px] font-medium text-gray-300 block mb-0.5">Суть услуг и предмет договора</label>
+                <textarea id="desc-input" rows="2" class="identical-input-box text-xs py-1.5">Разработка программного модуля автоматизации</textarea>
             </div>
 
-            <div class="grid grid-cols-2 gap-2 pt-1">
-                <button onclick="generateDocument()" class="btn-action justify-center bg-blue-600 hover:bg-blue-500 text-white shadow-md">
-                    <i class="fa-solid fa-file-contract mr-1.5"></i> Сгенерировать
+            <div class="grid grid-cols-2 gap-2 pt-0.5">
+                <button onclick="generateDocument()" class="btn-action justify-center bg-blue-600 hover:bg-blue-500 text-white shadow-sm">
+                    <i class="fa-solid fa-file-contract mr-1"></i> Сгенерировать
                 </button>
                 <button onclick="resetForm()" class="btn-action justify-center bg-gray-700 hover:bg-gray-600 text-gray-200 border border-gray-600">
-                    <i class="fa-solid fa-rotate-left mr-1.5"></i> Сбросить
+                    <i class="fa-solid fa-rotate-left mr-1"></i> Сбросить
                 </button>
             </div>
         </div>
 
         <!-- БЛОК РЕЗУЛЬТАТА -->
-        <div id="result-wrapper" class="hidden tg-card rounded-2xl p-4 border shadow-lg space-y-3">
+        <div id="result-wrapper" class="hidden tg-card rounded-xl p-3 border shadow-sm space-y-2">
             <div class="flex items-center justify-between">
                 <h3 id="result-title" class="text-xs font-semibold text-gray-300">Результат</h3>
                 <button id="download-docx-btn" onclick="downloadWord()" class="hidden chip-btn bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500">
@@ -132,29 +132,29 @@
                 </button>
             </div>
             
-            <div id="result-container" class="bg-gray-900 p-3 rounded-xl text-xs text-gray-300 min-h-[220px] max-h-[450px] overflow-y-auto border border-gray-800 prose prose-invert">
+            <div id="result-container" class="bg-gray-900 p-2.5 rounded-lg text-xs text-gray-300 min-h-[180px] max-h-[350px] overflow-y-auto border border-gray-800 prose prose-invert">
                 Результат появится здесь...
             </div>
         </div>
 
         <!-- ПОДВАЛ / ДИСКЛЕЙМЕР -->
-        <footer class="text-center py-4 text-[11px] text-gray-500 space-y-1">
+        <footer class="text-center py-2 text-[10px] text-gray-500 space-y-0.5">
             <p>© 2026 Lexify. Все права защищены.</p>
             <p>Сервис носит информационный характер и не заменяет очную юридическую консультацию.</p>
         </footer>
     </div>
 
     <!-- МОДАЛЬНОЕ ОКНО АДМИНКИ -->
-    <div id="admin-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
-        <div class="tg-card rounded-2xl p-5 border shadow-2xl max-w-lg w-full space-y-4">
+    <div id="admin-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center p-3 z-50">
+        <div class="tg-card rounded-2xl p-4 border shadow-2xl max-w-lg w-full space-y-3">
             <div class="flex items-center justify-between">
-                <h3 class="text-sm font-bold text-white"><i class="fa-solid fa-shield-halved mr-1.5 text-amber-500"></i> Админ-панель</h3>
-                <button onclick="closeAdminPanel()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <h3 class="text-xs font-bold text-white"><i class="fa-solid fa-shield-halved mr-1.5 text-amber-500"></i> Админ-панель</h3>
+                <button onclick="closeAdminPanel()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-base"></i></button>
             </div>
-            <div id="admin-stats-content" class="text-xs text-gray-300 space-y-2">
+            <div id="admin-stats-content" class="text-xs text-gray-300 space-y-1.5">
                 Загрузка статистики...
             </div>
-            <button onclick="closeAdminPanel()" class="w-full py-2 bg-gray-700 rounded-xl text-xs font-semibold text-white">Закрыть</button>
+            <button onclick="closeAdminPanel()" class="w-full py-1.5 bg-gray-700 rounded-lg text-xs font-semibold text-white">Закрыть</button>
         </div>
     </div>
 
@@ -185,12 +185,12 @@
             const secGenerate = document.getElementById('section-generate');
 
             if (tab === 'analyze') {
-                btnAnalyze.className = "btn-action bg-blue-600 text-white shadow-md";
+                btnAnalyze.className = "btn-action bg-blue-600 text-white shadow-sm";
                 btnGenerate.className = "btn-action bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700";
                 secAnalyze.classList.remove('hidden');
                 secGenerate.classList.add('hidden');
             } else {
-                btnGenerate.className = "btn-action bg-blue-600 text-white shadow-md";
+                btnGenerate.className = "btn-action bg-blue-600 text-white shadow-sm";
                 btnAnalyze.className = "btn-action bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700";
                 secGenerate.classList.remove('hidden');
                 secAnalyze.classList.add('hidden');
@@ -340,8 +340,8 @@
                     <p><b>Всего пользователей:</b> ${stats.total_users || 0}</p>
                     <p><b>Всего анализов:</b> ${stats.total_analyses || 0}</p>
                     <p><b>Всего платежей:</b> ${stats.total_payments || 0}</p>
-                    <hr class="border-gray-700 my-2">
-                    <p class="text-gray-400 text-[11px]">Административный доступ подтвержден (ID: ${currentTelegramId})</p>
+                    <hr class="border-gray-700 my-1">
+                    <p class="text-gray-400 text-[10px]">Административный доступ подтвержден (ID: ${currentTelegramId})</p>
                 `;
             } catch (err) {
                 content.innerHTML = "Ошибка загрузки статистики админ-панели.";
