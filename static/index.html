@@ -21,10 +21,14 @@
         .chip-btn.active { background-color: #3b82f6; color: #ffffff; border-color: #3b82f6; font-weight: 600; }
         .chip-btn:not(.active) { background-color: #1f2937; color: #9ca3af; }
         .chip-btn:not(.active):hover { background-color: #374151; color: #ffffff; }
-        .btn-action {
-            height: 38px; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600;
-            display: inline-flex; align-items: center; justify-content: flex-start; padding-left: 0.8rem; transition: background-color 0.2s ease;
+        .tab-btn {
+            height: 42px; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600;
+            display: inline-flex; align-items: center; justify-content: flex-start; padding-left: 0.8rem; transition: all 0.2s ease;
+            border: 2px solid transparent;
         }
+        .tab-btn.active { background-color: #1d4ed8; color: #ffffff; border-color: #60a5fa; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+        .tab-btn:not(.active) { background-color: #1f2937; color: #9ca3af; border-color: #374151; }
+        .tab-btn:not(.active):hover { background-color: #374151; color: #ffffff; }
         .top-badge-item {
             height: 28px; padding: 0 8px; display: inline-flex; align-items: center; justify-content: center; border-radius: 0.4rem; font-size: 0.7rem; font-weight: 600;
         }
@@ -46,11 +50,20 @@
         </div>
 
         <!-- ПРИВЕТСТВИЕ И ОПИСАНИЕ -->
-        <header class="text-center space-y-0.5">
+        <header class="text-center space-y-1">
             <h1 class="text-lg font-bold tracking-tight text-white">Lexify</h1>
             <p class="text-[11px] text-gray-400 max-w-md mx-auto">
                 Сервис правовой поддержки, предназначенный для поиска скрытых рисков в договорах, подготовки безопасных документов и разработки протоколов разногласий.
             </p>
+            
+            <!-- ПОРЯДОК РАБОТЫ (КРАТКАЯ ИНСТРУКЦИЯ) -->
+            <div class="bg-gray-800/60 border border-gray-700/60 rounded-xl p-2 mt-2 text-[10px] text-gray-300 flex justify-around items-center">
+                <span><b>1.</b> Юрисдикция</span>
+                <i class="fa-solid fa-chevron-right text-gray-500 text-[8px]"></i>
+                <span><b>2.</b> Режим работы</span>
+                <i class="fa-solid fa-chevron-right text-gray-500 text-[8px]"></i>
+                <span><b>3.</b> Результат / Word</span>
+            </div>
         </header>
 
         <!-- ВЫБОР ЮРИСДИКЦИИ -->
@@ -63,31 +76,35 @@
             </div>
         </div>
 
-        <!-- ОСНОВНЫЕ КНОПКИ ВЫБОРА РЕЖИМОВ -->
+        <!-- ОСНОВНЫЕ КНОПКИ ВЫБОРА РЕЖИМОВ (ГЛАВНЫЕ ПЕРЕКЛЮЧАТЕЛИ) -->
         <div class="grid grid-cols-2 gap-2">
-            <button onclick="switchTab('analyze')" id="tab-btn-analyze" class="btn-action bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700">
+            <button onclick="switchTab('analyze')" id="tab-btn-analyze" class="tab-btn active">
                 <i class="fa-solid fa-magnifying-glass-chart mr-2 ml-0.5"></i> Анализировать договор
             </button>
-            <button onclick="switchTab('generate')" id="tab-btn-generate" class="btn-action bg-blue-600 text-white shadow-sm">
+            <button onclick="switchTab('generate')" id="tab-btn-generate" class="tab-btn">
                 <i class="fa-solid fa-file-contract mr-2 ml-0.5"></i> Сгенерировать документ
             </button>
         </div>
 
-        <!-- РЕЖИМ 1: АНАЛИЗ ДОГОВОРА (СКРЫТ ПО УМОЛЧАНИЮ) -->
-        <div id="section-analyze" class="hidden tg-card rounded-xl p-3 border shadow-sm space-y-2">
-            <h2 class="text-xs font-semibold text-white">Экспресс-анализ договора на риски</h2>
+        <!-- РЕЖИМ 1: АНАЛИЗ ДОГОВОРА (ОТКРЫТ ПО УМОЛЧАНИЮ) -->
+        <div id="section-analyze" class="tg-card rounded-xl p-3 border-2 border-blue-500/50 shadow-md space-y-2">
+            <div class="flex items-center justify-between border-b border-gray-700 pb-1.5">
+                <h2 class="text-xs font-semibold text-blue-400"><i class="fa-solid fa-circle-dot mr-1 text-[10px]"></i> Режим: Экспресс-анализ рисков</h2>
+            </div>
             <div>
                 <label class="text-[11px] font-medium text-gray-300 block mb-1">Текст договора или выдержки из него</label>
                 <textarea id="analyze-text-input" rows="4" class="identical-input-box text-xs" placeholder="Вставьте текст договора сюда..."></textarea>
             </div>
-            <button onclick="runAnalysis()" class="w-full btn-action justify-center bg-blue-600 hover:bg-blue-500 text-white shadow-sm">
+            <button onclick="runAnalysis()" class="w-full bg-blue-600 hover:bg-blue-500 text-white shadow-sm py-2 rounded-lg font-semibold text-xs flex items-center justify-center">
                 <i class="fa-solid fa-shield-cat mr-1.5"></i> Проверить договор
             </button>
         </div>
 
-        <!-- РЕЖИМ 2: ГЕНЕРАЦИЯ ДОКУМЕНТА (ОТКРЫТ ПО УМОЛЧАНИЮ) -->
-        <div id="section-generate" class="tg-card rounded-xl p-3 border shadow-sm space-y-2">
-            <h2 class="text-xs font-semibold text-white">Конструктор полного договора / оферты</h2>
+        <!-- РЕЖИМ 2: ГЕНЕРАЦИЯ ДОКУМЕНТА (СКРЫТ ПО УМОЛЧАНИЮ) -->
+        <div id="section-generate" class="hidden tg-card rounded-xl p-3 border-2 border-blue-500/50 shadow-md space-y-2">
+            <div class="flex items-center justify-between border-b border-gray-700 pb-1.5">
+                <h2 class="text-xs font-semibold text-blue-400"><i class="fa-solid fa-circle-dot mr-1 text-[10px]"></i> Режим: Конструктор документов</h2>
+            </div>
             
             <div>
                 <label class="text-[11px] font-medium text-gray-300 block mb-1">Тип документа</label>
@@ -114,10 +131,10 @@
             </div>
 
             <div class="grid grid-cols-2 gap-2 pt-0.5">
-                <button onclick="generateDocument()" class="btn-action justify-center bg-blue-600 hover:bg-blue-500 text-white shadow-sm">
+                <button onclick="generateDocument()" class="w-full bg-blue-600 hover:bg-blue-500 text-white shadow-sm py-2 rounded-lg font-semibold text-xs flex items-center justify-center">
                     <i class="fa-solid fa-file-contract mr-1"></i> Сгенерировать
                 </button>
-                <button onclick="resetForm()" class="btn-action justify-center bg-gray-700 hover:bg-gray-600 text-gray-200 border border-gray-600">
+                <button onclick="resetForm()" class="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 border border-gray-600 py-2 rounded-lg font-semibold text-xs flex items-center justify-center">
                     <i class="fa-solid fa-rotate-left mr-1"></i> Сбросить
                 </button>
             </div>
@@ -185,13 +202,13 @@
             const secGenerate = document.getElementById('section-generate');
 
             if (tab === 'analyze') {
-                btnAnalyze.className = "btn-action bg-blue-600 text-white shadow-sm";
-                btnGenerate.className = "btn-action bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700";
+                btnAnalyze.className = "tab-btn active";
+                btnGenerate.className = "tab-btn";
                 secAnalyze.classList.remove('hidden');
                 secGenerate.classList.add('hidden');
             } else {
-                btnGenerate.className = "btn-action bg-blue-600 text-white shadow-sm";
-                btnAnalyze.className = "btn-action bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700";
+                btnGenerate.className = "tab-btn active";
+                btnAnalyze.className = "tab-btn";
                 secGenerate.classList.remove('hidden');
                 secAnalyze.classList.add('hidden');
             }
