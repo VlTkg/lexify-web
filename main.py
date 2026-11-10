@@ -6,7 +6,7 @@ import re
 import unicodedata
 import tempfile
 from datetime import datetime
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Form
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel
@@ -125,7 +125,7 @@ class ProtocolRequest(BaseModel):
     doc_type: str = "Общий"
     jurisdiction: str = "Россия (РФ)"
     telegram_id: Optional[int] = None
-    risks: List[ProtocolItem]
+    risks: List[ProtocolItem] = []
 
 class ContractGenerationRequest(BaseModel):
     doc_type: str = "contract"
@@ -138,7 +138,6 @@ class ContractGenerationRequest(BaseModel):
     revisions: str = "2"
     telegram_id: Optional[int] = None
 
-# Роутинг: веб-интерфейс открывается сразу по корню и по /app
 @app.get("/")
 async def serve_root():
     return FileResponse("static/index.html")
@@ -447,26 +446,26 @@ async def process_analysis(data: AnalyzeSchema):
 
     prompt = f"""
 Ты — профессиональный юрист-аналитик, специализирующийся на защите интересов фрилансеров и исполнителей.
-Проведи экспресс-анализ договора. Язык — современный и понятный (без канцеляризмов).
+Проведи экспресс-анализ договора или статьи. Язык ответа — русский.
 
 Контекст:
-- Тип договора: {data.doc_type}
+- Тип: {data.doc_type}
 - Юрисдикция: {data.jurisdiction}
 
-Текст договора:
+Текст:
 ---
 {contract_content[:15000]}
 ---
 
-Верни JSON строго по схеме:
-1. `overall_risk_level`: ('Низкий', 'Средний', 'Высокий').
-2. `summary`: Вывод в 1-2 предложениях.
-3. `risks`: Список рисков (3-6 штук). Поля:
-    - `category`: ('red', 'yellow', 'green')
-    - `title`: Название риска
-    - `quote`: Обязательно начни с точного номера пункта или статьи договора (например: "Пункт 3.2. ...", "Статья 5.1. ..."). Опиши условие Заказчика простыми словами.
-    - `explanation`: Чем грозит данное условие Исполнителю
-    - `recommendation`: Предлагаемая безопасная редакция пункта для Исполнителя
+Верни ответ СТРОГО в формате JSON, соответствующем схеме AnalysisResponse:
+- `overall_risk_level`: строка ('Низкий', 'Средний' или 'Высокий')
+- `summary`: краткое резюме (1-2 предложения)
+- `risks`: массив объектов, где каждый объект содержит:
+    - `category`: 'red' (высокий риск), 'yellow' (средний) или 'green' (низкий/безопасно)
+    - `title`: название пункта или риска
+    - `quote`: точная цитата из текста
+    - `explanation`: чем это грозит исполнителю
+    - `recommendation`: безопасная редакция или рекомендация
 """
 
     try:
@@ -479,9 +478,15 @@ async def process_analysis(data: AnalyzeSchema):
             }
         )
         
+        # Парсим текст ответа в словарь, чтобы клиент не получал сырую строку JSON
+        try:
+            parsed_json = json.loads(response.text)
+        except Exception:
+            parsed_json = response.text
+
         return {
             "status": "ok", 
-            "result": response.text,
+            "result": parsed_json,
             "checks_left": 999
         }
     except Exception as e:
@@ -494,3 +499,24 @@ async def analyze_contract_main(data: AnalyzeSchema):
 @app.post("/api/analyze")
 async def analyze_contract_api(data: AnalyzeSchema):
     return await process_analysis(data)
+
+@app.post("/api/analyze-file")
+async def analyze_file_api(file: UploadFile = File(...), jurisdiction: str = Form("Россия (РФ)"), telegram_id: Optional[int] = Form(None)):
+    content_bytes = await file.read()
+    extracted_text = ""
+    
+    if file.filename.endswith(".docx"):
+        try:
+            doc = docx.Document(io.BytesIO(content_bytes))
+            extracted_text = "\n".join([p.text for p in doc.paragraphs if p.text.strip()])
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Ошибка чтения .docx файла: {str(e)}")
+    else:
+        # Для прочих текстовых файлов / вырезок
+        extracted_text = content_bytes.decode("utf-8", errors="ignore")
+
+    if not extracted_text.strip():
+        raise HTTPException(status_code=400, detail="Загруженный файл пуст или не содержит текста.")
+
+    schema_data = AnalyzeSchema(text=extracted_text, jurisdiction=jurisdiction, telegram_id=telegram_id)
+    return await process_analysis(schema_data)
