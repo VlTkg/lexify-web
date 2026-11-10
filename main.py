@@ -10,7 +10,7 @@ from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Form
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Any
 from google import genai
 import docx
 from docx.shared import Inches, Pt, RGBColor
@@ -104,28 +104,22 @@ class InvoiceRequest(BaseModel):
     package_type: str = "5_checks"
 
 class RiskItem(BaseModel):
-    category: str
-    title: str
-    quote: str
-    explanation: str
-    recommendation: str
+    category: Optional[str] = "yellow"
+    title: Optional[str] = "Замечание"
+    quote: Optional[str] = "—"
+    explanation: Optional[str] = "—"
+    recommendation: Optional[str] = "—"
 
 class AnalysisResponse(BaseModel):
-    overall_risk_level: str
-    summary: str
-    risks: List[RiskItem]
-
-class ProtocolItem(BaseModel):
-    title: str
-    quote: str
-    explanation: str
-    recommendation: str
+    overall_risk_level: Optional[str] = "Средний"
+    summary: Optional[str] = ""
+    risks: Optional[List[RiskItem]] = []
 
 class ProtocolRequest(BaseModel):
     doc_type: str = "Общий"
     jurisdiction: str = "Россия (РФ)"
     telegram_id: Optional[int] = None
-    risks: List[ProtocolItem] = []
+    risks: Optional[List[Any]] = []
 
 class ContractGenerationRequest(BaseModel):
     doc_type: str = "contract"
@@ -274,7 +268,7 @@ async def generate_protocol(data: ProtocolRequest):
 
     sub_p = doc.add_paragraph()
     sub_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    sub_run = sub_p.add_run(f"к проекту договора ({clean_text(data.doc_type)})\n")
+    sub_run = sub_p.add_run(f"к проекту договора / статьи ({clean_text(data.doc_type)})\n")
     sub_run.font.size = Pt(11)
     sub_run.italic = True
     sub_run.font.color.rgb = RGBColor(0x4B, 0x55, 0x63)
@@ -313,7 +307,7 @@ async def generate_protocol(data: ProtocolRequest):
         for i in range(4):
             row_cells[i].width = col_widths[i]
         row_cells[0].merge(row_cells[3])
-        row_cells[0].text = "Существенных рисков и замечаний к редакции договора не выявлено."
+        row_cells[0].text = "Существенных рисков и замечаний к редакции не выявлено."
     else:
         for risk in data.risks:
             row_cells = table.add_row().cells
@@ -322,20 +316,32 @@ async def generate_protocol(data: ProtocolRequest):
                 row_cells[i].width = col_widths[i]
                 set_cell_margins(row_cells[i], top=80, bottom=80, left=80, right=80)
 
-            row_cells[0].text = clean_text(risk.title) or "—"
+            # Безопасное извлечение полей независимо от того, словарь это или объект
+            if isinstance(risk, dict):
+                r_title = risk.get('title', '—')
+                r_quote = risk.get('quote', '—')
+                r_rec = risk.get('recommendation', '—')
+                r_exp = risk.get('explanation', 'Защита интересов исполнителя')
+            else:
+                r_title = getattr(risk, 'title', '—')
+                r_quote = getattr(risk, 'quote', '—')
+                r_rec = getattr(risk, 'recommendation', '—')
+                r_exp = getattr(risk, 'explanation', 'Защита интересов исполнителя')
+
+            row_cells[0].text = clean_text(r_title) or "—"
             if row_cells[0].paragraphs[0].runs:
                 row_cells[0].paragraphs[0].runs[0].bold = True
                 row_cells[0].paragraphs[0].runs[0].font.size = Pt(9.5)
 
-            row_cells[1].text = clean_text(risk.quote) or "—"
+            row_cells[1].text = clean_text(r_quote) or "—"
             if row_cells[1].paragraphs[0].runs:
                 row_cells[1].paragraphs[0].runs[0].font.size = Pt(9.5)
 
-            row_cells[2].text = clean_text(risk.recommendation) or "—"
+            row_cells[2].text = clean_text(r_rec) or "—"
             if row_cells[2].paragraphs[0].runs:
                 row_cells[2].paragraphs[0].runs[0].font.size = Pt(9.5)
 
-            row_cells[3].text = clean_text(risk.explanation) or "Защита интересов исполнителя"
+            row_cells[3].text = clean_text(r_exp) or "Защита интересов исполнителя"
             if row_cells[3].paragraphs[0].runs:
                 row_cells[3].paragraphs[0].runs[0].font.size = Pt(9.5)
 
@@ -478,7 +484,6 @@ async def process_analysis(data: AnalyzeSchema):
             }
         )
         
-        # Парсим текст ответа в словарь, чтобы клиент не получал сырую строку JSON
         try:
             parsed_json = json.loads(response.text)
         except Exception:
@@ -512,7 +517,6 @@ async def analyze_file_api(file: UploadFile = File(...), jurisdiction: str = For
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Ошибка чтения .docx файла: {str(e)}")
     else:
-        # Для прочих текстовых файлов / вырезок
         extracted_text = content_bytes.decode("utf-8", errors="ignore")
 
     if not extracted_text.strip():
