@@ -224,7 +224,7 @@
         let currentDocType = 'contract';
         let currentAnalyzeMode = 'text';
         let currentTelegramId = 8804083078;
-        let lastAnalysisResult = null; // Для сохранения результатов под скачивание протокола
+        let lastAnalysisResult = null;
 
         window.addEventListener('DOMContentLoaded', () => {
             if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
@@ -308,27 +308,29 @@
             container.innerHTML = "";
             lastAnalysisResult = data;
 
+            let parsedData = data;
             if (typeof data === 'string') {
-                try { data = JSON.parse(data); } catch(e) {}
+                try { parsedData = JSON.parse(data); } catch(e) {}
             }
 
-            if (typeof data === 'object' && data !== null) {
+            if (typeof parsedData === 'object' && parsedData !== null) {
                 let html = "";
-                if (data.overall_risk_level) {
-                    let badgeColor = data.overall_risk_level === 'Высокий' ? 'bg-red-600/30 text-red-300 border-red-500' : (data.overall_risk_level === 'Средний' ? 'bg-amber-600/30 text-amber-300 border-amber-500' : 'bg-emerald-600/30 text-emerald-300 border-emerald-500');
-                    html += `<div class="p-2 rounded-lg border ${badgeColor} mb-2 flex justify-between items-center text-xs font-semibold"><span>Уровень риска: ${data.overall_risk_level}</span></div>`;
+                if (parsedData.overall_risk_level) {
+                    let lvl = parsedData.overall_risk_level;
+                    let badgeColor = lvl === 'Высокий' ? 'bg-red-600/35 text-red-300 border-red-500' : (lvl === 'Средний' ? 'bg-amber-600/35 text-amber-300 border-amber-500' : 'bg-emerald-600/35 text-emerald-300 border-emerald-500');
+                    html += `<div class="p-2 rounded-lg border ${badgeModelBadge = badgeColor} mb-2 flex justify-between items-center text-xs font-semibold"><span>Уровень риска: ${lvl}</span></div>`;
                 }
-                if (data.summary) {
-                    html += `<div class="analysis-block risk-medium"><b class="text-white block mb-0.5">Резюме:</b> ${data.summary}</div>`;
+                if (parsedData.summary) {
+                    html += `<div class="analysis-block risk-medium"><b class="text-white block mb-0.5">Резюме:</b> ${parsedData.summary}</div>`;
                 }
-                if (data.risks && Array.isArray(data.risks)) {
-                    data.risks.forEach((r, idx) => {
+                if (parsedData.risks && Array.isArray(parsedData.risks)) {
+                    parsedData.risks.forEach((r, idx) => {
                         let riskClass = r.category === 'red' ? 'risk-high' : (r.category === 'yellow' ? 'risk-medium' : 'risk-low');
                         html += `
                             <div class="analysis-block ${riskClass}">
                                 <b class="text-white block">Риск #${idx+1}: ${r.title || 'Замечание'}</b>
-                                <p class="text-gray-300 mt-0.5"><b>Цитата:</b> «${r.quote || ''}»</p>
-                                <p class="text-gray-300 mt-0.5"><b>Пояснение:</b> ${r.explanation || ''}</p>
+                                <p class="text-gray-300 mt-0.5"><b>Цитата / Пункт:</b> «${r.quote || ''}»</p>
+                                <p class="text-gray-300 mt-0.5"><b>Суть риска:</b> ${r.explanation || ''}</p>
                                 <p class="text-blue-300 mt-0.5"><b>Рекомендация:</b> ${r.recommendation || ''}</p>
                             </div>
                         `;
@@ -341,7 +343,7 @@
                 }
             }
 
-            let resText = typeof data === 'string' ? data : (data.result || data.summary || JSON.stringify(data));
+            let resText = typeof parsedData === 'string' ? parsedData : (parsedData.result || parsedData.summary || JSON.stringify(parsedData));
             container.innerHTML = marked.parse(resText);
             scrollToResults();
         }
@@ -379,7 +381,7 @@
                     });
 
                     const data = await response.json();
-                    renderFormattedAnalysis(data);
+                    renderFormattedAnalysis(data.result);
                 } else {
                     const fileInput = document.getElementById('analyze-file-input');
                     if (!fileInput.files || fileInput.files.length === 0) {
@@ -399,7 +401,7 @@
                     });
 
                     const data = await response.json();
-                    renderFormattedAnalysis(data);
+                    renderFormattedAnalysis(data.result);
                 }
             } catch (e) {
                 container.innerHTML = "Ошибка анализа: " + e.message;
@@ -455,19 +457,19 @@
 
         async function downloadWordProtocol() {
             let risksList = [];
-            if (lastAnalysisResult && lastAnalysisResult.risks) {
-                risksList = lastAnalysisResult.risks;
+            if (lastAnalysisResult) {
+                let parsed = lastAnalysisResult;
+                if (typeof parsed === 'string') {
+                    try { parsed = JSON.parse(parsed); } catch(e) {}
+                }
+                if (parsed && parsed.risks) {
+                    risksList = parsed.risks;
+                }
             }
 
             const payload = {
-                doc_type: "protocol",
+                doc_type: "Экспресс-анализ",
                 jurisdiction: currentJurisdiction,
-                executor: "Исполнитель",
-                client: "Заказчик",
-                description: "Протокол разногласий по результатам правового анализа",
-                payment: "100% предоплата",
-                deadline: "30 дней",
-                revisions: "2",
                 telegram_id: currentTelegramId,
                 risks: risksList
             };
