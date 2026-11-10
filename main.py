@@ -132,13 +132,17 @@ class ContractGenerationRequest(BaseModel):
     revisions: str = "2"
     telegram_id: Optional[int] = None
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 async def serve_root():
-    return FileResponse("static/index.html")
+    if os.path.exists("static/index.html"):
+        return FileResponse("static/index.html")
+    return HTMLResponse("<h3>Файл static/index.html не найден</h3>", status_code=404)
 
-@app.get("/app")
+@app.get("/app", response_class=HTMLResponse)
 async def serve_app():
-    return FileResponse("static/index.html")
+    if os.path.exists("static/index.html"):
+        return FileResponse("static/index.html")
+    return HTMLResponse("<h3>Файл static/index.html не найден</h3>", status_code=404)
 
 @app.get("/privacy", response_class=HTMLResponse)
 async def serve_privacy():
@@ -316,7 +320,6 @@ async def generate_protocol(data: ProtocolRequest):
                 row_cells[i].width = col_widths[i]
                 set_cell_margins(row_cells[i], top=80, bottom=80, left=80, right=80)
 
-            # Безопасное извлечение полей независимо от того, словарь это или объект
             if isinstance(risk, dict):
                 r_title = risk.get('title', '—')
                 r_quote = risk.get('quote', '—')
