@@ -362,7 +362,6 @@ async def generate_protocol(data: ProtocolRequest):
     cell_left.text = "ПОДРЯДЧИК / ИСПОЛНИТЕЛЬ:\n\n\n_______________________ / ____________ /\nМ.П."
     cell_right.text = "ЗАКАЗЧИК:\n\n\n_______________________ / ____________ /\nМ.П."
 
-    # Возвращаем файл напрямую через память (StreamingResponse), чтобы избежать проблем с временными файлами на Render
     file_stream = io.BytesIO()
     doc.save(file_stream)
     file_stream.seek(0)
