@@ -4,11 +4,10 @@ import json
 import httpx
 import re
 import unicodedata
-import tempfile
 from datetime import datetime
 from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Form
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
 from pydantic import BaseModel
 from typing import Optional, List, Any
 from google import genai
@@ -363,13 +362,18 @@ async def generate_protocol(data: ProtocolRequest):
     cell_left.text = "ПОДРЯДЧИК / ИСПОЛНИТЕЛЬ:\n\n\n_______________________ / ____________ /\nМ.П."
     cell_right.text = "ЗАКАЗЧИК:\n\n\n_______________________ / ____________ /\nМ.П."
 
-    file_path = os.path.join(tempfile.gettempdir(), "Protocol_Raznogasiy.docx")
-    doc.save(file_path)
+    # Возвращаем файл напрямую через память (StreamingResponse), чтобы избежать проблем с временными файлами на Render
+    file_stream = io.BytesIO()
+    doc.save(file_stream)
+    file_stream.seek(0)
 
-    return FileResponse(
-        file_path,
-        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        filename="Protocol_Raznogasiy.docx"
+    headers = {
+        'Content-Disposition': 'attachment; filename="Protocol_Raznogasiy.docx"'
+    }
+    return StreamingResponse(
+        file_stream, 
+        headers=headers, 
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
 
 async def process_document_generation(data: ContractGenerationRequest):
