@@ -125,10 +125,10 @@
 
             <!-- Кнопки действия -->
             <div class="grid grid-cols-2 gap-2 pt-0.5">
-                <button onclick="runAnalysis()" class="w-full bg-blue-600 hover:bg-blue-500 text-white shadow-sm py-2 rounded-lg font-semibold text-xs flex items-center justify-center">
+                <button type="button" onclick="runAnalysis()" class="w-full bg-blue-600 hover:bg-blue-500 text-white shadow-sm py-2 rounded-lg font-semibold text-xs flex items-center justify-center cursor-pointer">
                     <i class="fa-solid fa-shield-cat mr-1.5"></i> Проверить текст, договор или статью
                 </button>
-                <button onclick="resetAnalyzeForm()" class="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 border border-gray-600 py-2 rounded-lg font-semibold text-xs flex items-center justify-center">
+                <button type="button" onclick="resetAnalyzeForm()" class="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 border border-gray-600 py-2 rounded-lg font-semibold text-xs flex items-center justify-center cursor-pointer">
                     <i class="fa-solid fa-rotate-left mr-1"></i> Сбросить
                 </button>
             </div>
@@ -165,10 +165,10 @@
             </div>
 
             <div class="grid grid-cols-2 gap-2 pt-0.5">
-                <button onclick="generateDocument()" class="w-full bg-blue-600 hover:bg-blue-500 text-white shadow-sm py-2 rounded-lg font-semibold text-xs flex items-center justify-center">
+                <button type="button" onclick="generateDocument()" class="w-full bg-blue-600 hover:bg-blue-500 text-white shadow-sm py-2 rounded-lg font-semibold text-xs flex items-center justify-center cursor-pointer">
                     <i class="fa-solid fa-file-contract mr-1"></i> Сгенерировать
                 </button>
-                <button onclick="resetGenerateForm()" class="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 border border-gray-600 py-2 rounded-lg font-semibold text-xs flex items-center justify-center">
+                <button type="button" onclick="resetGenerateForm()" class="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 border border-gray-600 py-2 rounded-lg font-semibold text-xs flex items-center justify-center cursor-pointer">
                     <i class="fa-solid fa-rotate-left mr-1"></i> Сбросить
                 </button>
             </div>
@@ -179,10 +179,10 @@
             <div class="flex items-center justify-between flex-wrap gap-1">
                 <h3 id="result-title" class="text-xs font-semibold text-gray-300">Результат анализа</h3>
                 <div class="flex gap-1.5">
-                    <button id="download-protocol-btn" onclick="downloadWordProtocol()" class="hidden chip-btn bg-amber-600 hover:bg-amber-500 text-white border-amber-500 font-semibold">
+                    <button type="button" id="download-protocol-btn" onclick="downloadWordProtocol()" class="hidden chip-btn bg-amber-600 hover:bg-amber-500 text-white border-amber-500 font-semibold cursor-pointer">
                         <i class="fa-solid fa-file-invoice mr-1"></i> Скачать протокол разногласий (.docx)
                     </button>
-                    <button id="download-docx-btn" onclick="downloadWord()" class="hidden chip-btn bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500 font-semibold">
+                    <button type="button" id="download-docx-btn" onclick="downloadWord()" class="hidden chip-btn bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500 font-semibold cursor-pointer">
                         <i class="fa-solid fa-file-word mr-1"></i> Скачать документ (.docx)
                     </button>
                 </div>
@@ -205,12 +205,12 @@
         <div class="tg-card rounded-2xl p-4 border shadow-2xl max-w-lg w-full space-y-3">
             <div class="flex items-center justify-between border-b border-gray-700 pb-2">
                 <h3 class="text-xs font-bold text-white"><i class="fa-solid fa-shield-halved mr-1.5 text-amber-500"></i> Панель администратора (Детализация)</h3>
-                <button onclick="closeAdminPanel()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-base"></i></button>
+                <button type="button" onclick="closeAdminPanel()" class="text-gray-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark text-base"></i></button>
             </div>
             <div id="admin-stats-content" class="text-xs text-gray-300 space-y-2">
                 Загрузка детальной статистики...
             </div>
-            <button onclick="closeAdminPanel()" class="w-full py-1.5 bg-gray-700 hover:bg-gray-600 rounded-lg text-xs font-semibold text-white">Закрыть</button>
+            <button type="button" onclick="closeAdminPanel()" class="w-full py-1.5 bg-gray-700 hover:bg-gray-600 rounded-lg text-xs font-semibold text-white cursor-pointer">Закрыть</button>
         </div>
     </div>
 
@@ -343,7 +343,7 @@
             scrollToResults();
         }
 
-        async function runAnalysis() {
+        function runAnalysis() {
             const container = document.getElementById('result-container');
             const resultWrapper = document.getElementById('result-wrapper');
             const downloadDocBtn = document.getElementById('download-docx-btn');
@@ -365,7 +365,7 @@
                         return;
                     }
 
-                    const response = await fetch('/api/analyze', {
+                    fetch('/api/analyze', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -373,10 +373,14 @@
                             jurisdiction: currentJurisdiction,
                             telegram_id: currentTelegramId
                         })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        renderFormattedAnalysis(data.result);
+                    })
+                    .catch(err => {
+                        container.innerHTML = "Ошибка анализа: " + err.message;
                     });
-
-                    const data = await response.json();
-                    renderFormattedAnalysis(data.result);
                 } else {
                     const fileInput = document.getElementById('analyze-file-input');
                     if (!fileInput.files || fileInput.files.length === 0) {
@@ -390,20 +394,24 @@
                     formData.append('jurisdiction', currentJurisdiction);
                     formData.append('telegram_id', currentTelegramId);
 
-                    const response = await fetch('/api/analyze-file', {
+                    fetch('/api/analyze-file', {
                         method: 'POST',
                         body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        renderFormattedAnalysis(data.result);
+                    })
+                    .catch(err => {
+                        container.innerHTML = "Ошибка анализа файла: " + err.message;
                     });
-
-                    const data = await response.json();
-                    renderFormattedAnalysis(data.result);
                 }
             } catch (e) {
-                container.innerHTML = "Ошибка анализа: " + e.message;
+                container.innerHTML = "Ошибка: " + e.message;
             }
         }
 
-        async function generateDocument() {
+        function generateDocument() {
             const container = document.getElementById('result-container');
             const resultWrapper = document.getElementById('result-wrapper');
             const downloadDocBtn = document.getElementById('download-docx-btn');
@@ -428,54 +436,28 @@
                 telegram_id: currentTelegramId
             };
 
-            try {
-                const response = await fetch('/api/generate-document', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                const data = await response.json();
+            fetch('/api/generate-document', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
                 let markdownText = "";
                 if (typeof data === 'string') {
                     markdownText = data;
                 } else if (data) {
                     markdownText = data.document || data.result || data.text || data.response || data.content || "";
                 }
-
                 container.innerHTML = marked.parse(markdownText);
                 scrollToResults();
-            } catch (error) {
+            })
+            .catch(error => {
                 container.innerHTML = "Ошибка генерации: " + error.message;
-            }
+            });
         }
 
-        // Надежный метод скачивания через Blob URL с принудительным событием для Telegram WebView
-        async function triggerFileDownload(url, filename) {
-            try {
-                const response = await fetch(url);
-                const blob = await response.blob();
-                const blobUrl = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = blobUrl;
-                a.download = filename;
-                document.body.appendChild(a);
-                
-                // Пробуем нативный клик
-                a.click();
-                
-                setTimeout(() => {
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(blobUrl);
-                }, 1000);
-            } catch (e) {
-                // Если fetch заблокирован, пробуем открыть напрямую через location
-                window.location.href = url;
-            }
-        }
-
-        async function downloadWordProtocol() {
+        function downloadWordProtocol() {
             let risksList = [];
             if (lastAnalysisResult) {
                 let parsed = lastAnalysisResult;
@@ -494,34 +476,33 @@
                 risks: risksList
             };
 
-            try {
-                const response = await fetch('/generate-protocol', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const blobUrl = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = blobUrl;
-                    a.download = "Lexify_Protokol_Raznoglasiy.docx";
-                    document.body.appendChild(a);
-                    a.click();
-                    setTimeout(() => {
-                        a.remove();
-                        window.URL.revokeObjectURL(blobUrl);
-                    }, 500);
-                } else {
-                    alert("Не удалось сформировать протокол разногласий на сервере.");
-                }
-            } catch (e) {
+            fetch('/generate-protocol', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                if (response.ok) return response.blob();
+                throw new Error("Ошибка сервера");
+            })
+            .then(blob => {
+                const blobUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = "Lexify_Protokol_Raznoglasiy.docx";
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    a.remove();
+                    window.URL.revokeObjectURL(blobUrl);
+                }, 500);
+            })
+            .catch(e => {
                 alert("Ошибка при скачивании файла: " + e.message);
-            }
+            });
         }
 
-        async function downloadWord() {
+        function downloadWord() {
             const payload = {
                 doc_type: currentDocType,
                 jurisdiction: currentJurisdiction,
@@ -535,41 +516,40 @@
                 risks: []
             };
 
-            try {
-                const response = await fetch('/generate-protocol', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const blobUrl = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = blobUrl;
-                    a.download = "Lexify_Document.docx";
-                    document.body.appendChild(a);
-                    a.click();
-                    setTimeout(() => {
-                        a.remove();
-                        window.URL.revokeObjectURL(blobUrl);
-                    }, 500);
-                } else {
-                    alert("Не удалось сформировать файл на сервере.");
-                }
-            } catch (e) {
+            fetch('/generate-protocol', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                if (response.ok) return response.blob();
+                throw new Error("Ошибка сервера");
+            })
+            .then(blob => {
+                const blobUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = "Lexify_Document.docx";
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    a.remove();
+                    window.URL.revokeObjectURL(blobUrl);
+                }, 500);
+            })
+            .catch(e => {
                 alert("Ошибка при скачивании файла: " + e.message);
-            }
+            });
         }
 
-        async function openAdminPanel() {
+        function openAdminPanel() {
             document.getElementById('admin-modal').classList.remove('hidden');
             const content = document.getElementById('admin-stats-content');
             content.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Загрузка детальной статистики...';
 
-            try {
-                const resp = await fetch(`/admin/stats/${currentTelegramId}`);
-                const stats = await resp.json();
+            fetch(`/admin/stats/${currentTelegramId}`)
+            .then(resp => resp.json())
+            .then(stats => {
                 content.innerHTML = `
                     <div class="grid grid-cols-2 gap-2 bg-gray-900/50 p-2 rounded-lg border border-gray-800">
                         <p><b>Всего пользователей:</b> <span class="text-blue-400">${stats.total_users || 1}</span></p>
@@ -586,7 +566,8 @@
                     <hr class="border-gray-700 my-1">
                     <p class="text-gray-400 text-[10px]">Режим администратора активен для Telegram ID: <b>${currentTelegramId}</b></p>
                 `;
-            } catch (err) {
+            })
+            .catch(err => {
                 content.innerHTML = `
                     <div class="space-y-1">
                         <p><b>Всего пользователей:</b> 1 (Ваш аккаунт)</p>
@@ -595,7 +576,7 @@
                         <p class="text-gray-400 text-[10px]">Административный доступ подтвержден (ID: ${currentTelegramId})</p>
                     </div>
                 `;
-            }
+            });
         }
 
         function closeAdminPanel() {
@@ -612,4 +593,10 @@
 
         function resetGenerateForm() {
             document.getElementById('executor-input').value = "Иванов И.И.";
-            document.getElementById
+            document.getElementById('client-input').value = "ТОО «Альфа Технологии»";
+            document.getElementById('desc-input').value = "Разработка программного модуля автоматизации";
+            document.getElementById('result-wrapper').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
