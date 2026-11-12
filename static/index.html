@@ -457,7 +457,7 @@
             });
         }
 
-        // Обновленный метод скачивания с выводом прямой кнопки сохранения в интерфейс (обход блокировок десктопного Telegram WebView)
+        // Возвращаем чистый мобильный метод скачивания через Blob-ссылку
         function downloadWordProtocol() {
             let risksList = [];
             if (lastAnalysisResult) {
@@ -488,23 +488,18 @@
             })
             .then(blob => {
                 const blobUrl = window.URL.createObjectURL(blob);
-                const container = document.getElementById('result-container');
-                
-                // Добавляем прямую видимую кнопку скачивания внутрь окна результата (гарантированно работает в Telegram на ПК)
-                const downloadBoxId = 'dl-box-' + Date.now();
-                const downloadLinkHtml = `
-                    <div id="${downloadBoxId}" class="p-3 bg-blue-900/40 border border-blue-500 rounded-lg text-center mt-3 animate-pulse">
-                        <p class="text-xs text-blue-200 mb-2 font-semibold">Файл протокола готов к сохранению:</p>
-                        <a href="${blobUrl}" download="Lexify_Protokol_Raznoglasiy.docx" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold inline-block shadow cursor-pointer">
-                            <i class="fa-solid fa-download mr-1"></i> Скачать .docx на устройство
-                        </a>
-                    </div>
-                `;
-                container.insertAdjacentHTML('beforeend', downloadLinkHtml);
-                scrollToResults();
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = "Lexify_Protokol_Raznoglasiy.docx";
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    a.remove();
+                    window.URL.revokeObjectURL(blobUrl);
+                }, 500);
             })
             .catch(e => {
-                alert("Ошибка при формировании файла: " + e.message);
+                alert("Ошибка при скачивании файла: " + e.message);
             });
         }
 
@@ -533,21 +528,18 @@
             })
             .then(blob => {
                 const blobUrl = window.URL.createObjectURL(blob);
-                const container = document.getElementById('result-container');
-                
-                const downloadLinkHtml = `
-                    <div class="p-3 bg-blue-900/40 border border-blue-500 rounded-lg text-center mt-3 animate-pulse">
-                        <p class="text-xs text-blue-200 mb-2 font-semibold">Файл документа готов к сохранению:</p>
-                        <a href="${blobUrl}" download="Lexify_Document.docx" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold inline-block shadow cursor-pointer">
-                            <i class="fa-solid fa-download mr-1"></i> Скачать .docx на устройство
-                        </a>
-                    </div>
-                `;
-                container.insertAdjacentHTML('beforeend', downloadLinkHtml);
-                scrollToResults();
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = "Lexify_Document.docx";
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    a.remove();
+                    window.URL.revokeObjectURL(blobUrl);
+                }, 500);
             })
             .catch(e => {
-                alert("Ошибка при формировании файла: " + e.message);
+                alert("Ошибка при скачивании файла: " + e.message);
             });
         }
 
