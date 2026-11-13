@@ -67,8 +67,8 @@
                 </div>
                 <div class="text-[10px] text-gray-300 space-y-0.5 pl-1">
                     <p>1. Выберите применимое право (юрисдикцию) в блоке ниже.</p>
-                    <p>2. Переключитесь на нужный режим: <b>Анализ договора/статьи</b> или <b>Конструктор документов</b>.</p>
-                    <p>3. Введите текст или загрузите файл и нажмите кнопку проверки или генерации.</p>
+                    <p>2. Нажмите нужную кнопку: <b>Анализировать договор</b> или <b>Сгенерировать документ</b>.</p>
+                    <p>3. Введите текст или загрузите файл и запустите процесс.</p>
                     <p>4. Изучите отчет и при необходимости скачайте готовый файл в Word (.docx).</p>
                 </div>
             </div>
@@ -84,9 +84,9 @@
             </div>
         </div>
 
-        <!-- ОСНОВНЫЕ КНОПКИ ВЫБОРА РЕЖИМОВ -->
+        <!-- ОСНОВНЫЕ КНОПКИ ВЫБОРА РЕЖИМОВ (ПО УМОЛЧАНИЮ ВСЁ СКРЫТО, ПОКА НЕ НАЖАТО) -->
         <div class="grid grid-cols-2 gap-2">
-            <button type="button" onclick="switchTab('analyze')" id="tab-btn-analyze" class="tab-btn active cursor-pointer">
+            <button type="button" onclick="switchTab('analyze')" id="tab-btn-analyze" class="tab-btn cursor-pointer">
                 <i class="fa-solid fa-magnifying-glass-chart mr-2 ml-0.5"></i> Анализировать договор
             </button>
             <button type="button" onclick="switchTab('generate')" id="tab-btn-generate" class="tab-btn cursor-pointer">
@@ -94,8 +94,8 @@
             </button>
         </div>
 
-        <!-- РЕЖИМ 1: АНАЛИЗ ДОГОВОРА / СТАТЬИ -->
-        <div id="section-analyze" class="tg-card rounded-xl p-3 border-2 border-blue-500/50 shadow-md space-y-2">
+        <!-- РЕЖИМ 1: АНАЛИЗ ДОГОВОРА / СТАТЬИ ( СКРЫТ ПО УМОЛЧАНИЮ ) -->
+        <div id="section-analyze" class="hidden tg-card rounded-xl p-3 border-2 border-blue-500/50 shadow-md space-y-2">
             <div class="flex items-center justify-between border-b border-gray-700 pb-1.5">
                 <h2 class="text-xs font-semibold text-blue-400"><i class="fa-solid fa-circle-dot mr-1 text-[10px]"></i> Режим: Экспресс-анализ рисков</h2>
             </div>
@@ -134,7 +134,7 @@
             </div>
         </div>
 
-        <!-- РЕЖИМ 2: ГЕНЕРАЦИЯ ДОКУМЕНТА -->
+        <!-- РЕЖИМ 2: ГЕНЕРАЦИЯ ДОКУМЕНТА ( СКРЫТ ПО УМОЛЧАНИЮ ) -->
         <div id="section-generate" class="hidden tg-card rounded-xl p-3 border-2 border-blue-500/50 shadow-md space-y-2">
             <div class="flex items-center justify-between border-b border-gray-700 pb-1.5">
                 <h2 class="text-xs font-semibold text-blue-400"><i class="fa-solid fa-circle-dot mr-1 text-[10px]"></i> Режим: Конструктор документов</h2>
@@ -457,7 +457,6 @@
             });
         }
 
-        // Возвращаем чистый мобильный метод скачивания через Blob-ссылку
         function downloadWordProtocol() {
             let risksList = [];
             if (lastAnalysisResult) {
