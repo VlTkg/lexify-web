@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lexify — Проверка договоров и юридических рисков</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #111827; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        .tg-card { background-color: #1f2937; border-color: #374151; word-break: break-word; overflow-wrap: break-word; }
+        .identical-input-box { border: 1px solid #374151; background-color: #1f2937; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.9rem; color: #ffffff; width: 100%; outline: none; }
+        .identical-input-box:focus { border-color: #3b82f6; }
+        .chip-btn {
+            height: 32px; padding: 0 10px; border-radius: 0.5rem; font-size: 0.7rem; font-weight: 500;
+            display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease; border: 1px solid #374151;
+            white-space: nowrap;
+        }
+        .chip-btn.active { background-color: #3b82f6; color: #ffffff; border-color: #3b82f6; font-weight: 600; }
+        .chip-btn:not(.active) { background-color: #1f2937; color: #9ca3af; }
+        .chip-btn:not(.active):hover { background-color: #374151; color: #ffffff; }
+        .tab-btn {
+            height: 42px; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600;
+            display: inline-flex; align-items: center; justify-content: flex-start; padding-left: 0.8rem; transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+        .tab-btn.active { background-color: #1d4ed8; color: #ffffff; border-color: #60a5fa; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+        .tab-btn:not(.active) { background-color: #1f2937; color: #9ca3af; border-color: #374151; }
+        .tab-btn:not(.active):hover { background-color: #374151; color: #ffffff; }
+        .top-badge-item {
+            height: 28px; padding: 0 8px; display: inline-flex; align-items: center; justify-content: center; border-radius: 0.4rem; font-size: 0.7rem; font-weight: 600;
+        }
+        .analysis-block { background: #111827; border-left: 3px solid #3b82f6; padding: 10px; margin-bottom: 8px; border-radius: 0 0.5rem 0.5rem 0; font-size: 0.8rem; }
+        .risk-high { border-left-color: #ef4444; }
+        .risk-medium { border-left-color: #f59e0b; }
+        .risk-low { border-left-color: #10b981; }
+    </style>
+</head>
+<body class="min-h-screen pb-6">
+    <div class="max-w-2xl mx-auto p-2.5 space-y-2.5">
+        
+        <!-- ВЕРХНЯЯ ПАНЕЛЬ С КНОПКАМИ АДМИН И СЧЕТЧИК -->
+        <div class="flex items-center justify-end gap-2">
+            <div id="admin-panel-btn" class="hidden">
+                <button type="button" onclick="openAdminPanel()" class="top-badge-item bg-amber-600 hover:bg-amber-500 text-white shadow cursor-pointer">
+                    <i class="fa-solid fa-shield-halved mr-1"></i> Админ
+                </button>
+            </div>
+            <div id="top-admin-badge" class="hidden top-badge-item bg-blue-600/30 border border-blue-500/40 text-blue-300 font-medium">
+                Счетчик: ∞ (Безлимит)
+            </div>
+        </div>
+
+        <!-- ПРИВЕТСТВИЕ И ОПИСАНИЕ -->
+        <header class="text-center space-y-1.5">
+            <h1 class="text-lg font-bold tracking-tight text-white">Lexify</h1>
+            <p class="text-[11px] text-gray-400 max-w-md mx-auto">
+                Сервис правовой поддержки, предназначенный для поиска скрытых рисков в договорах, подготовки безопасных документов и разработки протоколов разногласий.
+            </p>
+            
+            <!-- ПОРЯДОК РАБОТЫ -->
+            <div class="bg-gray-800/40 border border-gray-700/50 rounded-xl p-2.5 text-left space-y-1 mt-2">
+                <div class="text-[11px] font-semibold text-gray-300 flex items-center">
+                    <i class="fa-solid fa-shoe-prints mr-1.5 text-blue-400"></i> Порядок работы с сервисом:
+                </div>
+                <div class="text-[10px] text-gray-300 space-y-0.5 pl-1">
+                    <p>1. Выберите применимое право (юрисдикцию) в блоке ниже.</p>
+                    <p>2. Нажмите нужную кнопку: <b>Анализировать договор</b> или <b>Сгенерировать документ</b>.</p>
+                    <p>3. Введите текст или загрузите файл и запустите процесс.</p>
+                    <p>4. Изучите отчет и при необходимости скачайте готовый файл в Word (.docx).</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- ВЫБОР ЮРИСДИКЦИИ -->
+        <div class="tg-card rounded-xl p-3 border shadow-sm space-y-1.5">
+            <label class="text-[11px] font-medium text-gray-300 block">Применимое право (юрисдикция)</label>
+            <div class="flex gap-1.5">
+                <button type="button" class="chip-btn active" onclick="setJurisdiction('Россия (РФ)', this)">Россия (РФ)</button>
+                <button type="button" class="chip-btn" onclick="setJurisdiction('Казахстан', this)">Казахстан</button>
+                <button type="button" class="chip-btn" onclick="setJurisdiction('Беларусь', this)">Беларусь</button>
+            </div>
+        </div>
+
+        <!-- ОСНОВНЫЕ КНОПКИ ВЫБОРА РЕЖИМОВ -->
+        <div class="grid grid-cols-2 gap-2">
+            <button type="button" onclick="switchTab('analyze')" id="tab-btn-analyze" class="tab-btn cursor-pointer">
+                <i class="fa-solid fa-magnifying-glass-chart mr-2 ml-0.5"></i> Анализировать договор
+            </button>
+            <button type="button" onclick="switchTab('generate')" id="tab-btn-generate" class="tab-btn cursor-pointer">
+                <i class="fa-solid fa-file-contract mr-2 ml-0.5"></i> Сгенерировать документ
+            </button>
+        </div>
+
+        <!-- РЕЖИМ 1: АНАЛИЗ ДОГОВОРА / СТАТЬИ (ЖЕСТКО СКРЫТ) -->
+        <div id="section-analyze" style="display: none;" class="tg-card rounded-xl p-3 border-2 border-blue-500/50 shadow-md space-y-2">
+            <div class="flex items-center justify-between border-b border-gray-700 pb-1.5">
+                <h2 class="text-xs font-semibold text-blue-400"><i class="fa-solid fa-circle-dot mr-1 text-[10px]"></i> Режим: Экспресс-анализ рисков</h2>
+            </div>
+            
+            <div>
+                <label class="text-[11px] font-medium text-gray-300 block mb-1">Способ предоставления материала</label>
+                <div class="flex gap-1.5">
+                    <button type="button" class="chip-btn active" onclick="setAnalyzeInputType('text', this)">Вставить текст</button>
+                    <button type="button" class="chip-btn" onclick="setAnalyzeInputType('file', this)">Выбрать файл (.docx / .pdf)</button>
+                </div>
+            </div>
+
+            <!-- Блок ввода текста -->
+            <div id="analyze-input-text-container">
+                <label class="text-[11px] font-medium text-gray-300 block mb-1">Текст договора, статьи или выдержки из него</label>
+                <textarea id="analyze-text-input" rows="4" class="identical-input-box text-xs" placeholder="Вставьте текст сюда..."></textarea>
+            </div>
+
+            <!-- Блок загрузки файла -->
+            <div id="analyze-input-file-container" class="hidden space-y-1">
+                <label class="text-[11px] font-medium text-gray-300 block">Загрузите документ или статью</label>
+                <div class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-600 rounded-lg bg-gray-900/50 hover:bg-gray-800/80 transition p-2">
+                    <input type="file" id="analyze-file-input" accept=".docx,.pdf" class="w-full text-xs text-gray-300 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer" onchange="handleFileSelect(this)">
+                    <span id="selected-file-name" class="text-[10px] text-emerald-400 mt-1 font-medium">Файл не выбран</span>
+                </div>
+            </div>
+
+            <!-- Кнопки действия -->
+            <div class="grid grid-cols-2 gap-2 pt-0.5">
+                <button type="button" onclick="runAnalysis()" class="w-full bg-blue-600 hover:bg-blue-500 text-white shadow-sm py-2 rounded-lg font-semibold text-xs flex items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-shield-cat mr-1.5"></i> Проверить текст, договор или статью
+                </button>
+                <button type="button" onclick="resetAnalyzeForm()" class="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 border border-gray-600 py-2 rounded-lg font-semibold text-xs flex items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-rotate-left mr-1"></i> Сбросить
+                </button>
+            </div>
+        </div>
+
+        <!-- РЕЖИМ 2: ГЕНЕРАЦИЯ ДОКУМЕНТА (ЖЕСТКО СКРЫТ) -->
+        <div id="section-generate" style="display: none;" class="tg-card rounded-xl p-3 border-2 border-blue-500/50 shadow-md space-y-2">
+            <div class="flex items-center justify-between border-b border-gray-700 pb-1.5">
+                <h2 class="text-xs font-semibold text-blue-400"><i class="fa-solid fa-circle-dot mr-1 text-[10px]"></i> Режим: Конструктор документов</h2>
+            </div>
+            
+            <div>
+                <label class="text-[11px] font-medium text-gray-300 block mb-1">Тип документа</label>
+                <div class="flex gap-1.5">
+                    <button type="button" class="chip-btn active" onclick="setDocType('contract', this)">Договор услуг</button>
+                    <button type="button" class="chip-btn" onclick="setDocType('offer', this)">Оферта</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div>
+                    <label class="text-[11px] font-medium text-gray-300 block mb-0.5">Исполнитель</label>
+                    <input type="text" id="executor-input" class="identical-input-box text-xs py-1.5" value="Иванов И.И.">
+                </div>
+                <div>
+                    <label class="text-[11px] font-medium text-gray-300 block mb-0.5">Заказчик</label>
+                    <input type="text" id="client-input" class="identical-input-box text-xs py-1.5" value="ТОО «Альфа Технологии»">
+                </div>
+            </div>
+
+            <div>
+                <label class="text-[11px] font-medium text-gray-300 block mb-0.5">Суть услуг и предмет договора</label>
+                <textarea id="desc-input" rows="2" class="identical-input-box text-xs py-1.5">Разработка программного модуля автоматизации</textarea>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 pt-0.5">
+                <button type="button" onclick="generateDocument()" class="w-full bg-blue-600 hover:bg-blue-500 text-white shadow-sm py-2 rounded-lg font-semibold text-xs flex items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-file-contract mr-1"></i> Сгенерировать
+                </button>
+                <button type="button" onclick="resetGenerateForm()" class="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 border border-gray-600 py-2 rounded-lg font-semibold text-xs flex items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-rotate-left mr-1"></i> Сбросить
+                </button>
+            </div>
+        </div>
+
+        <!-- БЛОК РЕЗУЛЬТАТА И СКАЧИВАНИЯ -->
+        <div id="result-wrapper" style="display: none;" class="tg-card rounded-xl p-3 border shadow-sm space-y-2">
+            <div class="flex items-center justify-between flex-wrap gap-1">
+                <h3 id="result-title" class="text-xs font-semibold text-gray-300">Результат анализа</h3>
+                <div class="flex gap-1.5">
+                    <button type="button" id="download-protocol-btn" onclick="downloadWordProtocol()" class="hidden chip-btn bg-amber-600 hover:bg-amber-500 text-white border-amber-500 font-semibold cursor-pointer">
+                        <i class="fa-solid fa-file-invoice mr-1"></i> Скачать протокол разногласий (.docx)
+                    </button>
+                    <button type="button" id="download-docx-btn" onclick="downloadWord()" class="hidden chip-btn bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500 font-semibold cursor-pointer">
+                        <i class="fa-solid fa-file-word mr-1"></i> Скачать документ (.docx)
+                    </button>
+                </div>
+            </div>
+            
+            <div id="result-container" class="bg-gray-900 p-3 rounded-lg text-xs text-gray-300 min-h-[180px] max-h-[400px] overflow-y-auto border border-gray-800 space-y-2">
+                Результат появится здесь...
+            </div>
+        </div>
+
+        <!-- ПОДВАЛ / ДИСКЛЕЙМЕР (ВСЕГДА ВИДЕН НА ГЛАВНОМ ЭКРАНЕ) -->
+        <footer class="text-center py-2 text-[10px] text-gray-500 space-y-0.5">
+            <p>© 2026 Lexify. Все права защищены.</p>
+            <p>Сервис носит информационный характер и не заменяет очную юридическую консультацию.</p>
+        </footer>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО АДМИНКИ -->
+    <div id="admin-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center p-3 z-50">
+        <div class="tg-card rounded-2xl p-4 border shadow-2xl max-w-lg w-full space-y-3">
+            <div class="flex items-center justify-between border-b border-gray-700 pb-2">
+                <h3 class="text-xs font-bold text-white"><i class="fa-solid fa-shield-halved mr-1.5 text-amber-500"></i> Панель администратора (Детализация)</h3>
+                <button type="button" onclick="closeAdminPanel()" class="text-gray-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark text-base"></i></button>
+            </div>
+            <div id="admin-stats-content" class="text-xs text-gray-300 space-y-2">
+                Загрузка детальной статистики...
+            </div>
+            <button type="button" onclick="closeAdminPanel()" class="w-full py-1.5 bg-gray-700 hover:bg-gray-600 rounded-lg text-xs font-semibold text-white cursor-pointer">Закрыть</button>
+        </div>
+    </div>
+
+    <script>
+        let currentJurisdiction = 'Россия (РФ)';
+        let currentDocType = 'contract';
+        let currentAnalyzeMode = 'text';
+        let currentTelegramId = 8804083078;
+        let lastAnalysisResult = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const secAnalyze = document.getElementById('section-analyze');
+            const secGenerate = document.getElementById('section-generate');
+            if (secAnalyze) secAnalyze.style.display = 'none';
+            if (secGenerate) secGenerate.style.display = 'none';
+
+            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
+                const user = window.Telegram.WebApp.initDataUnsafe.user;
+                if (user && user.id) {
+                    currentTelegramId = user.id;
+                }
+            }
+
+            if (currentTelegramId === 8804083078) {
+                document.getElementById('top-admin-badge').classList.remove('hidden');
+                document.getElementById('admin-panel-btn').classList.remove('hidden');
+            }
+        });
+
+        function switchTab(tab) {
+            const btnAnalyze = document.getElementById('tab-btn-analyze');
+            const btnGenerate = document.getElementById('tab-btn-generate');
+            const secAnalyze = document.getElementById('section-analyze');
+            const secGenerate = document.getElementById('section-generate');
+
+            if (tab === 'analyze') {
+                btnAnalyze.className = "tab-btn active cursor-pointer";
+                btnGenerate.className = "tab-btn cursor-pointer";
+                secAnalyze.style.display = 'block';
+                secGenerate.style.display = 'none';
+            } else {
+                btnGenerate.className = "tab-btn active cursor-pointer";
+                btnAnalyze.className = "tab-btn cursor-pointer";
+                secGenerate.style.display = 'block';
+                secAnalyze.style.display = 'none';
+            }
+        }
+
+        function setAnalyzeInputType(mode, btn) {
+            currentAnalyzeMode = mode;
+            const parent = btn.parentElement;
+            parent.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const textContainer = document.getElementById('analyze-input-text-container');
+            const fileContainer = document.getElementById('analyze-input-file-container');
+
+            if (mode === 'text') {
+                textContainer.classList.remove('hidden');
+                fileContainer.classList.add('hidden');
+            } else {
+                textContainer.classList.add('hidden');
+                fileContainer.classList.remove('hidden');
+            }
+        }
+
+        function handleFileSelect(input) {
+            const fileNameSpan = document.getElementById('selected-file-name');
+            if (input.files && input.files.length > 0) {
+                fileNameSpan.textContent = "Выбран файл: " + input.files[0].name;
+            } else {
+                fileNameSpan.textContent = "Файл не выбран";
+            }
+        }
+
+        function setJurisdiction(jur, btn) {
+            currentJurisdiction = jur;
+            document.querySelectorAll('button[onclick^="setJurisdiction"]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function setDocType(type, btn) {
+            currentDocType = type;
+            document.querySelectorAll('button[onclick^="setDocType"]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function scrollToResults() {
+            const resWrapper = document.getElementById('result-wrapper');
+            resWrapper.style.display = 'block';
+            resWrapper.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function renderFormattedAnalysis(data) {
+            let container = document.getElementById('result-container');
+            container.innerHTML = "";
+            lastAnalysisResult = data;
+
+            let parsedData = data;
+            if (typeof data === 'string') {
+                try { parsedData = JSON.parse(data); } catch(e) {}
+            }
+
+            if (typeof parsedData === 'object' && parsedData !== null) {
+                let html = "";
+                if (parsedData.overall_risk_level) {
+                    let lvl = parsedData.overall_risk_level;
+                    let badgeColor = lvl === 'Высокий' ? 'bg-red-600/35 text-red-300 border-red-500' : (lvl === 'Средний' ? 'bg-amber-600/35 text-amber-300 border-amber-500' : 'bg-emerald-600/35 text-emerald-300 border-emerald-500');
+                    html += `<div class="p-2 rounded-lg border ${badgeColor} mb-2 flex justify-between items-center text-xs font-semibold"><span>Уровень риска: ${lvl}</span></div>`;
+                }
+                if (parsedData.summary) {
+                    html += `<div class="analysis-block risk-medium"><b class="text-white block mb-0.5">Резюме:</b> ${parsedData.summary}</div>`;
+                }
+                if (parsedData.risks && Array.isArray(parsedData.risks)) {
+                    parsedData.risks.forEach((r, idx) => {
+                        let riskClass = r.category === 'red' ? 'risk-high' : (r.category === 'yellow' ? 'risk-medium' : 'risk-low');
+                        html += `
+                            <div class="analysis-block ${riskClass}">
+                                <b class="text-white block">Риск #${idx+1}: ${r.title || 'Замечание'}</b>
+                                <p class="text-gray-300 mt-0.5"><b>Цитата / Пункт:</b> «${r.quote || ''}»</p>
+                                <p class="text-gray-300 mt-0.5"><b>Суть риска:</b> ${r.explanation || ''}</p>
+                                <p class="text-blue-300 mt-0.5"><b>Рекомендация:</b> ${r.recommendation || ''}</p>
+                            </div>
+                        `;
+                    });
+                }
+                if (html) {
+                    container.innerHTML = html;
+                    scrollToResults();
+                    return;
+                }
+            }
+
+            let resText = typeof parsedData === 'string' ? parsedData : (parsedData.result || parsedData.summary || JSON.stringify(parsedData));
+            container.innerHTML = marked.parse(resText);
+            scrollToResults();
+        }
+
+        function runAnalysis() {
+            const container = document.getElementById('result-container');
+            const resultWrapper = document.getElementById('result-wrapper');
+            const downloadDocBtn = document.getElementById('download-docx-btn');
+            const downloadProtocolBtn = document.getElementById('download-protocol-btn');
+
+            resultWrapper.style.display = 'block';
+            downloadDocBtn.classList.add('hidden');
+            downloadProtocolBtn.classList.remove('hidden');
+            document.getElementById('result-title').innerText = "Результат анализа рисков и статьи";
+            container.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Идет правовой анализ материала...';
+            scrollToResults();
+
+            try {
+                if (currentAnalyzeMode === 'text') {
+                    const text = document.getElementById('analyze-text-input').value.trim();
+                    if (!text) {
+                        alert("Пожалуйста, введите текст для анализа.");
+                        resultWrapper.style.display = 'none';
+                        return;
+                    }
+
+                    fetch('/api/analyze', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            text: text,
+                            jurisdiction: currentJurisdiction,
+                            telegram_id: currentTelegramId
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        renderFormattedAnalysis(data.result);
+                    })
+                    .catch(err => {
+                        container.innerHTML = "Ошибка анализа: " + err.message;
+                    });
+                } else {
+                    const fileInput = document.getElementById('analyze-file-input');
+                    if (!fileInput.files || fileInput.files.length === 0) {
+                        alert("Пожалуйста, выберите файл для анализа.");
+                        resultWrapper.style.display = 'none';
+                        return;
+                    }
+
+                    const formData = new FormData();
+                    formData.append('file', fileInput.files[0]);
+                    formData.append('jurisdiction', currentJurisdiction);
+                    formData.append('telegram_id', currentTelegramId);
+
+                    fetch('/api/analyze-file', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        renderFormattedAnalysis(data.result);
+                    })
+                    .catch(err => {
+                        container.innerHTML = "Ошибка анализа файла: " + err.message;
+                    });
+                }
+            } catch (e) {
+                container.innerHTML = "Ошибка: " + e.message;
+            }
+        }
+
+        function generateDocument() {
+            const container = document.getElementById('result-container');
+            const resultWrapper = document.getElementById('result-wrapper');
+            const downloadDocBtn = document.getElementById('download-docx-btn');
+            const downloadProtocolBtn = document.getElementById('download-protocol-btn');
+
+            resultWrapper.style.display = 'block';
+            downloadDocBtn.classList.remove('hidden');
+            downloadProtocolBtn.classList.add('hidden');
+            document.getElementById('result-title').innerText = "Сгенерированный документ";
+            container.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Идет генерация документа...';
+            scrollToResults();
+
+            const payload = {
+                doc_type: currentDocType,
+                jurisdiction: currentJurisdiction,
+                executor: document.getElementById('executor-input').value,
+                client: document.getElementById('client-input').value,
+                description: document.getElementById('desc-input').value,
+                payment: "100% предоплата",
+                deadline: "30 дней",
+                revisions: "2",
+                telegram_id: currentTelegramId
+            };
+
+            fetch('/api/generate-document', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                let markdownText = "";
+                if (typeof data === 'string') {
+                    markdownText = data;
+                } else if (data) {
+                    markdownText = data.document || data.result || data.text || data.response || data.content || "";
+                }
+                container.innerHTML = marked.parse(markdownText);
+                scrollToResults();
+            })
+            .catch(error => {
+                container.innerHTML = "Ошибка генерации: " + error.message;
+            });
+        }
+
+        function downloadWordProtocol() {
+            let risksList = [];
+            if (lastAnalysisResult) {
+                let parsed = lastAnalysisResult;
+                if (typeof parsed === 'string') {
+                    try { parsed = JSON.parse(parsed); } catch(e) {}
+                }
+                if (parsed && parsed.risks) {
+                    risksList = parsed.risks;
+                }
+            }
+
+            const payload = {
+                doc_type: "Экспресс-анализ",
+                jurisdiction: currentJurisdiction,
+                telegram_id: currentTelegramId,
+                risks: risksList
+            };
+
+            fetch('/generate-protocol', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                if (response.ok) return response.blob();
+                throw new Error("Ошибка сервера");
+            })
+            .then(blob => {
+                const blobUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = "Lexify_Protokol_Raznoglasiy.docx";
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    a.remove();
+                    window.URL.revokeObjectURL(blobUrl);
+                }, 500);
+            })
+            .catch(e => {
+                alert("Ошибка при скачивании файла: " + e.message);
+            });
+        }
+
+        function downloadWord() {
+            const payload = {
+                doc_type: currentDocType,
+                jurisdiction: currentJurisdiction,
+                executor: document.getElementById('executor-input').value,
+                client: document.getElementById('client-input').value,
+                description: document.getElementById('desc-input').value,
+                payment: "100% предоплата",
+                deadline: "30 дней",
+                revisions: "2",
+                telegram_id: currentTelegramId,
+                risks: []
+            };
+
+            fetch('/generate-protocol', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                if (response.ok) return response.blob();
+                throw new Error("Ошибка сервера");
+            })
+            .then(blob => {
+                const blobUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = "Lexify_Document.docx";
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    a.remove();
+                    window.URL.revokeObjectURL(blobUrl);
+                }, 500);
+            })
+            .catch(e => {
+                alert("Ошибка при скачивании файла: " + e.message);
+            });
+        }
+
+        function openAdminPanel() {
+            document.getElementById('admin-modal').classList.remove('hidden');
+            const content = document.getElementById('admin-stats-content');
+            content.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Загрузка детальной статистики...';
+
+            fetch(`/admin/stats/${currentTelegramId}`)
+            .then(resp => resp.json())
+            .then(stats => {
+                content.innerHTML = `
+                    <div class="grid grid-cols-2 gap-2 bg-gray-900/50 p-2 rounded-lg border border-gray-800">
+                        <p><b>Всего пользователей:</b> <span class="text-blue-400">${stats.total_users || 1}</span></p>
+                        <p><b>Всего анализов:</b> <span class="text-blue-400">${stats.total_analyses || 0}</span></p>
+                        <p><b>Генераций документов:</b> <span class="text-blue-400">${stats.total_generations || 0}</span></p>
+                        <p><b>Успешных платежей:</b> <span class="text-emerald-400">${stats.total_payments || 0}</span></p>
+                    </div>
+                    <div class="space-y-1 pt-1">
+                        <p class="text-[11px] font-semibold text-gray-400">Системные метрики:</p>
+                        <p class="text-[11px] text-gray-300">• Активная модель: <code class="text-blue-300">gemini-3.8-flash</code></p>
+                        <p class="text-[11px] text-gray-300">• Статус базы данных: <span class="text-emerald-400">Подключено (PostgreSQL)</span></p>
+                        <p class="text-[11px] text-gray-300">• Хостинг: <span class="text-purple-400">Render Cloud</span></p>
+                    </div>
+                    <hr class="border-gray-700 my-1">
+                    <p class="text-gray-400 text-[10px]">Режим администратора активен для Telegram ID: <b>${currentTelegramId}</b></p>
+                `;
+            })
+            .catch(err => {
+                content.innerHTML = `
+                    <div class="space-y-1">
+                        <p><b>Всего пользователей:</b> 1 (Ваш аккаунт)</p>
+                        <p><b>Безлимитный доступ:</b> Активен</p>
+                        <hr class="border-gray-700 my-1">
+                        <p class="text-gray-400 text-[10px]">Административный доступ подтвержден (ID: ${currentTelegramId})</p>
+                    </div>
+                `;
+            });
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('admin-modal').classList.add('hidden');
+        }
+
+        function resetAnalyzeForm() {
+            document.getElementById('analyze-text-input').value = "";
+            document.getElementById('analyze-file-input').value = "";
+            document.getElementById('selected-file-name').textContent = "Файл не выбран";
+            document.getElementById('result-wrapper').style.display = 'none';
+            lastAnalysisResult = null;
+        }
+
+        function resetGenerateForm() {
+            document.getElementById('executor-input').value = "Иванов И.И.";
+            document.getElementById('client-input').value = "ТОО «Альфа Технологии»";
+            document.getElementById('desc-input').value = "Разработка программного модуля автоматизации";
+            document.getElementById('result-wrapper').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
