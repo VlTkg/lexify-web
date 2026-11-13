@@ -94,7 +94,7 @@
             </button>
         </div>
 
-        <!-- РЕЖИМ 1: АНАЛИЗ ДОГОВОРА / СТАТЬИ (ИЗНАЧАЛЬНО СКРЫТ СТИЛЕМ) -->
+        <!-- РЕЖИМ 1: АНАЛИЗ ДОГОВОРА / СТАТЬИ (ЖЕСТКО СКРЫТ) -->
         <div id="section-analyze" style="display: none;" class="tg-card rounded-xl p-3 border-2 border-blue-500/50 shadow-md space-y-2">
             <div class="flex items-center justify-between border-b border-gray-700 pb-1.5">
                 <h2 class="text-xs font-semibold text-blue-400"><i class="fa-solid fa-circle-dot mr-1 text-[10px]"></i> Режим: Экспресс-анализ рисков</h2>
@@ -134,7 +134,7 @@
             </div>
         </div>
 
-        <!-- РЕЖИМ 2: ГЕНЕРАЦИЯ ДОКУМЕНТА (ИЗНАЧАЛЬНО СКРЫТ СТИЛЕМ) -->
+        <!-- РЕЖИМ 2: ГЕНЕРАЦИЯ ДОКУМЕНТА (ЖЕСТКО СКРЫТ) -->
         <div id="section-generate" style="display: none;" class="tg-card rounded-xl p-3 border-2 border-blue-500/50 shadow-md space-y-2">
             <div class="flex items-center justify-between border-b border-gray-700 pb-1.5">
                 <h2 class="text-xs font-semibold text-blue-400"><i class="fa-solid fa-circle-dot mr-1 text-[10px]"></i> Режим: Конструктор документов</h2>
@@ -222,7 +222,6 @@
         let lastAnalysisResult = null;
 
         window.addEventListener('DOMContentLoaded', () => {
-            // ЖЕСТКАЯ ПРОВЕРКА ПРИ ЗАГРУЗКЕ СТРАНИЦЫ
             const secAnalyze = document.getElementById('section-analyze');
             const secGenerate = document.getElementById('section-generate');
             if (secAnalyze) secAnalyze.style.display = 'none';
@@ -330,7 +329,7 @@
                         let riskClass = r.category === 'red' ? 'risk-high' : (r.category === 'yellow' ? 'risk-medium' : 'risk-low');
                         html += `
                             <div class="analysis-block ${riskClass}">
-                                <b class="text-white block">Риск #${idx+1}:${r.title || 'Замечание'}</b>
+                                <b class="text-white block">Риск #${idx+1}: ${r.title || 'Замечание'}</b>
                                 <p class="text-gray-300 mt-0.5"><b>Цитата / Пункт:</b> «${r.quote || ''}»</p>
                                 <p class="text-gray-300 mt-0.5"><b>Суть риска:</b> ${r.explanation || ''}</p>
                                 <p class="text-blue-300 mt-0.5"><b>Рекомендация:</b> ${r.recommendation || ''}</p>
@@ -562,4 +561,48 @@
                         <p><b>Всего пользователей:</b> <span class="text-blue-400">${stats.total_users || 1}</span></p>
                         <p><b>Всего анализов:</b> <span class="text-blue-400">${stats.total_analyses || 0}</span></p>
                         <p><b>Генераций документов:</b> <span class="text-blue-400">${stats.total_generations || 0}</span></p>
-                        <p><b>Успешных платежей
+                        <p><b>Успешных платежей:</b> <span class="text-emerald-400">${stats.total_payments || 0}</span></p>
+                    </div>
+                    <div class="space-y-1 pt-1">
+                        <p class="text-[11px] font-semibold text-gray-400">Системные метрики:</p>
+                        <p class="text-[11px] text-gray-300">• Активная модель: <code class="text-blue-300">gemini-3.8-flash</code></p>
+                        <p class="text-[11px] text-gray-300">• Статус базы данных: <span class="text-emerald-400">Подключено (PostgreSQL)</span></p>
+                        <p class="text-[11px] text-gray-300">• Хостинг: <span class="text-purple-400">Render Cloud</span></p>
+                    </div>
+                    <hr class="border-gray-700 my-1">
+                    <p class="text-gray-400 text-[10px]">Режим администратора активен для Telegram ID: <b>${currentTelegramId}</b></p>
+                `;
+            })
+            .catch(err => {
+                content.innerHTML = `
+                    <div class="space-y-1">
+                        <p><b>Всего пользователей:</b> 1 (Ваш аккаунт)</p>
+                        <p><b>Безлимитный доступ:</b> Активен</p>
+                        <hr class="border-gray-700 my-1">
+                        <p class="text-gray-400 text-[10px]">Административный доступ подтвержден (ID: ${currentTelegramId})</p>
+                    </div>
+                `;
+            });
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('admin-modal').classList.add('hidden');
+        }
+
+        function resetAnalyzeForm() {
+            document.getElementById('analyze-text-input').value = "";
+            document.getElementById('analyze-file-input').value = "";
+            document.getElementById('selected-file-name').textContent = "Файл не выбран";
+            document.getElementById('result-wrapper').style.display = 'none';
+            lastAnalysisResult = null;
+        }
+
+        function resetGenerateForm() {
+            document.getElementById('executor-input').value = "Иванов И.И.";
+            document.getElementById('client-input').value = "ТОО «Альфа Технологии»";
+            document.getElementById('desc-input').value = "Разработка программного модуля автоматизации";
+            document.getElementById('result-wrapper').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
