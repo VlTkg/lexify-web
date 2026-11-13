@@ -79,14 +79,18 @@ def run_gemini_analysis(text: str, jurisdiction: str) -> str:
 async def analyze_text(data: dict):
     try:
         text = data.get("text", "")
-        jurisdiction = data.get("jurisdiction", "Россия (РФ)")
+        jurisdiction = data.get("jurisdiction", "Россия (РФ)") or "Россия (РФ)"
         analysis = run_gemini_analysis(text, jurisdiction)
         return {"result": analysis}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/analyze-file")
-async def analyze_file(file: UploadFile = File(...), jurisdiction: str = Form(...), telegram_id: int = Form(...)):
+async def analyze_file(
+    file: UploadFile = File(...), 
+    jurisdiction: Optional[str] = Form("Россия (РФ)"), 
+    telegram_id: Optional[int] = Form(8804083078)
+):
     try:
         contents = await file.read()
         filename = file.filename.lower()
@@ -108,7 +112,8 @@ async def analyze_file(file: UploadFile = File(...), jurisdiction: str = Form(..
                 "risks": []
             }, ensure_ascii=False)}
 
-        analysis_result = run_gemini_analysis(extracted_text, jurisdiction)
+        jur = jurisdiction if jurisdiction else "Россия (РФ)"
+        analysis_result = run_gemini_analysis(extracted_text, jur)
         return {"result": analysis_result}
     except Exception as e:
         return {"result": json.dumps({
@@ -149,7 +154,7 @@ async def generate_protocol(req: ProtocolRequest):
         run.font.color.rgb = RGBColor(30, 58, 138)
 
         p_meta = doc.add_paragraph()
-        p_meta.add_run(f"Юрисдикция: {req.jurisdiction}\n").bold = True
+        p_meta.add_run(f"Юрисдикция: {req.jurisdiction or 'Россия (РФ)'}\n").bold = True
         p_meta.add_run(f"Исполнитель: {req.executor} | Заказчик: {req.client}\n")
         p_meta.add_run(f"Дата формирования: {datetime.now().strftime('%d.%m.%Y')}")
 
