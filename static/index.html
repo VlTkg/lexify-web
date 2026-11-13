@@ -53,7 +53,7 @@
             </div>
         </div>
 
-        <!-- ПРИВЕТСТВИЕ И ОПИСАНИЕ (ОБЛАСТЬ 1: УВЕЛИЧЕННЫЕ И ДОМИНИРУЮЩИЕ) -->
+        <!-- ПРИВЕТСТВИЕ И ОПИСАНИЕ -->
         <header class="text-center space-y-2 py-1">
             <h1 class="text-2xl font-extrabold tracking-tight text-white flex items-center justify-center">
                 <i class="fa-solid fa-scale-balanced mr-2 text-blue-500"></i> Lexify
@@ -62,13 +62,13 @@
                 Сервис правовой поддержки, предназначенный для поиска скрытых рисков в договорах, подготовки безопасных документов и разработки протоколов разногласий.
             </p>
             
-            <!-- ПОРЯДОК РАБОТЫ (ОБЛАСТЬ 2: СДЕЛАН СВЕТЛЕЕ И ЛЕГЧЕ) -->
+            <!-- ПОРЯДОК РАБОТЫ -->
             <div class="bg-gray-800/20 border border-gray-700/30 rounded-xl p-2.5 text-left space-y-1 mt-2">
                 <div class="text-[11px] font-semibold text-blue-400 flex items-center">
                     <i class="fa-solid fa-circle-info mr-1.5"></i> Порядок работы с сервисом:
                 </div>
                 <div class="text-[10px] text-gray-400 space-y-0.5 pl-1">
-                    <p>1. Выберите применимое право (юрисдикцию) в блоке ниже.</p>
+                    <p>1. Выберите применимое право (<b class="text-gray-300">юрисдикцию</b>) в блоке ниже.</p>
                     <p>2. Нажмите нужную кнопку: <b class="text-gray-300">Анализировать договор</b> или <b class="text-gray-300">Сгенерировать документ</b>.</p>
                     <p>3. Введите текст или загрузите файл и запустите процесс.</p>
                     <p>4. Изучите отчет и при необходимости скачайте готовый файл в Word (.docx).</p>
@@ -76,11 +76,11 @@
             </div>
         </header>
 
-        <!-- ВЫБОР ЮРИСДИКЦИИ -->
+        <!-- ВЫБОР ЮРИСДИКЦИИ (КНОПКА РФ ТЕПЕРЬ НЕАКТИВНА ПО УМОЛЧАНИЮ) -->
         <div class="tg-card rounded-xl p-3 border shadow-sm space-y-1.5">
             <label class="text-[11px] font-medium text-gray-300 block">Применимое право (юрисдикция)</label>
             <div class="flex gap-1.5">
-                <button type="button" class="chip-btn active" onclick="setJurisdiction('Россия (РФ)', this)">Россия (РФ)</button>
+                <button type="button" class="chip-btn" onclick="setJurisdiction('Россия (РФ)', this)">Россия (РФ)</button>
                 <button type="button" class="chip-btn" onclick="setJurisdiction('Казахстан', this)">Казахстан</button>
                 <button type="button" class="chip-btn" onclick="setJurisdiction('Беларусь', this)">Беларусь</button>
             </div>
@@ -195,7 +195,7 @@
             </div>
         </div>
 
-        <!-- ПОДВАЛ / ДИСКЛЕЙМЕР (ВСЕГДА ВИДЕН НА ГЛАВНОМ ЭКРАНЕ) -->
+        <!-- ПОДВАЛ / ДИСКЛЕЙМЕР -->
         <footer class="text-center py-2 text-[10px] text-gray-500 space-y-0.5">
             <p>© 2026 Lexify. Все права защищены.</p>
             <p>Сервис носит информационный характер и не заменяет очную юридическую консультацию.</p>
@@ -217,7 +217,7 @@
     </div>
 
     <script>
-        let currentJurisdiction = 'Россия (РФ)';
+        let currentJurisdiction = '';
         let currentDocType = 'contract';
         let currentAnalyzeMode = 'text';
         let currentTelegramId = 8804083078;
@@ -332,7 +332,7 @@
                         html += `
                             <div class="analysis-block ${riskClass}">
                                 <b class="text-white block">Риск #${idx+1}: ${r.title || 'Замечание'}</b>
-                                <p class="text-gray-300 mt-0.5"><b>Цитата / Пункт:</b> «{r.quote || ''}»</p>
+                                <p class="text-gray-300 mt-0.5"><b>Цитата / Пункт:</b> «${r.quote || ''}»</p>
                                 <p class="text-gray-300 mt-0.5"><b>Суть риска:</b> ${r.explanation || ''}</p>
                                 <p class="text-blue-300 mt-0.5"><b>Рекомендация:</b> ${r.recommendation || ''}</p>
                             </div>
@@ -436,7 +436,7 @@
                 doc_type: currentDocType,
                 jurisdiction: currentJurisdiction,
                 executor: document.getElementById('executor-input').value,
-                client: document.getElementById('client-input'].value,
+                client: document.getElementById('client-input').value,
                 description: document.getElementById('desc-input').value,
                 payment: "100% предоплата",
                 deadline: "30 дней",
@@ -467,138 +467,3 @@
 
         function downloadWordProtocol() {
             let risksList = [];
-            if (lastAnalysisResult) {
-                let parsed = lastAnalysisResult;
-                if (typeof parsed === 'string') {
-                    try { parsed = JSON.parse(parsed); } catch(e) {}
-                }
-                if (parsed && parsed.risks) {
-                    risksList = parsed.risks;
-                }
-            }
-
-            const payload = {
-                doc_type: "Экспресс-анализ",
-                jurisdiction: currentJurisdiction,
-                telegram_id: currentTelegramId,
-                risks: risksList
-            };
-
-            fetch('/generate-protocol', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(response => {
-                if (response.ok) return response.blob();
-                throw new Error("Ошибка сервера");
-            })
-            .then(blob => {
-                const blobUrl = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = blobUrl;
-                a.download = "Lexify_Protokol_Raznoglasiy.docx";
-                document.body.appendChild(a);
-                a.click();
-                setTimeout(() => {
-                    a.remove();
-                    window.URL.revokeObjectURL(blobUrl);
-                }, 500);
-            })
-            .catch(e => {
-                alert("Ошибка при скачивании файла: " + e.message);
-            });
-        }
-
-        function downloadWord() {
-            const payload = {
-                doc_type: currentDocType,
-                jurisdiction: currentJurisdiction,
-                executor: document.getElementById('executor-input').value,
-                client: document.getElementById('client-input').value,
-                description: document.getElementById('desc-input').value,
-                payment: "100% предоплата",
-                deadline: "30 дней",
-                revisions: "2",
-                telegram_id: currentTelegramId,
-                risks: []
-            };
-
-            fetch('/generate-protocol', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(response => {
-                if (response.ok) return response.blob();
-                throw new Error("Ошибка сервера");
-            })
-            .then(blob => {
-                const blobUrl = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = blobUrl;
-                a.download = "Lexify_Document.docx";
-                document.body.appendChild(a);
-                a.click();
-                setTimeout(() => {
-                    a.remove();
-                    window.URL.revokeObjectURL(blobUrl);
-                }, 500);
-            })
-            .catch(e => {
-                alert("Ошибка при скачивании файла: " + e.message);
-            });
-        }
-
-        function openAdminPanel() {
-            document.getElementById('admin-modal').classList.remove('hidden');
-            const content = document.getElementById('admin-stats-content');
-            content.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Загрузка детальной статистики...';
-
-            fetch(`/admin/stats/${currentTelegramId}`)
-            .then(resp => resp.json())
-            .then(stats => {
-                content.innerHTML = `
-                    <div class="grid grid-cols-2 gap-2 bg-gray-900/50 p-2 rounded-lg border border-gray-800">
-                        <p><b>Всего пользователей:</b> <span class="text-blue-400">${stats.total_users || 1}</span></p>
-                        <p><b>Всего анализов:</b> <span class="text-blue-400">${stats.total_analyses || 0}</span></p>
-                        <p><b>Генераций документов:</b> <span class="text-blue-400">${stats.total_generations || 0}</span></p>
-                        <p><b>Успешных платежей:</b> <span class="text-emerald-400">${stats.total_payments || 0}</span></p>
-                    </div>
-                    <div class="space-y-1 pt-1">
-                        <p class="text-[11px] font-semibold text-gray-400">Системные метрики:</p>
-                        <p class="text-[11px] text-gray-300">• Активная модель: <code class="text-blue-300">gemini-3.8-flash</code></p>
-                        <p class="text-[11px] text-gray-300">• Статус базы данных: <span class="text-emerald-400">Подключено (PostgreSQL)</span></p>
-                        <p class="text-[11px] text-gray-300">• Хостинг: <span class="text-purple-400">Render Cloud</span></p>
-                    </div>
-                    <hr class="border-gray-700 my-1">
-                    <p class="text-gray-400 text-[10px]">Режим администратора активен для Telegram ID: <b>${currentTelegramId}</b></p>
-                `;
-            })
-            .catch(err => {
-                content.innerHTML = `
-                    <div class="space-y-1">
-                        <p><b>Всего пользователей:</b> 1 (Ваш аккаунт)</p>
-                        <p><b>Безлимитный доступ:</b> Активен</p>
-                        <hr class="border-gray-700 my-1">
-                        <p class="text-gray-400 text-[10px]">Административный доступ подтвержден (ID: ${currentTelegramId})</p>
-                    </div>
-                `;
-            });
-        }
-
-        closeAdminPanel() {
-            document.getElementById('admin-modal').classList.add('hidden');
-        }
-
-        function resetAnalyzeForm() {
-            document.getElementById('analyze-text-input').value = "";
-            document.getElementById('analyze-file-input').value = "";
-            document.getElementById('selected-file-name').textContent = "Файл не выбран";
-            document.getElementById('result-wrapper').style.display = 'none';
-            lastAnalysisResult = null;
-        }
-
-        function resetGenerateForm() {
-            document.getElementById('executor-input').value = "Иванов И.И.";
-            document.getElementById('client-
