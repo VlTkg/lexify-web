@@ -14,17 +14,14 @@ from google import genai
 import docx
 from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.table import WD_TABLE_ALIGNMENT, WD_VERTICAL_ALIGNMENT
 from docx.oxml import OxmlElement
 from docx.oxml.ns import nsdecls, qn
 import pypdf
 
 app = FastAPI()
 
-# Подключаем статические файлы
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Инициализация Gemini API
 gemini_api_key = os.environ.get("GEMINI_API_KEY")
 client = genai.Client(api_key=gemini_api_key) if gemini_api_key else None
 
@@ -66,7 +63,6 @@ def run_gemini_analysis(text: str, jurisdiction: str) -> str:
             contents=prompt
         )
         res_text = response.text.strip()
-        # Очистка от markdown обертки если есть
         if res_text.startswith("```json"):
             res_text = res_text[7:]
         if res_text.endswith("```"):
@@ -138,7 +134,6 @@ async def generate_protocol(req: ProtocolRequest):
     try:
         doc = docx.Document()
         
-        # Настройка полей страницы
         sections = doc.sections
         for section in sections:
             section.top_margin = Inches(1)
@@ -146,7 +141,6 @@ async def generate_protocol(req: ProtocolRequest):
             section.left_margin = Inches(1)
             section.right_margin = Inches(1)
 
-        # Заголовок документа
         p = doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         run = p.add_run(f"ДОКУМЕНТ / ОТЧЕТ: {req.doc_type}")
@@ -154,7 +148,6 @@ async def generate_protocol(req: ProtocolRequest):
         run.font.size = Pt(14)
         run.font.color.rgb = RGBColor(30, 58, 138)
 
-        # Метаданные
         p_meta = doc.add_paragraph()
         p_meta.add_run(f"Юрисдикция: {req.jurisdiction}\n").bold = True
         p_meta.add_run(f"Исполнитель: {req.executor} | Заказчик: {req.client}\n")
@@ -198,7 +191,7 @@ async def generate_protocol(req: ProtocolRequest):
         filename = "Lexify_Document.docx"
         if "протокол" in req.doc_type.lower():
             filename = "Lexify_Protokol_Raznoglasiy.docx"
-        elif "анализ" in req.doc_type.lower():
+        elif "анализ" in req.doc_type.lower() or "отчет" in req.doc_type.lower():
             filename = "Lexify_Analysis_Report.docx"
 
         return StreamingResponse(
