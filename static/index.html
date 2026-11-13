@@ -94,7 +94,7 @@
             </button>
         </div>
 
-        <!-- РЕЖИМ 1: АНАЛИЗ ДОГОВОРА / СТАТЬИ (ГАРАНТИРОВАННО СКРЫТ ПО УМОЛЧАНИЮ) -->
+        <!-- РЕЖИМ 1: АНАЛИЗ ДОГОВОРА / СТАТЬИ (СКРЫТ ПО УМОЛЧАНИЮ) -->
         <div id="section-analyze" class="hidden tg-card rounded-xl p-3 border-2 border-blue-500/50 shadow-md space-y-2">
             <div class="flex items-center justify-between border-b border-gray-700 pb-1.5">
                 <h2 class="text-xs font-semibold text-blue-400"><i class="fa-solid fa-circle-dot mr-1 text-[10px]"></i> Режим: Экспресс-анализ рисков</h2>
@@ -134,7 +134,7 @@
             </div>
         </div>
 
-        <!-- РЕЖИМ 2: ГЕНЕРАЦИЯ ДОКУМЕНТА (ГАРАНТИРОВАННО СКРЫТ ПО УМОЛЧАНИЮ) -->
+        <!-- РЕЖИМ 2: ГЕНЕРАЦИЯ ДОКУМЕНТА (СКРЫТ ПО УМОЛЧАНИЮ) -->
         <div id="section-generate" class="hidden tg-card rounded-xl p-3 border-2 border-blue-500/50 shadow-md space-y-2">
             <div class="flex items-center justify-between border-b border-gray-700 pb-1.5">
                 <h2 class="text-xs font-semibold text-blue-400"><i class="fa-solid fa-circle-dot mr-1 text-[10px]"></i> Режим: Конструктор документов</h2>
@@ -222,11 +222,17 @@
         let lastAnalysisResult = null;
 
         window.addEventListener('DOMContentLoaded', () => {
-            // Принудительно скрываем оба блока при старте
-            document.getElementById('section-analyze').classList.add('hidden');
-            document.getElementById('section-generate').classList.add('hidden');
-            document.getElementById('tab-btn-analyze').className = "tab-btn cursor-pointer";
-            document.getElementById('tab-btn-generate').className = "tab-btn cursor-pointer";
+            // ЖЕСТКОЕ ПРИНУДИТЕЛЬНОЕ СКРЫТИЕ ПРИ ЗАГРУЗКЕ
+            const secAnalyze = document.getElementById('section-analyze');
+            const secGenerate = document.getElementById('section-generate');
+            if (secAnalyze) {
+                secAnalyze.style.display = 'none';
+                secAnalyze.classList.add('hidden');
+            }
+            if (secGenerate) {
+                secGenerate.style.display = 'none';
+                secGenerate.classList.add('hidden');
+            }
 
             if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
                 const user = window.Telegram.WebApp.initDataUnsafe.user;
@@ -250,12 +256,16 @@
             if (tab === 'analyze') {
                 btnAnalyze.className = "tab-btn active cursor-pointer";
                 btnGenerate.className = "tab-btn cursor-pointer";
+                secAnalyze.style.display = 'block';
                 secAnalyze.classList.remove('hidden');
+                secGenerate.style.display = 'none';
                 secGenerate.classList.add('hidden');
             } else {
                 btnGenerate.className = "tab-btn active cursor-pointer";
                 btnAnalyze.className = "tab-btn cursor-pointer";
+                secGenerate.style.display = 'block';
                 secGenerate.classList.remove('hidden');
+                secAnalyze.style.display = 'none';
                 secAnalyze.classList.add('hidden');
             }
         }
