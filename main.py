@@ -59,7 +59,7 @@ def run_gemini_analysis(text: str, jurisdiction: str) -> str:
     """
     try:
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-3.8-flash',
             contents=prompt
         )
         res_text = response.text.strip()
