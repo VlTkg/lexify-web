@@ -53,21 +53,23 @@
             </div>
         </div>
 
-        <!-- ПРИВЕТСТВИЕ И ОПИСАНИЕ -->
-        <header class="text-center space-y-1.5">
-            <h1 class="text-lg font-bold tracking-tight text-white">Lexify</h1>
-            <p class="text-[11px] text-gray-400 max-w-md mx-auto">
+        <!-- ПРИВЕТСТВИЕ И ОПИСАНИЕ (ОБЛАСТЬ 1: УВЕЛИЧЕННЫЕ И ДОМИНИРУЮЩИЕ) -->
+        <header class="text-center space-y-2 py-1">
+            <h1 class="text-2xl font-extrabold tracking-tight text-white flex items-center justify-center">
+                <i class="fa-solid fa-scale-balanced mr-2 text-blue-500"></i> Lexify
+            </h1>
+            <p class="text-xs text-gray-300 max-w-lg mx-auto leading-relaxed font-normal">
                 Сервис правовой поддержки, предназначенный для поиска скрытых рисков в договорах, подготовки безопасных документов и разработки протоколов разногласий.
             </p>
             
-            <!-- ПОРЯДОК РАБОТЫ -->
-            <div class="bg-gray-800/40 border border-gray-700/50 rounded-xl p-2.5 text-left space-y-1 mt-2">
-                <div class="text-[11px] font-semibold text-gray-300 flex items-center">
-                    <i class="fa-solid fa-shoe-prints mr-1.5 text-blue-400"></i> Порядок работы с сервисом:
+            <!-- ПОРЯДОК РАБОТЫ (ОБЛАСТЬ 2: СДЕЛАН СВЕТЛЕЕ И ЛЕГЧЕ) -->
+            <div class="bg-gray-800/20 border border-gray-700/30 rounded-xl p-2.5 text-left space-y-1 mt-2">
+                <div class="text-[11px] font-semibold text-blue-400 flex items-center">
+                    <i class="fa-solid fa-circle-info mr-1.5"></i> Порядок работы с сервисом:
                 </div>
-                <div class="text-[10px] text-gray-300 space-y-0.5 pl-1">
+                <div class="text-[10px] text-gray-400 space-y-0.5 pl-1">
                     <p>1. Выберите применимое право (юрисдикцию) в блоке ниже.</p>
-                    <p>2. Нажмите нужную кнопку: <b>Анализировать договор</b> или <b>Сгенерировать документ</b>.</p>
+                    <p>2. Нажмите нужную кнопку: <b class="text-gray-300">Анализировать договор</b> или <b class="text-gray-300">Сгенерировать документ</b>.</p>
                     <p>3. Введите текст или загрузите файл и запустите процесс.</p>
                     <p>4. Изучите отчет и при необходимости скачайте готовый файл в Word (.docx).</p>
                 </div>
@@ -94,7 +96,7 @@
             </button>
         </div>
 
-        <!-- РЕЖИМ 1: АНАЛИЗ ДОГОВОРА / СТАТЬИ (ЖЕСТКО СКРЫТ) -->
+        <!-- РЕЖИМ 1: АНАЛИЗ ДОГОВОРА / СТАТЬИ (ИЗНАЧАЛЬНО СКРЫТ) -->
         <div id="section-analyze" style="display: none;" class="tg-card rounded-xl p-3 border-2 border-blue-500/50 shadow-md space-y-2">
             <div class="flex items-center justify-between border-b border-gray-700 pb-1.5">
                 <h2 class="text-xs font-semibold text-blue-400"><i class="fa-solid fa-circle-dot mr-1 text-[10px]"></i> Режим: Экспресс-анализ рисков</h2>
@@ -134,7 +136,7 @@
             </div>
         </div>
 
-        <!-- РЕЖИМ 2: ГЕНЕРАЦИЯ ДОКУМЕНТА (ЖЕСТКО СКРЫТ) -->
+        <!-- РЕЖИМ 2: ГЕНЕРАЦИЯ ДОКУМЕНТА (ИЗНАЧАЛЬНО СКРЫТ) -->
         <div id="section-generate" style="display: none;" class="tg-card rounded-xl p-3 border-2 border-blue-500/50 shadow-md space-y-2">
             <div class="flex items-center justify-between border-b border-gray-700 pb-1.5">
                 <h2 class="text-xs font-semibold text-blue-400"><i class="fa-solid fa-circle-dot mr-1 text-[10px]"></i> Режим: Конструктор документов</h2>
@@ -330,7 +332,7 @@
                         html += `
                             <div class="analysis-block ${riskClass}">
                                 <b class="text-white block">Риск #${idx+1}: ${r.title || 'Замечание'}</b>
-                                <p class="text-gray-300 mt-0.5"><b>Цитата / Пункт:</b> «${r.quote || ''}»</p>
+                                <p class="text-gray-300 mt-0.5"><b>Цитата / Пункт:</b> «{r.quote || ''}»</p>
                                 <p class="text-gray-300 mt-0.5"><b>Суть риска:</b> ${r.explanation || ''}</p>
                                 <p class="text-blue-300 mt-0.5"><b>Рекомендация:</b> ${r.recommendation || ''}</p>
                             </div>
@@ -434,7 +436,7 @@
                 doc_type: currentDocType,
                 jurisdiction: currentJurisdiction,
                 executor: document.getElementById('executor-input').value,
-                client: document.getElementById('client-input').value,
+                client: document.getElementById('client-input'].value,
                 description: document.getElementById('desc-input').value,
                 payment: "100% предоплата",
                 deadline: "30 дней",
@@ -585,7 +587,7 @@
             });
         }
 
-        function closeAdminPanel() {
+        closeAdminPanel() {
             document.getElementById('admin-modal').classList.add('hidden');
         }
 
@@ -599,10 +601,4 @@
 
         function resetGenerateForm() {
             document.getElementById('executor-input').value = "Иванов И.И.";
-            document.getElementById('client-input').value = "ТОО «Альфа Технологии»";
-            document.getElementById('desc-input').value = "Разработка программного модуля автоматизации";
-            document.getElementById('result-wrapper').style.display = 'none';
-        }
-    </script>
-</body>
-</html>
+            document.getElementById('client-
