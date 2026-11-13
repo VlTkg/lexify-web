@@ -21,8 +21,6 @@
         .chip-btn.active { background-color: #3b82f6; color: #ffffff; border-color: #3b82f6; font-weight: 600; }
         .chip-btn:not(.active) { background-color: #1f2937; color: #9ca3af; }
         .chip-btn:not(.active):hover { background-color: #374151; color: #ffffff; }
-        
-        /* Стили для основных кнопок режимов с акцентом */
         .tab-btn {
             height: 42px; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600;
             display: inline-flex; align-items: center; justify-content: flex-start; padding-left: 0.8rem; transition: all 0.2s ease;
@@ -30,7 +28,6 @@
         }
         .tab-btn.active { background-color: #1d4ed8; color: #ffffff; border-color: #60a5fa; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); }
         .tab-btn:not(.active):hover { background-color: rgba(30, 58, 138, 0.7); color: #ffffff; border-color: #3b82f6; }
-
         .top-badge-item {
             height: 28px; padding: 0 8px; display: inline-flex; align-items: center; justify-content: center; border-radius: 0.4rem; font-size: 0.7rem; font-weight: 600;
         }
@@ -88,7 +85,7 @@
             </div>
         </div>
 
-        <!-- ОСНОВНЫЕ КНОПКИ ВЫБОРА РЕЖИМОВ (АКЦЕНТИРОВАННЫЕ) -->
+        <!-- ОСНОВНЫЕ КНОПКИ ВЫБОРА РЕЖИМОВ -->
         <div class="grid grid-cols-2 gap-2">
             <button type="button" onclick="switchTab('analyze')" id="tab-btn-analyze" class="tab-btn cursor-pointer">
                 <i class="fa-solid fa-magnifying-glass-chart mr-2 ml-0.5"></i> Анализировать договор
@@ -98,7 +95,7 @@
             </button>
         </div>
 
-        <!-- РЕЖИМ 1: АНАЛИЗ ДОГОВОРА / СТАТЬИ (ИЗНАЧАЛЬНО СКРЫТ) -->
+        <!-- РЕЖИМ 1: АНАЛИЗ ДОГОВОРА / СТАТЬИ -->
         <div id="section-analyze" style="display: none;" class="tg-card rounded-xl p-3 border-2 border-blue-500/50 shadow-md space-y-2">
             <div class="flex items-center justify-between border-b border-gray-700 pb-1.5">
                 <h2 class="text-xs font-semibold text-blue-400"><i class="fa-solid fa-circle-dot mr-1 text-[10px]"></i> Режим: Экспресс-анализ рисков</h2>
@@ -138,7 +135,7 @@
             </div>
         </div>
 
-        <!-- РЕЖИМ 2: ГЕНЕРАЦИЯ ДОКУМЕНТА (ИЗНАЧАЛЬНО СКРЫТ) -->
+        <!-- РЕЖИМ 2: ГЕНЕРАЦИЯ ДОКУМЕНТА -->
         <div id="section-generate" style="display: none;" class="tg-card rounded-xl p-3 border-2 border-blue-500/50 shadow-md space-y-2">
             <div class="flex items-center justify-between border-b border-gray-700 pb-1.5">
                 <h2 class="text-xs font-semibold text-blue-400"><i class="fa-solid fa-circle-dot mr-1 text-[10px]"></i> Режим: Конструктор документов</h2>
@@ -182,9 +179,12 @@
         <div id="result-wrapper" style="display: none;" class="tg-card rounded-xl p-3 border shadow-sm space-y-2">
             <div class="flex items-center justify-between flex-wrap gap-1">
                 <h3 id="result-title" class="text-xs font-semibold text-gray-300">Результат анализа</h3>
-                <div class="flex gap-1.5">
+                <div class="flex gap-1.5 flex-wrap">
+                    <button type="button" id="download-analysis-btn" onclick="downloadAnalysisText()" class="hidden chip-btn bg-blue-600 hover:bg-blue-500 text-white border-blue-500 font-semibold cursor-pointer">
+                        <i class="fa-solid fa-file-arrow-down mr-1"></i> Скачать отчет (.docx)
+                    </button>
                     <button type="button" id="download-protocol-btn" onclick="downloadWordProtocol()" class="hidden chip-btn bg-amber-600 hover:bg-amber-500 text-white border-amber-500 font-semibold cursor-pointer">
-                        <i class="fa-solid fa-file-invoice mr-1"></i> Скачать протокол разногласий (.docx)
+                        <i class="fa-solid fa-file-invoice mr-1"></i> Скачать протокол (.docx)
                     </button>
                     <button type="button" id="download-docx-btn" onclick="downloadWord()" class="hidden chip-btn bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500 font-semibold cursor-pointer">
                         <i class="fa-solid fa-file-word mr-1"></i> Скачать документ (.docx)
@@ -356,12 +356,14 @@
         function runAnalysis() {
             const container = document.getElementById('result-container');
             const resultWrapper = document.getElementById('result-wrapper');
+            const downloadAnalysisBtn = document.getElementById('download-analysis-btn');
             const downloadDocBtn = document.getElementById('download-docx-btn');
             const downloadProtocolBtn = document.getElementById('download-protocol-btn');
 
             resultWrapper.style.display = 'block';
-            downloadDocBtn.classList.add('hidden');
+            downloadAnalysisBtn.classList.remove('hidden');
             downloadProtocolBtn.classList.remove('hidden');
+            downloadDocBtn.classList.add('hidden');
             document.getElementById('result-title').innerText = "Результат анализа рисков и статьи";
             container.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Идет правовой анализ материала...';
             scrollToResults();
@@ -424,10 +426,12 @@
         function generateDocument() {
             const container = document.getElementById('result-container');
             const resultWrapper = document.getElementById('result-wrapper');
+            const downloadAnalysisBtn = document.getElementById('download-analysis-btn');
             const downloadDocBtn = document.getElementById('download-docx-btn');
             const downloadProtocolBtn = document.getElementById('download-protocol-btn');
 
             resultWrapper.style.display = 'block';
+            downloadAnalysisBtn.classList.add('hidden');
             downloadDocBtn.classList.remove('hidden');
             downloadProtocolBtn.classList.add('hidden');
             document.getElementById('result-title').innerText = "Сгенерированный документ";
@@ -467,6 +471,52 @@
             });
         }
 
+        function downloadAnalysisText() {
+            let risksList = [];
+            let summaryText = "";
+            if (lastAnalysisResult) {
+                let parsed = lastAnalysisResult;
+                if (typeof parsed === 'string') {
+                    try { parsed = JSON.parse(parsed); } catch(e) {}
+                }
+                if (parsed && parsed.risks) risksList = parsed.risks;
+                if (parsed && parsed.summary) summaryText = parsed.summary;
+            }
+
+            const payload = {
+                doc_type: "Отчет по анализу рисков",
+                jurisdiction: currentJurisdiction,
+                telegram_id: currentTelegramId,
+                risks: risksList,
+                description: summaryText
+            };
+
+            fetch('/generate-protocol', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                if (response.ok) return response.blob();
+                throw new Error("Ошибка генерации файла отчета");
+            })
+            .then(blob => {
+                const blobUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = "Lexify_Analysis_Report.docx";
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    a.remove();
+                    window.URL.revokeObjectURL(blobUrl);
+                }, 500);
+            })
+            .catch(e => {
+                alert("Ошибка при скачивании отчета: " + e.message);
+            });
+        }
+
         function downloadWordProtocol() {
             let risksList = [];
             if (lastAnalysisResult) {
@@ -474,9 +524,7 @@
                 if (typeof parsed === 'string') {
                     try { parsed = JSON.parse(parsed); } catch(e) {}
                 }
-                if (parsed && parsed.risks) {
-                    risksList = parsed.risks;
-                }
+                if (parsed && parsed.risks) risksList = parsed.risks;
             }
 
             const payload = {
@@ -508,7 +556,7 @@
                 }, 500);
             })
             .catch(e => {
-                alert("Ошибка при скачивании файла: " + e.message);
+                alert("Ошибка при скачивании протокола: " + e.message);
             });
         }
 
@@ -548,7 +596,7 @@
                 }, 500);
             })
             .catch(e => {
-                alert("Ошибка при скачивании файла: " + e.message);
+                alert("Ошибка при скачивании документа: " + e.message);
             });
         }
 
