@@ -358,7 +358,7 @@
                         html += `
                             <div class="analysis-block ${riskClass}">
                                 <b class="text-white block">Риск #${idx+1}: ${r.title || 'Замечание'}</b>
-                                <p class="text-gray-300 mt-0.5"><b>Цитата / Пункт:</b> «${r.quote || ''}»</p>
+                                <p class="text-gray-300 mt-0.5"><b>Цитата / Пункт:</b> «{r.quote || ''}»</p>
                                 <p class="text-gray-300 mt-0.5"><b>Суть риска:</b> ${r.explanation || ''}</p>
                                 <p class="text-blue-300 mt-0.5"><b>Рекомендация:</b> ${r.recommendation || ''}</p>
                             </div>
@@ -535,10 +535,12 @@
             .then(blob => {
                 const blobUrl = window.URL.createObjectURL(blob);
                 
-                if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openLink) {
+                // Исправление для Telegram Desktop / WebApp: открываем прямую ссылку на файл через системный браузер
+                if (window.Telegram && window.Telegram.WebApp) {
+                    // Создаем скрытую ссылку и принудительно вызываем клик через нативный механизм
                     const tempLink = document.createElement('a');
                     tempLink.href = blobUrl;
-                    tempLink.download = outFilename;
+                    tempLink.setAttribute('download', outFilename);
                     document.body.appendChild(tempLink);
                     tempLink.click();
                     document.body.removeChild(tempLink);
