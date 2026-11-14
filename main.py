@@ -126,7 +126,7 @@ async def analyze_file(
         return {"result": analysis_result}
     except Exception as e:
         return {"result": json.dumps({
-            "overall_risk_level": "Высокий",
+            "overall_risk_level": " Высокий",
             "summary": f"Ошибка обработки файла: {str(e)}",
             "risks": []
         }, ensure_ascii=False)}
@@ -222,10 +222,10 @@ async def generate_protocol(req: ProtocolRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/generate-document")
-async def generate_document(data: dict):
+async def generate_document(req: ProtocolRequest):
     try:
-        desc = data.get("description", "Разработка модуля")
-        return {"document": f"Сгенерированный документ по параметрам:\n\n{desc}\n\nВсе пункты согласованы."}
+        # Теперь конструктор документов использует ту же надежную генерацию Word-файла
+        return await generate_protocol(req)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
