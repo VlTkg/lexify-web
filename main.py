@@ -21,7 +21,6 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 gemini_api_key = os.environ.get("GEMINI_API_KEY")
 client = genai.Client(api_key=gemini_api_key) if gemini_api_key else None
 
-# Временная папка для хранения генерируемых файлов
 TEMP_FILES_DIR = "/tmp/lexify_docs"
 os.makedirs(TEMP_FILES_DIR, exist_ok=True)
 
@@ -114,7 +113,6 @@ async def analyze_file(
     if not extracted_text:
         raise HTTPException(status_code=400, detail="Не удалось извлечь текст из файла")
 
-    # Вызываем логику анализа текста
     req = AnalyzeRequest(text=extracted_text, jurisdiction=jurisdiction, telegram_id=telegram_id)
     return await analyze_contract(req)
 
@@ -122,7 +120,6 @@ async def analyze_file(
 async def generate_protocol(req: GenerateRequest, request: Request):
     doc = docx.Document()
     
-    # Стилизация документа
     title = doc.add_paragraph()
     title_run = title.add_run(f"ДОКУМЕНТ: {req.doc_type.upper()}")
     title_run.bold = True
@@ -145,7 +142,7 @@ async def generate_protocol(req: GenerateRequest, request: Request):
                 p.add_run(f"Суть: {r.get('explanation', '')}\n")
                 p.add_run(f"Рекомендация: {r.get('recommendation', '')}\n")
         else:
-                  doc.add_paragraph("Существенных критических замечаний не зафиксировано.")
+            doc.add_paragraph("Существенных критических замечаний не зафиксировано.")
     else:
         doc.add_paragraph(f"Исполнитель: {req.executor}")
         doc.add_paragraph(f"Заказчик: {req.client}")
@@ -153,7 +150,6 @@ async def generate_protocol(req: GenerateRequest, request: Request):
         doc.add_paragraph(f"Условия оплаты: {req.payment}")
         doc.add_paragraph(f"Срок выполнения: {req.deadline}")
 
-    # Сохраняем файл во временную директорию с уникальным UUID
     file_id = str(uuid.uuid4())
     safe_name = "Protocol.docx" if "Протокол" in req.doc_type else ("Result.docx" if "Результат" in req.doc_type else "Document.docx")
     filename = f"{file_id[:8]}_{safe_name}"
@@ -161,7 +157,6 @@ async def generate_protocol(req: GenerateRequest, request: Request):
     
     doc.save(file_path)
 
-    # Формируем публичную HTTPS ссылку для скачивания через openLink
     base_url = str(request.base_url).rstrip("/")
     download_url = f"{base_url}/api/download-temp/{file_id}"
 
@@ -197,10 +192,7 @@ if __name__ == "__main__":
 
 ---
 
-### 2. Обновленный файл `static/index.html`
-Фронтенд теперь отправляет POST-запрос, получает в ответ JSON с полем `download_url` и передает его в `window.Telegram.WebApp.openLink(data.download_url)`. Это заставляет Telegram Desktop открывать системный браузер устройства, который сразу загружает `.docx` файл без каких-либо блокировок.
-
-Замените содержимое **`static/index.html`** целиком:
+### Файл 2: `static/index.html`
 
 ```html
 <!DOCTYPE html>
@@ -705,7 +697,6 @@ if __name__ == "__main__":
                 };
             }
 
-            // Отправляем запрос на сервер, получаем публичную URL и открываем через openLink
             fetch('/generate-protocol', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
