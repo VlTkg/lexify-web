@@ -21,6 +21,15 @@
         .chip-btn.active { background-color: #3b82f6; color: #ffffff; border-color: #3b82f6; font-weight: 600; }
         .chip-btn:not(.active) { background-color: #1f2937; color: #9ca3af; }
         .chip-btn:not(.active):hover { background-color: #374151; color: #ffffff; }
+        
+        /* Единый стиль для кнопок скачивания */
+        .download-action-btn {
+            height: 34px; padding: 0 12px; border-radius: 0.5rem; font-size: 0.7rem; font-weight: 600;
+            display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease;
+            background-color: #2563eb; color: #ffffff; border: 1px solid #3b82f6; cursor: pointer; white-space: nowrap;
+        }
+        .download-action-btn:hover { background-color: #1d4ed8; }
+
         .tab-btn {
             height: 42px; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600;
             display: inline-flex; align-items: center; justify-content: flex-start; padding-left: 0.8rem; transition: all 0.2s ease;
@@ -180,14 +189,14 @@
             <div class="flex items-center justify-between flex-wrap gap-1">
                 <h3 id="result-title" class="text-xs font-semibold text-gray-300">Результат анализа</h3>
                 <div class="flex gap-1.5 flex-wrap">
-                    <button type="button" id="download-analysis-btn" onclick="downloadAnalysisText()" class="hidden chip-btn bg-blue-600 hover:bg-blue-500 text-white border-blue-500 font-semibold cursor-pointer">
-                        <i class="fa-solid fa-file-arrow-down mr-1"></i> Скачать отчет (.docx)
+                    <button type="button" id="download-analysis-btn" onclick="downloadAnalysisText()" class="hidden download-action-btn">
+                        <i class="fa-solid fa-file-word mr-1.5"></i> Скачать результат анализа
                     </button>
-                    <button type="button" id="download-protocol-btn" onclick="downloadWordProtocol()" class="hidden chip-btn bg-amber-600 hover:bg-amber-500 text-white border-amber-500 font-semibold cursor-pointer">
-                        <i class="fa-solid fa-file-invoice mr-1"></i> Скачать протокол (.docx)
+                    <button type="button" id="download-protocol-btn" onclick="downloadWordProtocol()" class="hidden download-action-btn">
+                        <i class="fa-solid fa-file-word mr-1.5"></i> Скачать протокол разногласий
                     </button>
-                    <button type="button" id="download-docx-btn" onclick="downloadWord()" class="hidden chip-btn bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500 font-semibold cursor-pointer">
-                        <i class="fa-solid fa-file-word mr-1"></i> Скачать документ (.docx)
+                    <button type="button" id="download-docx-btn" onclick="downloadWord()" class="hidden download-action-btn">
+                        <i class="fa-solid fa-file-word mr-1.5"></i> Скачать документ (.docx)
                     </button>
                 </div>
             </div>
@@ -357,8 +366,8 @@
             const container = document.getElementById('result-container');
             const resultWrapper = document.getElementById('result-wrapper');
             const downloadAnalysisBtn = document.getElementById('download-analysis-btn');
-            const downloadDocBtn = document.getElementById('download-docx-btn');
             const downloadProtocolBtn = document.getElementById('download-protocol-btn');
+            const downloadDocBtn = document.getElementById('download-docx-btn');
 
             resultWrapper.style.display = 'block';
             downloadAnalysisBtn.classList.remove('hidden');
@@ -427,13 +436,13 @@
             const container = document.getElementById('result-container');
             const resultWrapper = document.getElementById('result-wrapper');
             const downloadAnalysisBtn = document.getElementById('download-analysis-btn');
-            const downloadDocBtn = document.getElementById('download-docx-btn');
             const downloadProtocolBtn = document.getElementById('download-protocol-btn');
+            const downloadDocBtn = document.getElementById('download-docx-btn');
 
             resultWrapper.style.display = 'block';
             downloadAnalysisBtn.classList.add('hidden');
-            downloadDocBtn.classList.remove('hidden');
             downloadProtocolBtn.classList.add('hidden');
+            downloadDocBtn.classList.remove('hidden');
             document.getElementById('result-title').innerText = "Сгенерированный документ";
             container.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Идет генерация документа...';
             scrollToResults();
@@ -484,7 +493,7 @@
             }
 
             const payload = {
-                doc_type: "Отчет по анализу рисков",
+                doc_type: "Результат анализа",
                 jurisdiction: currentJurisdiction,
                 telegram_id: currentTelegramId,
                 risks: risksList,
@@ -498,13 +507,13 @@
             })
             .then(response => {
                 if (response.ok) return response.blob();
-                throw new Error("Ошибка генерации файла отчета");
+                throw new Error("Ошибка сервера");
             })
             .then(blob => {
                 const blobUrl = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = blobUrl;
-                a.download = "Lexify_Analysis_Report.docx";
+                a.download = "Lexify_Rezultat_Analiza.docx";
                 document.body.appendChild(a);
                 a.click();
                 setTimeout(() => {
@@ -528,7 +537,7 @@
             }
 
             const payload = {
-                doc_type: "Экспресс-анализ",
+                doc_type: "Протокол разногласий",
                 jurisdiction: currentJurisdiction,
                 telegram_id: currentTelegramId,
                 risks: risksList
