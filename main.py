@@ -27,7 +27,6 @@ client = genai.Client(api_key=gemini_api_key) if gemini_api_key else None
 
 @app.get("/")
 def read_root():
-    # Отдаем index.html с запретом кэширования, чтобы версия в BotFather больше не требовалась
     with open("static/index.html", "r", encoding="utf-8") as f:
         html_content = f.read()
     return HTMLResponse(
