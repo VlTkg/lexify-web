@@ -448,7 +448,7 @@
             scrollToResults();
 
             const payload = {
-                doc_type: currentDocType,
+                doc_type: currentDocType === 'offer' ? 'Оферта' : 'Договор услуг',
                 jurisdiction: currentJurisdiction,
                 executor: document.getElementById('executor-input').value,
                 client: document.getElementById('client-input').value,
@@ -528,19 +528,22 @@
 
         function downloadWordProtocol() {
             let risksList = [];
+            let summaryText = "";
             if (lastAnalysisResult) {
                 let parsed = lastAnalysisResult;
                 if (typeof parsed === 'string') {
                     try { parsed = JSON.parse(parsed); } catch(e) {}
                 }
                 if (parsed && parsed.risks) risksList = parsed.risks;
+                if (parsed && parsed.summary) summaryText = parsed.summary;
             }
 
             const payload = {
                 doc_type: "Протокол разногласий",
                 jurisdiction: currentJurisdiction,
                 telegram_id: currentTelegramId,
-                risks: risksList
+                risks: risksList,
+                description: summaryText
             };
 
             fetch('/generate-protocol', {
@@ -571,7 +574,7 @@
 
         function downloadWord() {
             const payload = {
-                doc_type: currentDocType,
+                doc_type: currentDocType === 'offer' ? 'Оферта' : 'Договор услуг',
                 jurisdiction: currentJurisdiction,
                 executor: document.getElementById('executor-input').value,
                 client: document.getElementById('client-input').value,
