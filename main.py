@@ -27,7 +27,17 @@ client = genai.Client(api_key=gemini_api_key) if gemini_api_key else None
 
 @app.get("/")
 def read_root():
-    return FileResponse("static/index.html")
+    # Отдаем index.html с запретом кэширования, чтобы версия в BotFather больше не требовалась
+    with open("static/index.html", "r", encoding="utf-8") as f:
+        html_content = f.read()
+    return HTMLResponse(
+        content=html_content,
+        headers={
+            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+            "Pragma": "no-cache",
+            "Expires": "0"
+        }
+    )
 
 def run_gemini_analysis(text: str, jurisdiction: str) -> str:
     if not client:
@@ -160,6 +170,10 @@ async def generate_protocol(req: ProtocolRequest):
 
         doc.add_paragraph()
 
+        if req.description and not req.risks:
+            p_desc = doc.add_paragraph()
+            p_desc.add_run(f"Описание / Резюме:\n{req.description}")
+
         if req.risks and len(req.risks) > 0:
             p_head = doc.add_paragraph()
             r_head = p_head.add_run("Выявленные риски и рекомендации:")
@@ -182,7 +196,7 @@ async def generate_protocol(req: ProtocolRequest):
                         p_r.add_run(f"• Рекомендация: {rec}\n")
                 else:
                     p_r.add_run(f"• {str(risk)}")
-        else:
+        elif not req.description:
             p_body = doc.add_paragraph()
             p_body.add_run(f"Предмет договора / описание: {req.description}\n")
             p_body.add_run(f"Условия оплаты: {req.payment}\n")
@@ -194,10 +208,11 @@ async def generate_protocol(req: ProtocolRequest):
         file_stream.seek(0)
 
         filename = "Lexify_Document.docx"
-        if "протокол" in req.doc_type.lower():
+        doc_type_lower = (req.doc_type or "").lower()
+        if "протокол" in doc_type_lower:
             filename = "Lexify_Protokol_Raznoglasiy.docx"
-        elif "анализ" in req.doc_type.lower() or "отчет" in req.doc_type.lower():
-            filename = "Lexify_Analysis_Report.docx"
+        elif "анализ" in doc_type_lower or "результат" in doc_type_lower:
+            filename = "Lexify_Rezultat_Analiza.docx"
 
         return StreamingResponse(
             file_stream,
