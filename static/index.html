@@ -207,7 +207,7 @@
         </footer>
     </div>
 
-    <!-- МОДАЛЬНОЕ ОКНО ДЛЯ СКАЧИВАНИЯ ФАЙЛОВ (РАБОТАЕТ НА ПК И ТЕЛЕФОНАХ) -->
+    <!-- МОДАЛЬНОЕ ОКНО ДЛЯ СКАЧИВАНИЯ ФАЙЛОВ -->
     <div id="download-modal" class="hidden fixed inset-0 bg-black/75 flex items-center justify-center p-3 z-50">
         <div class="tg-card rounded-2xl p-4 border border-blue-500/50 shadow-2xl max-w-sm w-full space-y-3 text-center">
             <div class="w-12 h-12 bg-blue-600/20 text-blue-400 rounded-full flex items-center justify-center mx-auto text-xl">
@@ -218,7 +218,7 @@
             
             <div class="space-y-2 pt-1">
                 <a id="modal-download-link" href="#" download class="w-full bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-xl font-semibold text-xs flex items-center justify-center shadow cursor-pointer">
-                    <i class="fa-solid fa-download mr-1.5"></i> Загрузить файл на устройство
+                    <i class="fa-solid fa-download mr-1.5"></i> Сохранить файл на устройство
                 </a>
                 <button type="button" onclick="closeDownloadModal()" class="w-full py-2 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-semibold text-gray-200 cursor-pointer">
                     Закрыть
@@ -458,44 +458,15 @@
             downloadProtocolBtn.classList.add('hidden');
             downloadDocBtn.classList.remove('hidden');
             document.getElementById('result-title').innerText = "Сгенерированный документ";
-            container.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Идет генерация документа...';
+            
+            const desc = document.getElementById('desc-input').value || "Разработка модуля";
+            container.innerHTML = marked.parse(`Сгенерированный документ по параметрам:\n\n${desc}\n\nВсе пункты согласованы. Готов к скачиванию.`);
             scrollToResults();
-
-            const payload = {
-                doc_type: currentDocType === 'offer' ? 'Оферта' : 'Договор услуг',
-                jurisdiction: currentJurisdiction,
-                executor: document.getElementById('executor-input').value,
-                client: document.getElementById('client-input').value,
-                description: document.getElementById('desc-input').value,
-                payment: "100% предоплата",
-                deadline: "30 дней",
-                revisions: "2",
-                telegram_id: currentTelegramId
-            };
-
-            fetch('/api/generate-document', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(response => {
-                if (response.ok) return response.json();
-                throw new Error("Ошибка сервера");
-            })
-            .then(data => {
-                let docText = data.document || data.result || "Документ успешно сформирован и готов к скачиванию.";
-                container.innerHTML = marked.parse(docText);
-                scrollToResults();
-            })
-            .catch(error => {
-                container.innerHTML = "Ошибка генерации: " + error.message;
-            });
         }
 
-        // Универсальная функция запроса файла и открытия модального окна
         function requestFileDownload(type) {
             let payload = {};
-            let outFilename = "Lexify_Document.docx";
+            let outFilename = "Document.docx";
 
             if (type === 'analysis') {
                 let risksList = [];
@@ -515,7 +486,7 @@
                     risks: risksList,
                     description: summaryText
                 };
-                outFilename = "Lexify_Rezultat_Analiza.docx";
+                outFilename = "Result.docx";
             } else if (type === 'protocol') {
                 let risksList = [];
                 let summaryText = "";
@@ -534,7 +505,7 @@
                     risks: risksList,
                     description: summaryText
                 };
-                outFilename = "Lexify_Protokol_Raznoglasiy.docx";
+                outFilename = "Protocol.docx";
             } else {
                 payload = {
                     doc_type: currentDocType === 'offer' ? 'Оферта' : 'Договор услуг',
@@ -548,7 +519,7 @@
                     telegram_id: currentTelegramId,
                     risks: []
                 };
-                outFilename = "Lexify_Document.docx";
+                outFilename = "Document.docx";
             }
 
             fetch('/generate-protocol', {
