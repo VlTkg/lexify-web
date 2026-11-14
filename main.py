@@ -3,19 +3,16 @@ import io
 import json
 import httpx
 import re
-import unicodedata
 from datetime import datetime
 from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Form
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, StreamingResponse
 from pydantic import BaseModel
 from typing import Optional, List, Any
 from google import genai
 import docx
 from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.oxml import OxmlElement
-from docx.oxml.ns import nsdecls, qn
 import pypdf
 
 app = FastAPI()
@@ -126,7 +123,7 @@ async def analyze_file(
         return {"result": analysis_result}
     except Exception as e:
         return {"result": json.dumps({
-            "overall_risk_level": " Высокий",
+            "overall_risk_level": "Высокий",
             "summary": f"Ошибка обработки файла: {str(e)}",
             "risks": []
         }, ensure_ascii=False)}
@@ -171,7 +168,7 @@ async def generate_protocol(req: ProtocolRequest):
 
         if req.description and not req.risks:
             p_desc = doc.add_paragraph()
-            p_desc.add_run(f"Описание / Резюме:\n{req.description}")
+            p_desc.add_run(f"Описание / Предмет договора:\n{req.description}")
 
         if req.risks and len(req.risks) > 0:
             p_head = doc.add_paragraph()
@@ -206,26 +203,18 @@ async def generate_protocol(req: ProtocolRequest):
         doc.save(file_stream)
         file_stream.seek(0)
 
-        filename = "Lexify_Document.docx"
+        filename = "Document.docx"
         doc_type_lower = (req.doc_type or "").lower()
         if "протокол" in doc_type_lower:
-            filename = "Lexify_Protokol_Raznoglasiy.docx"
+            filename = "Protocol.docx"
         elif "анализ" in doc_type_lower or "результат" in doc_type_lower:
-            filename = "Lexify_Rezultat_Analiza.docx"
+            filename = "Result.docx"
 
         return StreamingResponse(
             file_stream,
             media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             headers={"Content-Disposition": f"attachment; filename={filename}"}
         )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/api/generate-document")
-async def generate_document(req: ProtocolRequest):
-    try:
-        # Теперь конструктор документов использует ту же надежную генерацию Word-файла
-        return await generate_protocol(req)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
