@@ -22,7 +22,6 @@
         .chip-btn:not(.active) { background-color: #1f2937; color: #9ca3af; }
         .chip-btn:not(.active):hover { background-color: #374151; color: #ffffff; }
         
-        /* Единый стиль для кнопок скачивания */
         .download-action-btn {
             height: 34px; padding: 0 12px; border-radius: 0.5rem; font-size: 0.7rem; font-weight: 600;
             display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease;
@@ -49,7 +48,7 @@
 <body class="min-h-screen pb-6">
     <div class="max-w-2xl mx-auto p-2.5 space-y-2.5">
         
-        <!-- ВЕРХНЯЯ ПАНЕЛЬ С КНОПКАМИ АДМИН И СЧЕТЧИК -->
+        <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
         <div class="flex items-center justify-end gap-2">
             <div id="admin-panel-btn" class="hidden">
                 <button type="button" onclick="openAdminPanel()" class="top-badge-item bg-amber-600 hover:bg-amber-500 text-white shadow cursor-pointer">
@@ -61,7 +60,7 @@
             </div>
         </div>
 
-        <!-- ПРИВЕТСТВИЕ И ОПИСАНИЕ -->
+        <!-- ЗАГОЛОВОК -->
         <header class="text-center space-y-2 py-1">
             <h1 class="text-2xl font-extrabold tracking-tight text-white flex items-center justify-center">
                 <i class="fa-solid fa-scale-balanced mr-2 text-blue-500"></i> Lexify
@@ -70,7 +69,6 @@
                 Сервис правовой поддержки, предназначенный для поиска скрытых рисков в договорах, подготовки безопасных документов и разработки протоколов разногласий.
             </p>
             
-            <!-- ПОРЯДОК РАБОТЫ -->
             <div class="bg-gray-800/20 border border-gray-700/30 rounded-xl p-2.5 text-left space-y-1 mt-2">
                 <div class="text-[11px] font-semibold text-blue-400 flex items-center">
                     <i class="fa-solid fa-circle-info mr-1.5"></i> Порядок работы с сервисом:
@@ -84,7 +82,7 @@
             </div>
         </header>
 
-        <!-- ВЫБОР ЮРИСДИКЦИИ -->
+        <!-- ЮРИСДИКЦИЯ -->
         <div class="tg-card rounded-xl p-3 border shadow-sm space-y-1.5">
             <label class="text-[11px] font-medium text-gray-300 block">Применимое право (юрисдикция)</label>
             <div class="flex gap-1.5">
@@ -94,7 +92,7 @@
             </div>
         </div>
 
-        <!-- ОСНОВНЫЕ КНОПКИ ВЫБОРА РЕЖИМОВ -->
+        <!-- ВКЛАДКИ -->
         <div class="grid grid-cols-2 gap-2">
             <button type="button" onclick="switchTab('analyze')" id="tab-btn-analyze" class="tab-btn cursor-pointer">
                 <i class="fa-solid fa-magnifying-glass-chart mr-2 ml-0.5"></i> Анализировать договор
@@ -104,7 +102,7 @@
             </button>
         </div>
 
-        <!-- РЕЖИМ 1: АНАЛИЗ ДОГОВОРА / СТАТЬИ -->
+        <!-- АНАЛИЗ -->
         <div id="section-analyze" style="display: none;" class="tg-card rounded-xl p-3 border-2 border-blue-500/50 shadow-md space-y-2">
             <div class="flex items-center justify-between border-b border-gray-700 pb-1.5">
                 <h2 class="text-xs font-semibold text-blue-400"><i class="fa-solid fa-circle-dot mr-1 text-[10px]"></i> Режим: Экспресс-анализ рисков</h2>
@@ -118,13 +116,11 @@
                 </div>
             </div>
 
-            <!-- Блок ввода текста -->
             <div id="analyze-input-text-container">
                 <label class="text-[11px] font-medium text-gray-300 block mb-1">Текст договора, статьи или выдержки из него</label>
                 <textarea id="analyze-text-input" rows="4" class="identical-input-box text-xs" placeholder="Вставьте текст сюда..."></textarea>
             </div>
 
-            <!-- Блок загрузки файла -->
             <div id="analyze-input-file-container" class="hidden space-y-1">
                 <label class="text-[11px] font-medium text-gray-300 block">Загрузите документ или статью</label>
                 <div class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-600 rounded-lg bg-gray-900/50 hover:bg-gray-800/80 transition p-2">
@@ -133,7 +129,6 @@
                 </div>
             </div>
 
-            <!-- Кнопки действия -->
             <div class="grid grid-cols-2 gap-2 pt-0.5">
                 <button type="button" onclick="runAnalysis()" class="w-full bg-blue-600 hover:bg-blue-500 text-white shadow-sm py-2 rounded-lg font-semibold text-xs flex items-center justify-center cursor-pointer">
                     <i class="fa-solid fa-shield-cat mr-1.5"></i> Проверить текст, договор или статью
@@ -144,7 +139,7 @@
             </div>
         </div>
 
-        <!-- РЕЖИМ 2: ГЕНЕРАЦИЯ ДОКУМЕНТА -->
+        <!-- КОНСТРУКТОР -->
         <div id="section-generate" style="display: none;" class="tg-card rounded-xl p-3 border-2 border-blue-500/50 shadow-md space-y-2">
             <div class="flex items-center justify-between border-b border-gray-700 pb-1.5">
                 <h2 class="text-xs font-semibold text-blue-400"><i class="fa-solid fa-circle-dot mr-1 text-[10px]"></i> Режим: Конструктор документов</h2>
@@ -184,18 +179,18 @@
             </div>
         </div>
 
-        <!-- БЛОК РЕЗУЛЬТАТА И СКАЧИВАНИЯ -->
+        <!-- РЕЗУЛЬТАТ -->
         <div id="result-wrapper" style="display: none;" class="tg-card rounded-xl p-3 border shadow-sm space-y-2">
             <div class="flex items-center justify-between flex-wrap gap-1">
                 <h3 id="result-title" class="text-xs font-semibold text-gray-300">Результат анализа</h3>
                 <div class="flex gap-1.5 flex-wrap">
-                    <button type="button" id="download-analysis-btn" onclick="downloadAnalysisText()" class="hidden download-action-btn">
+                    <button type="button" id="download-analysis-btn" onclick="requestFileDownload('analysis')" class="hidden download-action-btn">
                         <i class="fa-solid fa-file-word mr-1.5"></i> Скачать результат анализа
                     </button>
-                    <button type="button" id="download-protocol-btn" onclick="downloadWordProtocol()" class="hidden download-action-btn">
+                    <button type="button" id="download-protocol-btn" onclick="requestFileDownload('protocol')" class="hidden download-action-btn">
                         <i class="fa-solid fa-file-word mr-1.5"></i> Скачать протокол разногласий
                     </button>
-                    <button type="button" id="download-docx-btn" onclick="downloadWord()" class="hidden download-action-btn">
+                    <button type="button" id="download-docx-btn" onclick="requestFileDownload('document')" class="hidden download-action-btn">
                         <i class="fa-solid fa-file-word mr-1.5"></i> Скачать документ (.docx)
                     </button>
                 </div>
@@ -206,11 +201,30 @@
             </div>
         </div>
 
-        <!-- ПОДВАЛ / ДИСКЛЕЙМЕР -->
         <footer class="text-center py-2 text-[10px] text-gray-500 space-y-0.5">
             <p>© 2026 Lexify. Все права защищены.</p>
             <p>Сервис носит информационный характер и не заменяет очную юридическую консультацию.</p>
         </footer>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО ДЛЯ СКАЧИВАНИЯ ФАЙЛОВ (РАБОТАЕТ НА ПК И ТЕЛЕФОНАХ) -->
+    <div id="download-modal" class="hidden fixed inset-0 bg-black/75 flex items-center justify-center p-3 z-50">
+        <div class="tg-card rounded-2xl p-4 border border-blue-500/50 shadow-2xl max-w-sm w-full space-y-3 text-center">
+            <div class="w-12 h-12 bg-blue-600/20 text-blue-400 rounded-full flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-file-arrow-down"></i>
+            </div>
+            <h3 class="text-sm font-bold text-white">Документ готов к скачиванию</h3>
+            <p id="download-modal-filename" class="text-xs text-gray-400 font-mono">filename.docx</p>
+            
+            <div class="space-y-2 pt-1">
+                <a id="modal-download-link" href="#" download class="w-full bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-xl font-semibold text-xs flex items-center justify-center shadow cursor-pointer">
+                    <i class="fa-solid fa-download mr-1.5"></i> Загрузить файл на устройство
+                </a>
+                <button type="button" onclick="closeDownloadModal()" class="w-full py-2 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-semibold text-gray-200 cursor-pointer">
+                    Закрыть
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- МОДАЛЬНОЕ ОКНО АДМИНКИ -->
@@ -464,15 +478,13 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             })
-            .then(response => response.json())
+            .then(response => {
+                if (response.ok) return response.json();
+                throw new Error("Ошибка сервера");
+            })
             .then(data => {
-                let markdownText = "";
-                if (typeof data === 'string') {
-                    markdownText = data;
-                } else if (data) {
-                    markdownText = data.document || data.result || data.text || data.response || data.content || "";
-                }
-                container.innerHTML = marked.parse(markdownText);
+                let docText = data.document || data.result || "Документ успешно сформирован и готов к скачиванию.";
+                container.innerHTML = marked.parse(docText);
                 scrollToResults();
             })
             .catch(error => {
@@ -480,25 +492,64 @@
             });
         }
 
-        function downloadAnalysisText() {
-            let risksList = [];
-            let summaryText = "";
-            if (lastAnalysisResult) {
-                let parsed = lastAnalysisResult;
-                if (typeof parsed === 'string') {
-                    try { parsed = JSON.parse(parsed); } catch(e) {}
-                }
-                if (parsed && parsed.risks) risksList = parsed.risks;
-                if (parsed && parsed.summary) summaryText = parsed.summary;
-            }
+        // Универсальная функция запроса файла и открытия модального окна
+        function requestFileDownload(type) {
+            let payload = {};
+            let outFilename = "Lexify_Document.docx";
 
-            const payload = {
-                doc_type: "Результат анализа",
-                jurisdiction: currentJurisdiction,
-                telegram_id: currentTelegramId,
-                risks: risksList,
-                description: summaryText
-            };
+            if (type === 'analysis') {
+                let risksList = [];
+                let summaryText = "";
+                if (lastAnalysisResult) {
+                    let parsed = lastAnalysisResult;
+                    if (typeof parsed === 'string') {
+                        try { parsed = JSON.parse(parsed); } catch(e) {}
+                    }
+                    if (parsed && parsed.risks) risksList = parsed.risks;
+                    if (parsed && parsed.summary) summaryText = parsed.summary;
+                }
+                payload = {
+                    doc_type: "Результат анализа",
+                    jurisdiction: currentJurisdiction,
+                    telegram_id: currentTelegramId,
+                    risks: risksList,
+                    description: summaryText
+                };
+                outFilename = "Lexify_Rezultat_Analiza.docx";
+            } else if (type === 'protocol') {
+                let risksList = [];
+                let summaryText = "";
+                if (lastAnalysisResult) {
+                    let parsed = lastAnalysisResult;
+                    if (typeof parsed === 'string') {
+                        try { parsed = JSON.parse(parsed); } catch(e) {}
+                    }
+                    if (parsed && parsed.risks) risksList = parsed.risks;
+                    if (parsed && parsed.summary) summaryText = parsed.summary;
+                }
+                payload = {
+                    doc_type: "Протокол разногласий",
+                    jurisdiction: currentJurisdiction,
+                    telegram_id: currentTelegramId,
+                    risks: risksList,
+                    description: summaryText
+                };
+                outFilename = "Lexify_Protokol_Raznoglasiy.docx";
+            } else {
+                payload = {
+                    doc_type: currentDocType === 'offer' ? 'Оферта' : 'Договор услуг',
+                    jurisdiction: currentJurisdiction,
+                    executor: document.getElementById('executor-input').value,
+                    client: document.getElementById('client-input').value,
+                    description: document.getElementById('desc-input').value,
+                    payment: "100% предоплата",
+                    deadline: "30 дней",
+                    revisions: "2",
+                    telegram_id: currentTelegramId,
+                    risks: []
+                };
+                outFilename = "Lexify_Document.docx";
+            }
 
             fetch('/generate-protocol', {
                 method: 'POST',
@@ -507,109 +558,26 @@
             })
             .then(response => {
                 if (response.ok) return response.blob();
-                throw new Error("Ошибка сервера");
+                throw new Error("Не удалось сгенерировать файл на сервере");
             })
             .then(blob => {
                 const blobUrl = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = blobUrl;
-                a.download = "Lexify_Rezultat_Analiza.docx";
-                document.body.appendChild(a);
-                a.click();
-                setTimeout(() => {
-                    a.remove();
-                    window.URL.revokeObjectURL(blobUrl);
-                }, 500);
+                const modal = document.getElementById('download-modal');
+                const link = document.getElementById('modal-download-link');
+                const fname = document.getElementById('download-modal-filename');
+
+                link.href = blobUrl;
+                link.download = outFilename;
+                fname.textContent = outFilename;
+                modal.classList.remove('hidden');
             })
             .catch(e => {
-                alert("Ошибка при скачивании отчета: " + e.message);
+                alert("Ошибка при создании файла: " + e.message);
             });
         }
 
-        function downloadWordProtocol() {
-            let risksList = [];
-            let summaryText = "";
-            if (lastAnalysisResult) {
-                let parsed = lastAnalysisResult;
-                if (typeof parsed === 'string') {
-                    try { parsed = JSON.parse(parsed); } catch(e) {}
-                }
-                if (parsed && parsed.risks) risksList = parsed.risks;
-                if (parsed && parsed.summary) summaryText = parsed.summary;
-            }
-
-            const payload = {
-                doc_type: "Протокол разногласий",
-                jurisdiction: currentJurisdiction,
-                telegram_id: currentTelegramId,
-                risks: risksList,
-                description: summaryText
-            };
-
-            fetch('/generate-protocol', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(response => {
-                if (response.ok) return response.blob();
-                throw new Error("Ошибка сервера");
-            })
-            .then(blob => {
-                const blobUrl = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = blobUrl;
-                a.download = "Lexify_Protokol_Raznoglasiy.docx";
-                document.body.appendChild(a);
-                a.click();
-                setTimeout(() => {
-                    a.remove();
-                    window.URL.revokeObjectURL(blobUrl);
-                }, 500);
-            })
-            .catch(e => {
-                alert("Ошибка при скачивании протокола: " + e.message);
-            });
-        }
-
-        function downloadWord() {
-            const payload = {
-                doc_type: currentDocType === 'offer' ? 'Оферта' : 'Договор услуг',
-                jurisdiction: currentJurisdiction,
-                executor: document.getElementById('executor-input').value,
-                client: document.getElementById('client-input').value,
-                description: document.getElementById('desc-input').value,
-                payment: "100% предоплата",
-                deadline: "30 дней",
-                revisions: "2",
-                telegram_id: currentTelegramId,
-                risks: []
-            };
-
-            fetch('/generate-protocol', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(response => {
-                if (response.ok) return response.blob();
-                throw new Error("Ошибка сервера");
-            })
-            .then(blob => {
-                const blobUrl = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = blobUrl;
-                a.download = "Lexify_Document.docx";
-                document.body.appendChild(a);
-                a.click();
-                setTimeout(() => {
-                    a.remove();
-                    window.URL.revokeObjectURL(blobUrl);
-                }, 500);
-            })
-            .catch(e => {
-                alert("Ошибка при скачивании документа: " + e.message);
-            });
+        function closeDownloadModal() {
+            document.getElementById('download-modal').classList.add('hidden');
         }
 
         function openAdminPanel() {
