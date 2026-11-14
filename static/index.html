@@ -534,14 +534,24 @@
             })
             .then(blob => {
                 const blobUrl = window.URL.createObjectURL(blob);
-                const modal = document.getElementById('download-modal');
-                const link = document.getElementById('modal-download-link');
-                const fname = document.getElementById('download-modal-filename');
+                
+                if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openLink) {
+                    const tempLink = document.createElement('a');
+                    tempLink.href = blobUrl;
+                    tempLink.download = outFilename;
+                    document.body.appendChild(tempLink);
+                    tempLink.click();
+                    document.body.removeChild(tempLink);
+                } else {
+                    const modal = document.getElementById('download-modal');
+                    const link = document.getElementById('modal-download-link');
+                    const fname = document.getElementById('download-modal-filename');
 
-                link.href = blobUrl;
-                link.download = outFilename;
-                fname.textContent = outFilename;
-                modal.classList.remove('hidden');
+                    link.href = blobUrl;
+                    link.download = outFilename;
+                    fname.textContent = outFilename;
+                    modal.classList.remove('hidden');
+                }
             })
             .catch(e => {
                 alert("Ошибка при создании файла: " + e.message);
