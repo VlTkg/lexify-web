@@ -245,7 +245,7 @@
         let currentJurisdiction = '';
         let currentDocType = 'contract';
         let currentAnalyzeMode = 'text';
-        let currentTelegramId = 8804083078;
+        let currentTelegramId = 0;
         let lastAnalysisResult = null;
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -254,10 +254,11 @@
             if (secAnalyze) secAnalyze.style.display = 'none';
             if (secGenerate) secGenerate.style.display = 'none';
 
-            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
-                const user = window.Telegram.WebApp.initDataUnsafe.user;
-                if (user && user.id) {
-                    currentTelegramId = user.id;
+            if (window.Telegram && window.Telegram.WebApp) {
+                const tg = window.Telegram.WebApp;
+                tg.ready();
+                if (tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
+                    currentTelegramId = tg.initDataUnsafe.user.id;
                 }
             }
 
