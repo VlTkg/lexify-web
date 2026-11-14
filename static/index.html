@@ -229,7 +229,6 @@
         let lastAnalysisResult = null;
 
         window.addEventListener('DOMContentLoaded', () => {
-            // Инициализация при старте: первая вкладка активна
             const secAnalyze = document.getElementById('section-analyze');
             const secGenerate = document.getElementById('section-generate');
             if (secAnalyze) secAnalyze.style.display = 'block';
@@ -520,7 +519,6 @@
                 a.style.display = 'none';
                 a.href = url;
                 a.download = outFilename;
-                document.endi.appendChild(a); // исправлено на document.body
                 document.body.appendChild(a);
                 a.click();
                 setTimeout(() => {
