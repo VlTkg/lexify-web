@@ -1,8 +1,6 @@
 import os
 import io
 import json
-import httpx
-import re
 from datetime import datetime
 from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Form
 from fastapi.staticfiles import StaticFiles
@@ -95,7 +93,7 @@ async def analyze_text(data: dict):
 async def analyze_file(
     file: UploadFile = File(...), 
     jurisdiction: Optional[str] = Form("Россия (РФ)"), 
-    telegram_id: Optional[int] = Form(8804083078)
+    telegram_id: Optional[int] = Form(0)
 ):
     try:
         contents = await file.read()
