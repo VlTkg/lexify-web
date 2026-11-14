@@ -114,7 +114,10 @@ async def analyze_file(
         raise HTTPException(status_code=400, detail="Не удалось извлечь текст из файла")
 
     req = AnalyzeRequest(text=extracted_text, jurisdiction=jurisdiction, telegram_id=telegram_id)
-    return await analyze_contract(req)
+    res = await analyze_contract(req)
+    if isinstance(res, dict) and "result" in res:
+        return res
+    return {"result": res}
 
 @app.post("/generate-protocol")
 async def generate_protocol(req: GenerateRequest, request: Request):
