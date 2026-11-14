@@ -192,7 +192,8 @@ if __name__ == "__main__":
 
 ---
 
-### Файл 2: `static/index.html`
+### Файл №2: `static/index.html`
+*(Скопируйте этот код и полностью замените им содержимое вашего файла `static/index.html`)*
 
 ```html
 <!DOCTYPE html>
