@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Lexify — Проверка договоров и юридических рисков</title>
-    <script src="[https://telegram.org/js/telegram-web-app.js](https://telegram.org/js/telegram-web-app.js)"></script>
-    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
-    <script src="[https://cdn.jsdelivr.net/npm/marked/marked.min.js](https://cdn.jsdelivr.net/npm/marked/marked.min.js)"></script>
-    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { background-color: #111827; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         .tg-card { background-color: #1f2937; border-color: #374151; word-break: break-word; overflow-wrap: break-word; }
@@ -32,7 +32,7 @@
         .tab-btn {
             height: 42px; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600;
             display: inline-flex; align-items: center; justify-content: flex-start; padding-left: 0.8rem; transition: all 0.2s ease;
-            background-color: rgba(30, 58, 138, 0.4); border: 1px solid rgba(59, 130, 246, 0.5); color: #93c5fd; cursor: pointer;
+            background-color: rgba(30, 58, 138, 0.4); border: 1px solid rgba(59, 130, 246, 0.5); color: #93c5fd; cursor: pointer; width: 100%;
         }
         .tab-btn.active { background-color: #1d4ed8; color: #ffffff; border-color: #60a5fa; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); }
         .tab-btn:not(.active):hover { background-color: rgba(30, 58, 138, 0.7); color: #ffffff; border-color: #3b82f6; }
@@ -40,13 +40,10 @@
             height: 28px; padding: 0 8px; display: inline-flex; align-items: center; justify-content: center; border-radius: 0.4rem; font-size: 0.7rem; font-weight: 600;
         }
         .analysis-block { background: #111827; border-left: 3px solid #3b82f6; padding: 10px; margin-bottom: 8px; border-radius: 0 0.5rem 0.5rem 0; font-size: 0.8rem; }
-        .risk-high { border-left-color: #ef4444; }
-        .risk-medium { border-left-color: #f59e0b; }
-        .risk-low { border-left-color: #10b981; }
     </style>
 </head>
 <body class="min-h-screen pb-6">
-    <div class="max-w-2xl mx-auto p-2.5 space-y-2.5">
+    <div class="max-w-2xl mx-auto p-3 space-y-3">
         
         <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
         <div class="flex items-center justify-end gap-2">
@@ -61,19 +58,19 @@
         </div>
 
         <!-- ЗАГОЛОВОК -->
-        <header class="text-center space-y-2 py-1">
-            <h1 class="text-2xl font-extrabold tracking-tight text-white flex items-center justify-center">
+        <header class="text-center space-y-1.5 py-1">
+            <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center justify-center">
                 <i class="fa-solid fa-scale-balanced mr-2 text-blue-500"></i> Lexify
             </h1>
             <p class="text-xs text-gray-300 max-w-lg mx-auto leading-relaxed font-normal">
-                Сервис правовой поддержки, предназначенный для поиска скрытых рисков в договорах, подготовки безопасных документов и разработки протоколов разногласий.
+                Сервис правовой поддержки для анализа рисков и подготовки документов.
             </p>
         </header>
 
         <!-- ЮРИСДИКЦИЯ -->
         <div class="tg-card rounded-xl p-3 border shadow-sm space-y-1.5">
             <label class="text-[11px] font-medium text-gray-300 block">Применимое право (юрисдикция)</label>
-            <div class="flex gap-1.5" id="jurisdiction-group">
+            <div class="flex flex-wrap gap-1.5" id="jurisdiction-group">
                 <button type="button" class="chip-btn active" onclick="setJurisdiction('Россия (РФ)', this)">Россия (РФ)</button>
                 <button type="button" class="chip-btn" onclick="setJurisdiction('Казахстан', this)">Казахстан</button>
                 <button type="button" class="chip-btn" onclick="setJurisdiction('Беларусь', this)">Беларусь</button>
@@ -83,59 +80,59 @@
         <!-- ВКЛАДКИ -->
         <div class="grid grid-cols-2 gap-2">
             <button type="button" onclick="switchTab('analyze')" id="tab-btn-analyze" class="tab-btn active cursor-pointer">
-                <i class="fa-solid fa-magnifying-glass-chart mr-2 ml-0.5"></i> Анализировать договор
+                <i class="fa-solid fa-magnifying-glass-chart mr-1.5"></i> Анализ
             </button>
             <button type="button" onclick="switchTab('generate')" id="tab-btn-generate" class="tab-btn cursor-pointer">
-                <i class="fa-solid fa-file-contract mr-2 ml-0.5"></i> Сгенерировать документ
+                <i class="fa-solid fa-file-contract mr-1.5"></i> Конструктор
             </button>
         </div>
 
         <!-- АНАЛИЗ -->
-        <div id="section-analyze" class="tg-card rounded-xl p-3 border-2 border-blue-500/50 shadow-md space-y-2">
-            <div class="flex items-center justify-between border-b border-gray-700 pb-1.5">
+        <div id="section-analyze" class="tg-card rounded-xl p-3 border border-gray-700 shadow-md space-y-3">
+            <div class="border-b border-gray-700 pb-1.5">
                 <h2 class="text-xs font-semibold text-blue-400"><i class="fa-solid fa-circle-dot mr-1 text-[10px]"></i> Режим: Экспресс-анализ рисков</h2>
             </div>
             
-            <div>
-                <label class="text-[11px] font-medium text-gray-300 block mb-1">Способ предоставления материала</label>
-                <div class="flex gap-1.5">
+            <div class="space-y-1">
+                <label class="text-[11px] font-medium text-gray-300 block">Способ предоставления материала</label>
+                <div class="flex flex-wrap gap-1.5">
                     <button type="button" class="chip-btn active" onclick="setAnalyzeInputType('text', this)">Вставить текст</button>
-                    <button type="button" class="chip-btn" onclick="setAnalyzeInputType('file', this)">Выбрать файл (.docx, .pdf, .txt, .odt)</button>
+                    <button type="button" class="chip-btn" onclick="setAnalyzeInputType('file', this)">Файл (.docx, .pdf, .txt, .odt)</button>
                 </div>
             </div>
 
-            <div id="analyze-input-text-container">
-                <label class="text-[11px] font-medium text-gray-300 block mb-1">Текст договора, статьи или выдержки из него</label>
+            <div id="analyze-input-text-container" class="space-y-1">
+                <label class="text-[11px] font-medium text-gray-300 block">Текст договора или статьи</label>
                 <textarea id="analyze-text-input" rows="4" class="identical-input-box text-xs" placeholder="Вставьте текст сюда..."></textarea>
             </div>
 
             <div id="analyze-input-file-container" class="hidden space-y-1">
-                <label class="text-[11px] font-medium text-gray-300 block">Загрузите документ (.docx, .pdf, .txt, .odt)</label>
-                <div class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-600 rounded-lg bg-gray-900/50 hover:bg-gray-800/80 transition p-2">
-                    <input type="file" id="analyze-file-input" accept=".docx,.pdf,.txt,.odt" class="w-full text-xs text-gray-300 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer" onchange="handleFileSelect(this)">
+                <label class="text-[11px] font-medium text-gray-300 block">Загрузите документ</label>
+                <div class="flex flex-col items-center justify-center w-full h-20 border-2 border-dashed border-gray-600 rounded-lg bg-gray-900/50 hover:bg-gray-800/80 transition p-2">
+                    <input type="file" id="analyze-file-input" accept=".docx,.pdf,.txt,.odt" class="w-full text-xs text-gray-300 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer" onchange="handleFileSelect(this)">
                     <span id="selected-file-name" class="text-[10px] text-emerald-400 mt-1 font-medium">Файл не выбран</span>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-2 pt-0.5">
-                <button type="button" onclick="runAnalysis()" class="w-full bg-blue-600 hover:bg-blue-500 text-white shadow-sm py-2 rounded-lg font-semibold text-xs flex items-center justify-center cursor-pointer">
-                    <i class="fa-solid fa-shield-cat mr-1.5"></i> Проверить текст, договор или статью
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <button type="button" onclick="runAnalysis()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg font-semibold text-xs flex items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-shield-cat mr-1"></i> Проверить
                 </button>
                 <button type="button" onclick="resetAnalyzeForm()" class="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 border border-gray-600 py-2 rounded-lg font-semibold text-xs flex items-center justify-center cursor-pointer">
-                    <i class="fa-solid fa-rotate-left mr-1"></i> Сбросить
+                    <i class="fa-solid fa-rotate-left mr-1"></i> Сброс
                 </button>
             </div>
         </div>
 
         <!-- КОНСТРУКТОР -->
-        <div id="section-generate" style="display: none;" class="tg-card rounded-xl p-3 border-2 border-blue-500/50 shadow-md space-y-2">
-            <div class="flex items-center justify-between border-b border-gray-700 pb-1.5">
+        <div id="section-generate" style="display: none;" class="tg-card rounded-xl p-3 border border-gray-700 shadow-md space-y-3">
+            <div class="border-b border-gray-700 pb-1.5">
                 <h2 class="text-xs font-semibold text-blue-400"><i class="fa-solid fa-circle-dot mr-1 text-[10px]"></i> Режим: Конструктор документов</h2>
             </div>
             
-            <div>
-                <label class="text-[11px] font-medium text-gray-300 block mb-1">Тип документа</label>
-                <div class="flex gap-1.5">
+            <div class="space-y-1">
+                <label class="text-[11px] font-medium text-gray-300 block">Тип документа</label>
+                <div class="flex flex-wrap gap-1.5">
                     <button type="button" class="chip-btn active" onclick="setDocType('contract', this)">Договор услуг</button>
                     <button type="button" class="chip-btn" onclick="setDocType('offer', this)">Оферта</button>
                 </div>
@@ -157,39 +154,39 @@
                 <textarea id="desc-input" rows="2" class="identical-input-box text-xs py-1.5">Разработка программного модуля автоматизации</textarea>
             </div>
 
-            <div class="grid grid-cols-2 gap-2 pt-0.5">
-                <button type="button" onclick="generateDocument()" class="w-full bg-blue-600 hover:bg-blue-500 text-white shadow-sm py-2 rounded-lg font-semibold text-xs flex items-center justify-center cursor-pointer">
-                    <i class="fa-solid fa-file-contract mr-1"></i> Сгенерировать
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <button type="button" onclick="generateDocument()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg font-semibold text-xs flex items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-file-contract mr-1"></i> Создать
                 </button>
                 <button type="button" onclick="resetGenerateForm()" class="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 border border-gray-600 py-2 rounded-lg font-semibold text-xs flex items-center justify-center cursor-pointer">
-                    <i class="fa-solid fa-rotate-left mr-1"></i> Сбросить
+                    <i class="fa-solid fa-rotate-left mr-1"></i> Сброс
                 </button>
             </div>
         </div>
 
         <!-- РЕЗУЛЬТАТ -->
         <div id="result-wrapper" style="display: none;" class="tg-card rounded-xl p-3 border shadow-sm space-y-2">
-            <div class="flex items-center justify-between flex-wrap gap-1">
+            <div class="flex items-center justify-between flex-wrap gap-1.5">
                 <h3 id="result-title" class="text-xs font-semibold text-gray-300">Результат анализа</h3>
                 <div class="flex gap-1.5 flex-wrap">
                     <button type="button" id="download-analysis-btn" onclick="requestFileDownload('analysis')" class="hidden download-action-btn">
-                        <i class="fa-solid fa-file-word mr-1.5"></i> Скачать результат анализа
+                        <i class="fa-solid fa-file-word mr-1"></i> Заключение (.docx)
                     </button>
                     <button type="button" id="download-protocol-btn" onclick="requestFileDownload('protocol')" class="hidden download-action-btn">
-                        <i class="fa-solid fa-file-word mr-1.5"></i> Скачать протокол разногласий
+                        <i class="fa-solid fa-file-word mr-1"></i> Протокол разногласий
                     </button>
                     <button type="button" id="download-docx-btn" onclick="requestFileDownload('document')" class="hidden download-action-btn">
-                        <i class="fa-solid fa-file-word mr-1.5"></i> Скачать документ (.docx)
+                        <i class="fa-solid fa-file-word mr-1"></i> Скачать документ
                     </button>
                 </div>
             </div>
             
-            <div id="result-container" class="bg-gray-900 p-3 rounded-lg text-xs text-gray-300 min-h-[180px] max-h-[400px] overflow-y-auto border border-gray-800 space-y-2">
+            <div id="result-container" class="bg-gray-900 p-3 rounded-lg text-xs text-gray-300 min-h-[160px] max-h-[350px] overflow-y-auto border border-gray-800 space-y-2">
                 Результат появится здесь...
             </div>
         </div>
 
-        <footer class="text-center py-2 text-[10px] text-gray-500 space-y-0.5">
+        <footer class="text-center py-2 text-[10px] text-gray-500">
             <p>© 2026 Lexify. Все права защищены.</p>
         </footer>
     </div>
@@ -275,7 +272,7 @@
         function handleFileSelect(input) {
             const fileNameSpan = document.getElementById('selected-file-name');
             if (input.files && input.files.length > 0) {
-                fileNameSpan.textContent = "Выбран файл: " + input.files[0].name;
+                fileNameSpan.textContent = "Выбран: " + input.files[0].name;
             } else {
                 fileNameSpan.textContent = "Файл не выбран";
             }
@@ -326,16 +323,15 @@
                     html += `<div class="p-2 rounded-lg border ${badgeColor} mb-2 flex justify-between items-center text-xs font-semibold"><span>Уровень риска: ${lvl}</span></div>`;
                 }
                 if (parsedData.summary) {
-                    html += `<div class="analysis-block risk-medium"><b class="text-white block mb-0.5">Резюме:</b> ${parsedData.summary}</div>`;
+                    html += `<div class="analysis-block"><b class="text-white block mb-0.5">Резюме:</b> ${parsedData.summary}</div>`;
                 }
                 if (parsedData.risks && Array.isArray(parsedData.risks)) {
                     parsedData.risks.forEach((r, idx) => {
-                        let riskClass = r.category === 'red' ? 'risk-high' : (r.category === 'yellow' ? 'risk-medium' : 'risk-low');
                         html += `
-                            <div class="analysis-block ${riskClass}">
+                            <div class="analysis-block">
                                 <b class="text-white block">Риск #${idx+1}: ${r.title || 'Замечание'}</b>
-                                <p class="text-gray-300 mt-0.5"><b>Цитата / Пункт:</b> «${r.quote || ''}»</p>
-                                <p class="text-gray-300 mt-0.5"><b>Суть риска:</b> ${r.explanation || ''}</p>
+                                <p class="text-gray-300 mt-0.5"><b>Цитата:</b> «${r.quote || ''}»</p>
+                                <p class="text-gray-300 mt-0.5"><b>Суть:</b> ${r.explanation || ''}</p>
                                 <p class="text-blue-300 mt-0.5"><b>Рекомендация:</b> ${r.recommendation || ''}</p>
                             </div>
                         `;
@@ -364,7 +360,7 @@
             downloadAnalysisBtn.classList.remove('hidden');
             downloadProtocolBtn.classList.remove('hidden');
             downloadDocBtn.classList.add('hidden');
-            document.getElementById('result-title').innerText = "Результат анализа рисков и статьи";
+            document.getElementById('result-title').innerText = "Результат анализа рисков";
             container.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Идет правовой анализ материала...';
             scrollToResults();
 
@@ -387,12 +383,8 @@
                         })
                     })
                     .then(response => response.json())
-                    .then(data => {
-                        renderFormattedAnalysis(data);
-                    })
-                    .catch(err => {
-                        container.innerHTML = "Ошибка анализа: " + err.message;
-                    });
+                    .then(data => renderFormattedAnalysis(data))
+                    .catch(err => { container.innerHTML = "Ошибка анализа: " + err.message; });
                 } else {
                     const fileInput = document.getElementById('analyze-file-input');
                     if (!fileInput.files || fileInput.files.length === 0) {
@@ -411,12 +403,8 @@
                         body: formData
                     })
                     .then(response => response.json())
-                    .then(data => {
-                        renderFormattedAnalysis(data);
-                    })
-                    .catch(err => {
-                        container.innerHTML = "Ошибка анализа файла: " + err.message;
-                    });
+                    .then(data => renderFormattedAnalysis(data))
+                    .catch(err => { container.innerHTML = "Ошибка анализа файла: " + err.message; });
                 }
             } catch (e) {
                 container.innerHTML = "Ошибка: " + e.message;
@@ -437,7 +425,7 @@
             document.getElementById('result-title').innerText = "Сгенерированный документ";
             
             const desc = document.getElementById('desc-input').value || "Разработка модуля";
-            container.innerHTML = marked.parse(`Сгенерированный документ по параметрам:\n\n${desc}\n\nВсе пункты согласованы. Готов к скачиванию.`);
+            container.innerHTML = marked.parse(`Документ успешно сформирован по заданным параметрам:\n\n${desc}\n\nГотов к скачиванию.`);
             scrollToResults();
         }
 
@@ -485,7 +473,7 @@
                     doc_type: currentDocType === 'offer' ? 'Оферта' : 'Договор услуг',
                     jurisdiction: currentJurisdiction,
                     executor: document.getElementById('executor-input').value,
-                    client: document.getElementById('client-input').value,
+                    client: document.getElementById('client-input-input' in window ? document.getElementById('client-input-input') : document.getElementById('client-input')).value,
                     description: document.getElementById('desc-input').value,
                     payment: "100% предоплата",
                     deadline: "30 дней",
