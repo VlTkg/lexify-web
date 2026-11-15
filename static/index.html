@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Lexify — Проверка договоров и юридических рисков</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="[https://telegram.org/js/telegram-web-app.js](https://telegram.org/js/telegram-web-app.js)"></script>
+    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
+    <script src="[https://cdn.jsdelivr.net/npm/marked/marked.min.js](https://cdn.jsdelivr.net/npm/marked/marked.min.js)"></script>
+    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
     <style>
         body { background-color: #111827; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         .tg-card { background-color: #1f2937; border-color: #374151; word-break: break-word; overflow-wrap: break-word; }
@@ -100,7 +100,7 @@
                 <label class="text-[11px] font-medium text-gray-300 block mb-1">Способ предоставления материала</label>
                 <div class="flex gap-1.5">
                     <button type="button" class="chip-btn active" onclick="setAnalyzeInputType('text', this)">Вставить текст</button>
-                    <button type="button" class="chip-btn" onclick="setAnalyzeInputType('file', this)">Выбрать файл (.docx / .pdf)</button>
+                    <button type="button" class="chip-btn" onclick="setAnalyzeInputType('file', this)">Выбрать файл (.docx, .pdf, .txt, .odt)</button>
                 </div>
             </div>
 
@@ -110,9 +110,9 @@
             </div>
 
             <div id="analyze-input-file-container" class="hidden space-y-1">
-                <label class="text-[11px] font-medium text-gray-300 block">Загрузите документ или статью</label>
+                <label class="text-[11px] font-medium text-gray-300 block">Загрузите документ (.docx, .pdf, .txt, .odt)</label>
                 <div class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-600 rounded-lg bg-gray-900/50 hover:bg-gray-800/80 transition p-2">
-                    <input type="file" id="analyze-file-input" accept=".docx,.pdf" class="w-full text-xs text-gray-300 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer" onchange="handleFileSelect(this)">
+                    <input type="file" id="analyze-file-input" accept=".docx,.pdf,.txt,.odt" class="w-full text-xs text-gray-300 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer" onchange="handleFileSelect(this)">
                     <span id="selected-file-name" class="text-[10px] text-emerald-400 mt-1 font-medium">Файл не выбран</span>
                 </div>
             </div>
@@ -304,7 +304,6 @@
             let container = document.getElementById('result-container');
             container.innerHTML = "";
             
-            // Защита от пустых данных или ошибок сервера
             if (!data) {
                 container.innerHTML = "Ошибка: получен пустой ответ от сервера.";
                 scrollToResults();
