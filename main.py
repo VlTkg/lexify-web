@@ -12,6 +12,9 @@ from google import genai
 import docx
 from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.oxml import parse_xml
+from docx.oxml.ns import nsdecls
 import pypdf
 
 app = FastAPI()
@@ -123,74 +126,151 @@ async def analyze_file(
 async def generate_protocol(req: GenerateRequest, request: Request):
     doc = docx.Document()
     
-    # Настройка стилей документа (шрифт Calibri, интервалы)
+    # Строгие стили документа (шрифт Calibri, темный нейтральный текст)
     style = doc.styles['Normal']
     font = style.font
     font.name = 'Calibri'
     font.size = Pt(11)
-    font.color.rgb = RGBColor(51, 51, 51)
+    font.color.rgb = RGBColor(38, 38, 38) # Темно-серый / почти черный
 
-    # Заголовок документа
-    title = doc.add_paragraph()
-    title.paragraph_format.space_after = Pt(4)
-    title_run = title.add_run(f"ДОКУМЕНТ: {req.doc_type.upper()}")
-    title_run.bold = True
-    title_run.font.size = Pt(16)
-    title_run.font.color.rgb = RGBColor(31, 41, 55)
+    if req.doc_type == "Результат анализа":
+        # Отчет об анализе рисков
+        title = doc.add_paragraph()
+        title.paragraph_format.space_after = Pt(2)
+        trun = title.add_run("ЭКСПЕРТНОЕ ЗАКЛЮЧЕНИЕ ПО РЕЗУЛЬТАТАМ АНАЛИЗА РИСКОВ")
+        trun.bold = True
+        trun.font.size = Pt(14)
+        trun.font.color.rgb = RGBColor(20, 20, 20)
 
-    # Метаданные
-    meta = doc.add_paragraph()
-    meta.paragraph_format.space_after = Pt(12)
-    meta.add_run(f"Юрисдикция: {req.jurisdiction}\n").bold = True
-    meta.add_run(f"Дата формирования: {datetime.now().strftime('%d.%m.%Y %H:%M')}")
+        meta = doc.add_paragraph()
+        meta.paragraph_format.space_after = Pt(12)
+        meta.add_run(f"Применимое право: {req.jurisdiction}\n").bold = True
+        meta.add_run(f"Дата формирования: {datetime.now().strftime('%d.%m.%Y %H:%M')}")
 
-    # Разделитель
-    div = doc.add_paragraph()
-    div.paragraph_format.space_after = Pt(12)
-    div_run = div.add_run("----------------------------------------------------------------------------------")
-    div_run.font.color.rgb = RGBColor(156, 163, 175)
+        div = doc.add_paragraph()
+        div.paragraph_format.space_after = Pt(12)
+        drun = div.add_run("--------------------------------------------------------------------------------------------------")
+        drun.font.color.rgb = RGBColor(120, 120, 120)
 
-    if req.doc_type in ["Результат анализа", "Протокол разногласий"]:
-        # Резюме блок
         sum_p = doc.add_paragraph()
         sum_p.paragraph_format.space_after = Pt(12)
-        sum_p.add_run("ПРАВОВОЕ РЕЗЮМЕ:\n").bold = True
-        sum_p.add_run(req.description or "Анализ правовых рисков выполнен.")
+        sum_p.add_run("1. ОБЩЕЕ ПРАВОВОЕ РЕЗЮМЕ\n").bold = True
+        sum_p.add_run(req.description or "Анализ рисков договора выполнен.")
 
         head_p = doc.add_paragraph()
         head_p.paragraph_format.space_after = Pt(8)
-        h_run = head_p.add_run("ВЫЯВЛЕННЫЕ РИСКИ И РЕКОМЕНДАЦИИ:")
-        h_run.bold = True
-        h_run.font.size = Pt(13)
-        h_run.font.color.rgb = RGBColor(29, 78, 216)
+        hrun = head_p.add_run("2. ДЕТАЛЬНЫЙ АНАЛИЗ ПУНКТОВ И ВЫЯВЛЕННЫЕ РИСКИ")
+        hrun.bold = True
+        hrun.font.size = Pt(12)
 
         if req.risks and isinstance(req.risks, list):
             for idx, r in enumerate(req.risks, 1):
                 p = doc.add_paragraph()
                 p.paragraph_format.space_after = Pt(10)
-                p.paragraph_format.left_indent = Inches(0.2)
                 
                 cat = r.get('category', 'yellow')
-                cat_label = "🔴 ВЫСОКИЙ РИСК" if cat == 'red' else ("🟡 СРЕДНИЙ РИСК" if cat == 'yellow' else "🟢 НИЗКИЙ РИСК")
+                lvl_str = "Высокий уровень риска" if cat == 'red' else ("Средний уровень риска" if cat == 'yellow' else "Низкий уровень риска")
                 
-                title_r = p.add_run(f"Пункт {idx}. {r.get('title', 'Замечание')} [{cat_label}]\n")
-                title_r.bold = True
-                title_r.font.size = Pt(11)
+                p.add_run(f"Пункт {idx}. {r.get('title', 'Замечание')} [{lvl_str}]\n").bold = True
                 
                 if r.get('quote'):
-                    q_run = p.add_run(f"Цитата: «{r.get('quote')}»\n")
-                    q_run.italic = True
-                    q_run.font.color.rgb = RGBColor(75, 85, 99)
+                    q = p.add_run(f"Реальная редакция: «{r.get('quote')}»\n")
+                    q.italic = True
+                    q.font.color.rgb = RGBColor(80, 80, 80)
                 
-                p.add_run(f"Суть риска: ").bold = True
+                p.add_run("Юридическая суть: ").bold = True
                 p.add_run(f"{r.get('explanation', '')}\n")
                 
-                p.add_run(f"Рекомендация: ").bold = True
-                rec_run = p.add_run(f"{r.get('recommendation', '')}\n")
-                rec_run.font.color.rgb = RGBColor(30, 64, 175)
+                p.add_run("Рекомендуемое решение: ").bold = True
+                p.add_run(f"{r.get('recommendation', '')}\n")
         else:
-            doc.add_paragraph("Существенных критических замечаний и рисков не зафиксировано.")
+            doc.add_paragraph("Существенных правовых замечаний не зафиксировано.")
+
+    elif req.doc_type == "Протокол разногласий":
+        # Настоящий юридический Протокол разногласий (Таблица)
+        title = doc.add_paragraph()
+        title.paragraph_format.space_after = Pt(2)
+        title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        trun = title.add_run("ПРОТОКОЛ РАЗНОГЛАСИЙ")
+        trun.bold = True
+        trun.font.size = Pt(14)
+        trun.font.color.rgb = RGBColor(20, 20, 20)
+
+        sub = doc.add_paragraph()
+        sub.paragraph_format.space_after = Pt(12)
+        sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        sub.add_run(f"к проекту договора от {datetime.now().strftime('%d.%m.%Y')}")
+
+        meta = doc.add_paragraph()
+        meta.paragraph_format.space_after = Pt(10)
+        meta.add_run(f"Юрисдикция: {req.jurisdiction}\n")
+
+        # Создаем таблицу протокола разногласий (3 колонки)
+        table = doc.add_table(rows=1, cols=3)
+        table.alignment = WD_TABLE_ALIGNMENT.CENTER
+        table.autofit = False
+
+        # Шапка таблицы
+        hdr_cells = table.rows[0].cells
+        hdr_cells[0].text = "Редакция по проекту договора"
+        hdr_cells[1].text = "Предлагаемая редакция"
+        hdr_cells[2].text = "Обоснование разногласий"
+
+        col_widths = [Inches(2.0), Inches(2.0), Inches(2.5)]
+        for row in table.rows:
+            for i, w in enumerate(col_widths):
+                row.cells[i].width = w
+
+        # Стилизация шапки таблицы
+        for cell in hdr_cells:
+            shading = parse_xml(r'<w:shd {} w:fill="E6E6E6"/>'.format(nsdecls('w')))
+            cell._tc.get_or_add_tcPr().append(shading)
+            for p in cell.paragraphs:
+                p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                for run in p.runs:
+                    run.bold = True
+                    run.font.size = Pt(9.5)
+
+        # Заполнение строк таблицы из выявленных рисков
+        if req.risks and isinstance(req.risks, list):
+            for r in req.risks:
+                row_cells = table.add_row().cells
+                for i, w in enumerate(col_widths):
+                    row_cells[i].width = w
+                
+                row_cells[0].text = r.get('quote', 'Текст пункта отсутствует')
+                row_cells[1].text = r.get('recommendation', 'Изложить в редакции стороны')
+                row_cells[2].text = f"{r.get('title', 'Риск')}: {r.get('explanation', '')}"
+
+                for cell in row_cells:
+                    for p in cell.paragraphs:
+                        for run in p.runs:
+                            run.font.size = Pt(9.5)
+                            run.font.color.rgb = RGBColor(40, 40, 40)
+        else:
+            row_cells = table.add_row().cells
+            row_cells[0].text = "Пункты не указаны"
+            row_cells[1].text = "Без изменений"
+            row_cells[2].text = "Замечаний нет"
+
+        doc.add_paragraph().paragraph_format.space_after = Pt(20)
+        
+        # Подписи сторон
+        sig = doc.add_paragraph()
+        sig.add_run("ЗАКАЗЧИК:                              ИСПОЛНИТЕЛЬ:\n\n")
+        sig.add_run("_________________                      _________________")
+
     else:
+        # Стандартный договор / оферта
+        title = doc.add_paragraph()
+        title.paragraph_format.space_after = Pt(4)
+        trun = title.add_run(f"ДОКУМЕНТ: {req.doc_type.upper()}")
+        trun.bold = True
+        trun.font.size = Pt(14)
+
+        doc.add_paragraph(f"Юрисдикция: {req.jurisdiction}")
+        doc.add_paragraph(f"Дата: {datetime.now().strftime('%d.%m.%Y')}")
+        doc.add_paragraph("--------------------------------------------------------------------------------------------------")
         doc.add_paragraph(f"Исполнитель: {req.executor}")
         doc.add_paragraph(f"Заказчик: {req.client}")
         doc.add_paragraph(f"Предмет: {req.description}")
@@ -198,7 +278,7 @@ async def generate_protocol(req: GenerateRequest, request: Request):
         doc.add_paragraph(f"Срок выполнения: {req.deadline}")
 
     file_id = str(uuid.uuid4())
-    safe_name = "Protocol.docx" if "Протокол" in req.doc_type else ("Result.docx" if "Результат" in req.doc_type else "Document.docx")
+    safe_name = "Protocol_Raznoglasiy.docx" if req.doc_type == "Протокол разногласий" else ("Result_Analysis.docx" if req.doc_type == "Результат анализа" else "Document.docx")
     filename = f"{file_id[:8]}_{safe_name}"
     file_path = os.path.join(TEMP_FILES_DIR, filename)
     
