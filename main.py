@@ -2,6 +2,8 @@ import os
 import io
 import uuid
 import json
+import zipfile
+import xml.etree.ElementTree as ET
 from datetime import datetime
 from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Form
 from fastapi.staticfiles import StaticFiles
@@ -103,18 +105,42 @@ async def analyze_file(
 ):
     content = await file.read()
     extracted_text = ""
+    filename_lower = file.filename.lower()
     
-    if file.filename.endswith(".docx"):
-        doc = docx.Document(io.BytesIO(content))
-        extracted_text = "\n".join([p.text for p in doc.paragraphs if p.text.strip()])
-    elif file.filename.endswith(".pdf"):
-        reader = pypdf.PdfReader(io.BytesIO(content))
-        extracted_text = "\n".join([page.extract_text() for page in reader.pages if page.extract_text()])
-    else:
-        raise HTTPException(status_code=400, detail="Поддерживаются только .docx и .pdf файлы")
+    try:
+        if filename_lower.endswith(".docx"):
+            doc = docx.Document(io.BytesIO(content))
+            extracted_text = "\n".join([p.text for p in doc.paragraphs if p.text.strip()])
+        elif filename_lower.endswith(".pdf"):
+            reader = pypdf.PdfReader(io.BytesIO(content))
+            extracted_text = "\n".join([page.extract_text() for page in reader.pages if page and page.extract_text()])
+        elif filename_lower.endswith(".txt"):
+            # Пробуем UTF-8, при неудаче — CP1251 (Windows)
+            try:
+                extracted_text = content.decode("utf-8")
+            except UnicodeDecodeError:
+                extracted_text = content.decode("cp1251", errors="ignore")
+        elif filename_lower.endswith(".odt"):
+            # ODT — это zip архив, текст хранится в content.xml
+            with zipfile.ZipFile(io.BytesIO(content)) as z:
+                if "content.xml" in z.namelist():
+                    xml_content = z.read("content.xml")
+                    root = ET.fromstring(xml_content)
+                    # Извлекаем все текстовые узлы
+                    texts = []
+                    for elem in root.iter():
+                        if elem.text:
+                            texts.append(elem.text)
+                    extracted_text = "\n".join(texts)
+        else:
+            raise HTTPException(status_code=400, detail="Поддерживаются только .docx, .pdf, .txt и .odt файлы")
+    except Exception as e:
+        if isinstance(e, HTTPException):
+            raise e
+        raise HTTPException(status_code=400, detail=f"Ошибка чтения файла: {str(e)}")
 
-    if not extracted_text:
-        raise HTTPException(status_code=400, detail="Не удалось извлечь текст из файла")
+    if not extracted_text.strip():
+        raise HTTPException(status_code=400, detail="Не удалось извлечь текст из файла или он пуст")
 
     req = AnalyzeRequest(text=extracted_text, jurisdiction=jurisdiction, telegram_id=telegram_id)
     res = await analyze_contract(req)
@@ -126,15 +152,13 @@ async def analyze_file(
 async def generate_protocol(req: GenerateRequest, request: Request):
     doc = docx.Document()
     
-    # Строгие стили документа (шрифт Calibri, темный нейтральный текст)
     style = doc.styles['Normal']
     font = style.font
     font.name = 'Calibri'
     font.size = Pt(11)
-    font.color.rgb = RGBColor(38, 38, 38) # Темно-серый / почти черный
+    font.color.rgb = RGBColor(38, 38, 38)
 
     if req.doc_type == "Результат анализа":
-        # Отчет об анализе рисков
         title = doc.add_paragraph()
         title.paragraph_format.space_after = Pt(2)
         trun = title.add_run("ЭКСПЕРТНОЕ ЗАКЛЮЧЕНИЕ ПО РЕЗУЛЬТАТАМ АНАЛИЗА РИСКОВ")
@@ -187,7 +211,6 @@ async def generate_protocol(req: GenerateRequest, request: Request):
             doc.add_paragraph("Существенных правовых замечаний не зафиксировано.")
 
     elif req.doc_type == "Протокол разногласий":
-        # Настоящий юридический Протокол разногласий (Таблица)
         title = doc.add_paragraph()
         title.paragraph_format.space_after = Pt(2)
         title.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -205,12 +228,10 @@ async def generate_protocol(req: GenerateRequest, request: Request):
         meta.paragraph_format.space_after = Pt(10)
         meta.add_run(f"Юрисдикция: {req.jurisdiction}\n")
 
-        # Создаем таблицу протокола разногласий (3 колонки)
         table = doc.add_table(rows=1, cols=3)
         table.alignment = WD_TABLE_ALIGNMENT.CENTER
         table.autofit = False
 
-        # Шапка таблицы
         hdr_cells = table.rows[0].cells
         hdr_cells[0].text = "Редакция по проекту договора"
         hdr_cells[1].text = "Предлагаемая редакция"
@@ -221,7 +242,6 @@ async def generate_protocol(req: GenerateRequest, request: Request):
             for i, w in enumerate(col_widths):
                 row.cells[i].width = w
 
-        # Стилизация шапки таблицы
         for cell in hdr_cells:
             shading = parse_xml(r'<w:shd {} w:fill="E6E6E6"/>'.format(nsdecls('w')))
             cell._tc.get_or_add_tcPr().append(shading)
@@ -231,7 +251,6 @@ async def generate_protocol(req: GenerateRequest, request: Request):
                     run.bold = True
                     run.font.size = Pt(9.5)
 
-        # Заполнение строк таблицы из выявленных рисков
         if req.risks and isinstance(req.risks, list):
             for r in req.risks:
                 row_cells = table.add_row().cells
@@ -255,13 +274,11 @@ async def generate_protocol(req: GenerateRequest, request: Request):
 
         doc.add_paragraph().paragraph_format.space_after = Pt(20)
         
-        # Подписи сторон
         sig = doc.add_paragraph()
         sig.add_run("ЗАКАЗЧИК:                              ИСПОЛНИТЕЛЬ:\n\n")
         sig.add_run("_________________                      _________________")
 
     else:
-        # Стандартный договор / оферта
         title = doc.add_paragraph()
         title.paragraph_format.space_after = Pt(4)
         trun = title.add_run(f"ДОКУМЕНТ: {req.doc_type.upper()}")
