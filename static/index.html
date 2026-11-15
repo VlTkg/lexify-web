@@ -43,13 +43,13 @@
     </style>
 </head>
 <body class="min-h-screen pb-4">
-    <div class="max-w-2xl mx-auto p-3 space-y-2.5">
+    <div class="max-w-2xl mx-auto p-3 space-y-3">
         
         <!-- ВЕРХНЯЯ ПАНЕЛЬ СТАТУСА -->
         <div class="flex items-center justify-end gap-1.5">
             <div id="admin-panel-btn" class="hidden">
                 <button type="button" onclick="openAdminPanel()" class="top-badge-item bg-amber-600 hover:bg-amber-500 text-white shadow cursor-pointer">
-                    <i class="fa-solid fa-shield-halved mr-1"></i> Админ
+                    Админ <i class="fa-solid fa-shield-halved ml-1"></i>
                 </button>
             </div>
             <div id="top-admin-badge" class="hidden top-badge-item bg-blue-600/30 border border-blue-500/40 text-blue-300 font-medium">
@@ -57,19 +57,25 @@
             </div>
         </div>
 
-        <!-- ЗАГОЛОВОК СЕРВИСА -->
-        <header class="text-center space-y-1 py-1">
+        <!-- ЗАГОЛОВОК И ПОДРОБНОЕ ОПИСАНИЕ СЕРВИСА -->
+        <header class="text-center space-y-1.5 py-1">
             <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center justify-center">
-                <i class="fa-solid fa-scale-balanced mr-2 text-blue-500"></i> Lexify
+                Lexify <i class="fa-solid fa-scale-balanced ml-2 text-blue-500"></i>
             </h1>
             <p class="text-xs text-gray-300 max-w-lg mx-auto leading-relaxed font-normal">
-                Сервис правовой поддержки для анализа рисков и подготовки документов.
+                Профессиональный ИИ-сервис правовой поддержки. Выявляет скрытые риски, кабальные условия и несоответствия законам за 1 минуту.
             </p>
+            <div class="bg-blue-950/40 border border-blue-800/50 rounded-lg p-2 text-[11px] text-blue-200 text-left space-y-1 mt-2">
+                <div class="font-semibold text-blue-300 mb-0.5"><i class="fa-solid fa-circle-info mr-1"></i> Порядок работы с сервисом:</div>
+                <div>1. Выберите применимую юрисдикцию для точной правовой оценки.</div>
+                <div>2. Переключите режим: <b>Анализ договора</b> (проверка готового файла/текста) или <b>Конструктор</b> (создание нового документа).</div>
+                <div>3. Получите структурированное экспертное заключение и скачайте готовые файлы Word (.docx).</div>
+            </div>
         </header>
 
         <!-- ШАГ 1: ВЫБОР ЮРИСДИКЦИИ -->
         <div class="tg-card rounded-lg p-3 border shadow-sm space-y-1.5">
-            <label class="text-[11px] font-medium text-gray-300 block">1. Выберите применимое право (юрисдикцию)</label>
+            <label class="text-[11px] font-medium text-gray-300 block">Шаг 1. Выберите применимое право (юрисдикцию)</label>
             <div class="flex flex-wrap gap-1.5" id="jurisdiction-group">
                 <button type="button" class="chip-btn active" onclick="setJurisdiction('Россия (РФ)', this)">Россия (РФ)</button>
                 <button type="button" class="chip-btn" onclick="setJurisdiction('Казахстан', this)">Казахстан</button>
@@ -79,13 +85,13 @@
 
         <!-- ШАГ 2: ВЫБОР РЕЖИМА РАБОТЫ -->
         <div class="space-y-1">
-            <label class="text-[11px] font-medium text-gray-300 block">2. Выберите режим работы</label>
+            <label class="text-[11px] font-medium text-gray-300 block">Шаг 2. Выберите режим работы</label>
             <div class="grid grid-cols-2 gap-2">
-                <button type="button" onclick="switchTab('analyze')" id="tab-btn-analyze" class="tab-btn active cursor-pointer">
-                    <i class="fa-solid fa-magnifying-glass-chart mr-1.5"></i> Анализировать договор
+                <button type="button" onclick="switchTab('analyze')" id="tab-btn-analyze" class="tab-btn active cursor-pointer flex items-center justify-center">
+                    Анализировать договор <i class="fa-solid fa-magnifying-glass-chart ml-1.5"></i>
                 </button>
-                <button type="button" onclick="switchTab('generate')" id="tab-btn-generate" class="tab-btn cursor-pointer">
-                    <i class="fa-solid fa-file-contract mr-1.5"></i> Сгенерировать документ
+                <button type="button" onclick="switchTab('generate')" id="tab-btn-generate" class="tab-btn cursor-pointer flex items-center justify-center">
+                    Сгенерировать документ <i class="fa-solid fa-file-contract ml-1.5"></i>
                 </button>
             </div>
         </div>
@@ -119,10 +125,10 @@
 
             <div class="grid grid-cols-2 gap-2 pt-1">
                 <button type="button" onclick="runAnalysis()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg font-semibold text-xs flex items-center justify-center cursor-pointer">
-                    <i class="fa-solid fa-shield-cat mr-1.5"></i> Проверить текст или договор
+                    Проверить текст или договор <i class="fa-solid fa-shield-cat ml-1.5"></i>
                 </button>
                 <button type="button" onclick="resetAnalyzeForm()" class="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 border border-gray-600 py-2 rounded-lg font-semibold text-xs flex items-center justify-center cursor-pointer">
-                    <i class="fa-solid fa-rotate-left mr-1"></i> Сбросить
+                    Сбросить <i class="fa-solid fa-rotate-left ml-1"></i>
                 </button>
             </div>
         </div>
@@ -159,10 +165,10 @@
 
             <div class="grid grid-cols-2 gap-2 pt-1">
                 <button type="button" onclick="generateDocument()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg font-semibold text-xs flex items-center justify-center cursor-pointer">
-                    <i class="fa-solid fa-file-contract mr-1.5"></i> Сгенерировать
+                    Сгенерировать <i class="fa-solid fa-file-contract ml-1.5"></i>
                 </button>
                 <button type="button" onclick="resetGenerateForm()" class="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 border border-gray-600 py-2 rounded-lg font-semibold text-xs flex items-center justify-center cursor-pointer">
-                    <i class="fa-solid fa-rotate-left mr-1"></i> Сбросить
+                    Сбросить <i class="fa-solid fa-rotate-left ml-1"></i>
                 </button>
             </div>
         </div>
@@ -172,14 +178,14 @@
             <div class="flex items-center justify-between flex-wrap gap-1.5">
                 <h3 id="result-title" class="text-xs font-semibold text-gray-300">Результат анализа</h3>
                 <div class="flex gap-1.5 flex-wrap">
-                    <button type="button" id="download-analysis-btn" onclick="requestFileDownload('analysis')" class="hidden download-action-btn">
-                        <i class="fa-solid fa-file-word mr-1"></i> скачать результат анализа
+                    <button type="button" id="download-analysis-btn" onclick="requestFileDownload('analysis')" class="hidden download-action-btn flex items-center">
+                        скачать результат анализа <i class="fa-solid fa-file-word ml-1.5"></i>
                     </button>
-                    <button type="button" id="download-protocol-btn" onclick="requestFileDownload('protocol')" class="hidden download-action-btn">
-                        <i class="fa-solid fa-file-word mr-1"></i> скачать протокол разногласий
+                    <button type="button" id="download-protocol-btn" onclick="requestFileDownload('protocol')" class="hidden download-action-btn flex items-center">
+                        скачать протокол разногласий <i class="fa-solid fa-file-word ml-1.5"></i>
                     </button>
-                    <button type="button" id="download-docx-btn" onclick="requestFileDownload('document')" class="hidden download-action-btn">
-                        <i class="fa-solid fa-file-word mr-1"></i> Скачать документ
+                    <button type="button" id="download-docx-btn" onclick="requestFileDownload('document')" class="hidden download-action-btn flex items-center">
+                        Скачать документ <i class="fa-solid fa-file-word ml-1.5"></i>
                     </button>
                 </div>
             </div>
@@ -198,7 +204,7 @@
     <div id="admin-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center p-3 z-50">
         <div class="tg-card rounded-2xl p-4 border shadow-2xl max-w-lg w-full space-y-3">
             <div class="flex items-center justify-between border-b border-gray-700 pb-2">
-                <h3 class="text-xs font-bold text-white"><i class="fa-solid fa-shield-halved mr-1.5 text-amber-500"></i> Панель администратора</h3>
+                <h3 class="text-xs font-bold text-white">Панель администратора <i class="fa-solid fa-shield-halved ml-1.5 text-amber-500"></i></h3>
                 <button type="button" onclick="closeAdminPanel()" class="text-gray-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark text-base"></i></button>
             </div>
             <div id="admin-stats-content" class="text-xs text-gray-300 space-y-2">
