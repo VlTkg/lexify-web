@@ -115,18 +115,22 @@ async def analyze_file(
             reader = pypdf.PdfReader(io.BytesIO(content))
             extracted_text = "\n".join([page.extract_text() for page in reader.pages if page and page.extract_text()])
         elif filename_lower.endswith(".txt"):
-            # Пробуем UTF-8, при неудаче — CP1251 (Windows)
-            try:
-                extracted_text = content.decode("utf-8")
-            except UnicodeDecodeError:
-                extracted_text = content.decode("cp1251", errors="ignore")
+            # Надежный перебор кодировок для исключения «вопросиков»
+            decoded = False
+            for enc in ["utf-8", "cp1251", "windows-1251", "iso-8859-1", "koi8-r"]:
+                try:
+                    extracted_text = content.decode(enc)
+                    decoded = True
+                    break
+                except UnicodeDecodeError:
+                    continue
+            if not decoded:
+                extracted_text = content.decode("utf-8", errors="ignore")
         elif filename_lower.endswith(".odt"):
-            # ODT — это zip архив, текст хранится в content.xml
             with zipfile.ZipFile(io.BytesIO(content)) as z:
                 if "content.xml" in z.namelist():
                     xml_content = z.read("content.xml")
                     root = ET.fromstring(xml_content)
-                    # Извлекаем все текстовые узлы
                     texts = []
                     for elem in root.iter():
                         if elem.text:
