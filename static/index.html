@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Lexify — Проверка договоров и юридических рисков</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="[https://telegram.org/js/telegram-web-app.js](https://telegram.org/js/telegram-web-app.js)"></script>
+    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
+    <script src="[https://cdn.jsdelivr.net/npm/marked/marked.min.js](https://cdn.jsdelivr.net/npm/marked/marked.min.js)"></script>
+    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
     <style>
         body { background-color: #111827; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         .tg-card { background-color: #1f2937; border-color: #374151; word-break: break-word; overflow-wrap: break-word; }
@@ -23,7 +23,7 @@
         .chip-btn:not(.active):hover { background-color: #374151; color: #ffffff; }
         
         .download-action-btn {
-            height: 34px; padding: 0 12px; border-radius: 0.5rem; font-size: 0.7rem; font-weight: 600;
+            height: 34px; padding: 0 10px; border-radius: 0.5rem; font-size: 0.65rem; font-weight: 600;
             display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease;
             background-color: #2563eb; color: #ffffff; border: 1px solid #3b82f6; cursor: pointer; white-space: nowrap;
         }
@@ -170,10 +170,10 @@
                 <h3 id="result-title" class="text-xs font-semibold text-gray-300">Результат анализа</h3>
                 <div class="flex gap-1.5 flex-wrap">
                     <button type="button" id="download-analysis-btn" onclick="requestFileDownload('analysis')" class="hidden download-action-btn">
-                        <i class="fa-solid fa-file-word mr-1"></i> Заключение (.docx)
+                        <i class="fa-solid fa-file-word mr-1"></i> скачать результат анализа
                     </button>
                     <button type="button" id="download-protocol-btn" onclick="requestFileDownload('protocol')" class="hidden download-action-btn">
-                        <i class="fa-solid fa-file-word mr-1"></i> Протокол разногласий
+                        <i class="fa-solid fa-file-word mr-1"></i> скачать протокол разногласий
                     </button>
                     <button type="button" id="download-docx-btn" onclick="requestFileDownload('document')" class="hidden download-action-btn">
                         <i class="fa-solid fa-file-word mr-1"></i> Скачать документ
@@ -473,7 +473,7 @@
                     doc_type: currentDocType === 'offer' ? 'Оферта' : 'Договор услуг',
                     jurisdiction: currentJurisdiction,
                     executor: document.getElementById('executor-input').value,
-                    client: document.getElementById('client-input-input' in window ? document.getElementById('client-input-input') : document.getElementById('client-input')).value,
+                    client: document.getElementById('client-input').value,
                     description: document.getElementById('desc-input').value,
                     payment: "100% предоплата",
                     deadline: "30 дней",
