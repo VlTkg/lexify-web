@@ -11,10 +11,10 @@
     <style>
         body { background-color: #111827; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         .tg-card { background-color: #1f2937; border-color: #374151; word-break: break-word; overflow-wrap: break-word; }
-        .identical-input-box { border: 1px solid #374151; background-color: #1f2937; border-radius: 0.5rem; padding: 0.4rem 0.6rem; font-size: 0.85rem; color: #ffffff; width: 100%; outline: none; }
+        .identical-input-box { border: 1px solid #374151; background-color: #1f2937; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.85rem; color: #ffffff; width: 100%; outline: none; }
         .identical-input-box:focus { border-color: #3b82f6; }
         .chip-btn {
-            height: 30px; padding: 0 8px; border-radius: 0.4rem; font-size: 0.65rem; font-weight: 500;
+            height: 32px; padding: 0 10px; border-radius: 0.4rem; font-size: 0.7rem; font-weight: 500;
             display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease; border: 1px solid #374151;
             white-space: nowrap; cursor: pointer;
         }
@@ -23,14 +23,14 @@
         .chip-btn:not(.active):hover { background-color: #374151; color: #ffffff; }
         
         .download-action-btn {
-            height: 32px; padding: 0 10px; border-radius: 0.4rem; font-size: 0.65rem; font-weight: 600;
+            height: 34px; padding: 0 12px; border-radius: 0.4rem; font-size: 0.7rem; font-weight: 600;
             display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease;
             background-color: #2563eb; color: #ffffff; border: 1px solid #3b82f6; cursor: pointer; white-space: nowrap;
         }
         .download-action-btn:hover { background-color: #1d4ed8; }
 
         .tab-btn {
-            height: 36px; border-radius: 0.4rem; font-size: 0.7rem; font-weight: 600;
+            height: 38px; border-radius: 0.4rem; font-size: 0.75rem; font-weight: 600;
             display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease;
             background-color: rgba(30, 58, 138, 0.4); border: 1px solid rgba(59, 130, 246, 0.5); color: #93c5fd; cursor: pointer; width: 100%;
         }
@@ -43,9 +43,9 @@
     </style>
 </head>
 <body class="min-h-screen pb-4">
-    <div class="max-w-2xl mx-auto p-2.5 space-y-2">
+    <div class="max-w-2xl mx-auto p-3 space-y-2.5">
         
-        <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
+        <!-- ВЕРХНЯЯ ПАНЕЛЬ СТАТУСА -->
         <div class="flex items-center justify-end gap-1.5">
             <div id="admin-panel-btn" class="hidden">
                 <button type="button" onclick="openAdminPanel()" class="top-badge-item bg-amber-600 hover:bg-amber-500 text-white shadow cursor-pointer">
@@ -57,118 +57,121 @@
             </div>
         </div>
 
-        <!-- ЗАГОЛОВОК -->
-        <header class="text-center space-y-1 py-0.5">
-            <h1 class="text-lg font-extrabold tracking-tight text-white flex items-center justify-center">
-                <i class="fa-solid fa-scale-balanced mr-1.5 text-blue-500"></i> Lexify
+        <!-- ЗАГОЛОВОК СЕРВИСА -->
+        <header class="text-center space-y-1 py-1">
+            <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center justify-center">
+                <i class="fa-solid fa-scale-balanced mr-2 text-blue-500"></i> Lexify
             </h1>
-            <p class="text-[11px] text-gray-300 max-w-md mx-auto leading-tight font-normal">
-                Правовой анализ договоров и подготовка документов.
+            <p class="text-xs text-gray-300 max-w-lg mx-auto leading-relaxed font-normal">
+                Сервис правовой поддержки для анализа рисков и подготовки документов.
             </p>
         </header>
 
-        <!-- ЮРИСДИКЦИЯ -->
-        <div class="tg-card rounded-lg p-2.5 border shadow-sm space-y-1">
-            <label class="text-[10px] font-medium text-gray-300 block">Юрисдикция</label>
-            <div class="flex flex-wrap gap-1" id="jurisdiction-group">
+        <!-- ШАГ 1: ВЫБОР ЮРИСДИКЦИИ -->
+        <div class="tg-card rounded-lg p-3 border shadow-sm space-y-1.5">
+            <label class="text-[11px] font-medium text-gray-300 block">1. Выберите применимое право (юрисдикцию)</label>
+            <div class="flex flex-wrap gap-1.5" id="jurisdiction-group">
                 <button type="button" class="chip-btn active" onclick="setJurisdiction('Россия (РФ)', this)">Россия (РФ)</button>
                 <button type="button" class="chip-btn" onclick="setJurisdiction('Казахстан', this)">Казахстан</button>
                 <button type="button" class="chip-btn" onclick="setJurisdiction('Беларусь', this)">Беларусь</button>
             </div>
         </div>
 
-        <!-- ВКЛАДКИ -->
-        <div class="grid grid-cols-2 gap-1.5">
-            <button type="button" onclick="switchTab('analyze')" id="tab-btn-analyze" class="tab-btn active cursor-pointer">
-                <i class="fa-solid fa-magnifying-glass-chart mr-1"></i> Анализ
-            </button>
-            <button type="button" onclick="switchTab('generate')" id="tab-btn-generate" class="tab-btn cursor-pointer">
-                <i class="fa-solid fa-file-contract mr-1"></i> Конструктор
-            </button>
+        <!-- ШАГ 2: ВЫБОР РЕЖИМА РАБОТЫ -->
+        <div class="space-y-1">
+            <label class="text-[11px] font-medium text-gray-300 block">2. Выберите режим работы</label>
+            <div class="grid grid-cols-2 gap-2">
+                <button type="button" onclick="switchTab('analyze')" id="tab-btn-analyze" class="tab-btn active cursor-pointer">
+                    <i class="fa-solid fa-magnifying-glass-chart mr-1.5"></i> Анализировать договор
+                </button>
+                <button type="button" onclick="switchTab('generate')" id="tab-btn-generate" class="tab-btn cursor-pointer">
+                    <i class="fa-solid fa-file-contract mr-1.5"></i> Сгенерировать документ
+                </button>
+            </div>
         </div>
 
-        <!-- АНАЛИЗ -->
-        <div id="section-analyze" class="tg-card rounded-lg p-2.5 border border-gray-700 shadow-md space-y-2">
-            <div class="border-b border-gray-700 pb-1">
-                <h2 class="text-[11px] font-semibold text-blue-400"><i class="fa-solid fa-circle-dot mr-1 text-[9px]"></i> Режим: Экспресс-анализ рисков</h2>
+        <!-- РЕЖИМ АНАЛИЗА -->
+        <div id="section-analyze" class="tg-card rounded-lg p-3 border border-gray-700 shadow-md space-y-2.5">
+            <div class="border-b border-gray-700 pb-1.5">
+                <h2 class="text-xs font-semibold text-blue-400"><i class="fa-solid fa-circle-dot mr-1 text-[10px]"></i> Режим: Экспресс-анализ рисков</h2>
             </div>
             
             <div class="space-y-1">
-                <label class="text-[10px] font-medium text-gray-300 block">Источник</label>
-                <div class="flex flex-wrap gap-1">
-                    <button type="button" class="chip-btn active" onclick="setAnalyzeInputType('text', this)">Текст</button>
-                    <button type="button" class="chip-btn" onclick="setAnalyzeInputType('file', this)">Файл (.docx, .pdf, .txt, .odt)</button>
+                <label class="text-[11px] font-medium text-gray-300 block">Способ предоставления материала</label>
+                <div class="flex flex-wrap gap-1.5">
+                    <button type="button" class="chip-btn active" onclick="setAnalyzeInputType('text', this)">Вставить текст</button>
+                    <button type="button" class="chip-btn" onclick="setAnalyzeInputType('file', this)">Выбрать файл (.docx, .pdf, .txt, .odt)</button>
                 </div>
             </div>
 
             <div id="analyze-input-text-container" class="space-y-1">
-                <label class="text-[10px] font-medium text-gray-300 block">Текст договора или статьи</label>
-                <textarea id="analyze-text-input" rows="3" class="identical-input-box text-xs" placeholder="Вставьте текст сюда..."></textarea>
+                <label class="text-[11px] font-medium text-gray-300 block">Текст договора, статьи или выдержки из него</label>
+                <textarea id="analyze-text-input" rows="4" class="identical-input-box text-xs" placeholder="Вставьте текст сюда..."></textarea>
             </div>
 
             <div id="analyze-input-file-container" class="hidden space-y-1">
-                <label class="text-[10px] font-medium text-gray-300 block">Загрузите документ</label>
-                <div class="flex flex-col items-center justify-center w-full h-16 border border-dashed border-gray-600 rounded-lg bg-gray-900/50 hover:bg-gray-800/80 transition p-1.5">
-                    <input type="file" id="analyze-file-input" accept=".docx,.pdf,.txt,.odt" class="w-full text-[11px] text-gray-300 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer" onchange="handleFileSelect(this)">
-                    <span id="selected-file-name" class="text-[10px] text-emerald-400 mt-0.5 font-medium">Файл не выбран</span>
+                <label class="text-[11px] font-medium text-gray-300 block">Загрузите документ</label>
+                <div class="flex flex-col items-center justify-center w-full h-20 border-2 border-dashed border-gray-600 rounded-lg bg-gray-900/50 hover:bg-gray-800/80 transition p-2">
+                    <input type="file" id="analyze-file-input" accept=".docx,.pdf,.txt,.odt" class="w-full text-xs text-gray-300 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer" onchange="handleFileSelect(this)">
+                    <span id="selected-file-name" class="text-[10px] text-emerald-400 mt-1 font-medium">Файл не выбран</span>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-1.5 pt-0.5">
-                <button type="button" onclick="runAnalysis()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-1.5 rounded-md font-semibold text-xs flex items-center justify-center cursor-pointer">
-                    <i class="fa-solid fa-shield-cat mr-1"></i> Проверить
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <button type="button" onclick="runAnalysis()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg font-semibold text-xs flex items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-shield-cat mr-1.5"></i> Проверить текст или договор
                 </button>
-                <button type="button" onclick="resetAnalyzeForm()" class="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 border border-gray-600 py-1.5 rounded-md font-semibold text-xs flex items-center justify-center cursor-pointer">
-                    <i class="fa-solid fa-rotate-left mr-1"></i> Сброс
+                <button type="button" onclick="resetAnalyzeForm()" class="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 border border-gray-600 py-2 rounded-lg font-semibold text-xs flex items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-rotate-left mr-1"></i> Сбросить
                 </button>
             </div>
         </div>
 
-        <!-- КОНСТРУКТОР -->
-        <div id="section-generate" style="display: none;" class="tg-card rounded-lg p-2.5 border border-gray-700 shadow-md space-y-2">
-            <div class="border-b border-gray-700 pb-1">
-                <h2 class="text-[11px] font-semibold text-blue-400"><i class="fa-solid fa-circle-dot mr-1 text-[9px]"></i> Режим: Конструктор документов</h2>
+        <!-- РЕЖИМ КОНСТРУКТОРА -->
+        <div id="section-generate" style="display: none;" class="tg-card rounded-lg p-3 border border-gray-700 shadow-md space-y-2.5">
+            <div class="border-b border-gray-700 pb-1.5">
+                <h2 class="text-xs font-semibold text-blue-400"><i class="fa-solid fa-circle-dot mr-1 text-[10px]"></i> Режим: Конструктор документов</h2>
             </div>
             
             <div class="space-y-1">
-                <label class="text-[10px] font-medium text-gray-300 block">Тип документа</label>
-                <div class="flex flex-wrap gap-1">
+                <label class="text-[11px] font-medium text-gray-300 block">Тип документа</label>
+                <div class="flex flex-wrap gap-1.5">
                     <button type="button" class="chip-btn active" onclick="setDocType('contract', this)">Договор услуг</button>
                     <button type="button" class="chip-btn" onclick="setDocType('offer', this)">Оферта</button>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-1.5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                 <div>
-                    <label class="text-[10px] font-medium text-gray-300 block mb-0.5">Исполнитель</label>
-                    <input type="text" id="executor-input" class="identical-input-box text-xs py-1" value="Иванов И.И.">
+                    <label class="text-[11px] font-medium text-gray-300 block mb-0.5">Исполнитель</label>
+                    <input type="text" id="executor-input" class="identical-input-box text-xs py-1.5" value="Иванов И.И.">
                 </div>
                 <div>
-                    <label class="text-[10px] font-medium text-gray-300 block mb-0.5">Заказчик</label>
-                    <input type="text" id="client-input" class="identical-input-box text-xs py-1" value="ТОО «Альфа Технологии»">
+                    <label class="text-[11px] font-medium text-gray-300 block mb-0.5">Заказчик</label>
+                    <input type="text" id="client-input" class="identical-input-box text-xs py-1.5" value="ТОО «Альфа Технологии»">
                 </div>
             </div>
 
             <div>
-                <label class="text-[10px] font-medium text-gray-300 block mb-0.5">Суть услуг и предмет договора</label>
-                <textarea id="desc-input" rows="2" class="identical-input-box text-xs py-1">Разработка программного модуля автоматизации</textarea>
+                <label class="text-[11px] font-medium text-gray-300 block mb-0.5">Суть услуг и предмет договора</label>
+                <textarea id="desc-input" rows="2" class="identical-input-box text-xs py-1.5">Разработка программного модуля автоматизации</textarea>
             </div>
 
-            <div class="grid grid-cols-2 gap-1.5 pt-0.5">
-                <button type="button" onclick="generateDocument()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-1.5 rounded-md font-semibold text-xs flex items-center justify-center cursor-pointer">
-                    <i class="fa-solid fa-file-contract mr-1"></i> Создать
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <button type="button" onclick="generateDocument()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg font-semibold text-xs flex items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-file-contract mr-1.5"></i> Сгенерировать
                 </button>
-                <button type="button" onclick="resetGenerateForm()" class="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 border border-gray-600 py-1.5 rounded-md font-semibold text-xs flex items-center justify-center cursor-pointer">
-                    <i class="fa-solid fa-rotate-left mr-1"></i> Сброс
+                <button type="button" onclick="resetGenerateForm()" class="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 border border-gray-600 py-2 rounded-lg font-semibold text-xs flex items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-rotate-left mr-1"></i> Сбросить
                 </button>
             </div>
         </div>
 
-        <!-- РЕЗУЛЬТАТ -->
-        <div id="result-wrapper" style="display: none;" class="tg-card rounded-lg p-2.5 border shadow-sm space-y-2">
-            <div class="flex items-center justify-between flex-wrap gap-1">
-                <h3 id="result-title" class="text-[11px] font-semibold text-gray-300">Результат анализа</h3>
-                <div class="flex gap-1 flex-wrap">
+        <!-- РЕЗУЛЬТАТЫ И СКАЧИВАНИЕ -->
+        <div id="result-wrapper" style="display: none;" class="tg-card rounded-lg p-3 border shadow-sm space-y-2">
+            <div class="flex items-center justify-between flex-wrap gap-1.5">
+                <h3 id="result-title" class="text-xs font-semibold text-gray-300">Результат анализа</h3>
+                <div class="flex gap-1.5 flex-wrap">
                     <button type="button" id="download-analysis-btn" onclick="requestFileDownload('analysis')" class="hidden download-action-btn">
                         <i class="fa-solid fa-file-word mr-1"></i> скачать результат анализа
                     </button>
@@ -181,27 +184,27 @@
                 </div>
             </div>
             
-            <div id="result-container" class="bg-gray-900 p-2.5 rounded-lg text-xs text-gray-300 min-h-[140px] max-h-[300px] overflow-y-auto border border-gray-800 space-y-1.5">
+            <div id="result-container" class="bg-gray-900 p-3 rounded-lg text-xs text-gray-300 min-h-[160px] max-h-[350px] overflow-y-auto border border-gray-800 space-y-2">
                 Результат появится здесь...
             </div>
         </div>
 
-        <footer class="text-center py-1 text-[9px] text-gray-500">
+        <footer class="text-center py-2 text-[10px] text-gray-500">
             <p>© 2026 Lexify. Все права защищены.</p>
         </footer>
     </div>
 
     <!-- МОДАЛЬНОЕ ОКНО АДМИНКИ -->
-    <div id="admin-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center p-2 z-50">
-        <div class="tg-card rounded-xl p-3 border shadow-2xl max-w-md w-full space-y-2.5">
-            <div class="flex items-center justify-between border-b border-gray-700 pb-1.5">
-                <h3 class="text-xs font-bold text-white"><i class="fa-solid fa-shield-halved mr-1 text-amber-500"></i> Панель администратора</h3>
-                <button type="button" onclick="closeAdminPanel()" class="text-gray-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark text-sm"></i></button>
+    <div id="admin-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center p-3 z-50">
+        <div class="tg-card rounded-2xl p-4 border shadow-2xl max-w-lg w-full space-y-3">
+            <div class="flex items-center justify-between border-b border-gray-700 pb-2">
+                <h3 class="text-xs font-bold text-white"><i class="fa-solid fa-shield-halved mr-1.5 text-amber-500"></i> Панель администратора</h3>
+                <button type="button" onclick="closeAdminPanel()" class="text-gray-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark text-base"></i></button>
             </div>
-            <div id="admin-stats-content" class="text-xs text-gray-300 space-y-1.5">
+            <div id="admin-stats-content" class="text-xs text-gray-300 space-y-2">
                 Загрузка...
             </div>
-            <button type="button" onclick="closeAdminPanel()" class="w-full py-1 bg-gray-700 hover:bg-gray-600 rounded-md text-xs font-semibold text-white cursor-pointer">Закрыть</button>
+            <button type="button" onclick="closeAdminPanel()" class="w-full py-1.5 bg-gray-700 hover:bg-gray-600 rounded-lg text-xs font-semibold text-white cursor-pointer">Закрыть</button>
         </div>
     </div>
 
@@ -320,7 +323,7 @@
                 if (parsedData.overall_risk_level) {
                     let lvl = parsedData.overall_risk_level;
                     let badgeColor = lvl === 'Высокий' ? 'bg-red-600/35 text-red-300 border-red-500' : (lvl === 'Средний' ? 'bg-amber-600/35 text-amber-300 border-amber-500' : 'bg-emerald-600/35 text-emerald-300 border-emerald-500');
-                    html += `<div class="p-1.5 rounded-md border ${badgeColor} mb-1.5 flex justify-between items-center text-xs font-semibold"><span>Уровень риска: ${lvl}</span></div>`;
+                    html += `<div class="p-2 rounded-lg border ${badgeColor} mb-2 flex justify-between items-center text-xs font-semibold"><span>Уровень риска: ${lvl}</span></div>`;
                 }
                 if (parsedData.summary) {
                     html += `<div class="analysis-block"><b class="text-white block mb-0.5">Резюме:</b> ${parsedData.summary}</div>`;
@@ -514,9 +517,9 @@
             .then(resp => resp.json())
             .then(stats => {
                 content.innerHTML = `
-                    <div class="grid grid-cols-2 gap-1.5 bg-gray-900/50 p-2 rounded-md border border-gray-800">
-                        <p><b>Пользователи:</b> <span class="text-blue-400">${stats.total_users || 1}</span></p>
-                        <p><b>Анализы:</b> <span class="text-blue-400">${stats.total_analyses || 0}</span></p>
+                    <div class="grid grid-cols-2 gap-2 bg-gray-900/50 p-2 rounded-lg border border-gray-800">
+                        <p><b>Всего пользователей:</b> <span class="text-blue-400">${stats.total_users || 1}</span></p>
+                        <p><b>Всего анализов:</b> <span class="text-blue-400">${stats.total_analyses || 0}</span></p>
                     </div>
                 `;
             });
