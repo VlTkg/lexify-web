@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Lexify — Проверка договоров и юридических рисков</title>
-    <script src="[https://telegram.org/js/telegram-web-app.js](https://telegram.org/js/telegram-web-app.js)"></script>
-    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
-    <script src="[https://cdn.jsdelivr.net/npm/marked/marked.min.js](https://cdn.jsdelivr.net/npm/marked/marked.min.js)"></script>
-    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { background-color: #111827; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         .tg-card { background-color: #1f2937; border-color: #374151; word-break: break-word; overflow-wrap: break-word; }
@@ -43,7 +43,7 @@
     </style>
 </head>
 <body class="min-h-screen pb-4">
-    <div class="max-w-2xl mx-auto p-3 space-y-3">
+    <div class="max-w-2xl mx-auto p-3 space-y-2.5">
         
         <!-- ВЕРХНЯЯ ПАНЕЛЬ СТАТУСА -->
         <div class="flex items-center justify-end gap-1.5">
@@ -57,20 +57,14 @@
             </div>
         </div>
 
-        <!-- ЗАГОЛОВОК И ПОДРОБНОЕ ОПИСАНИЕ СЕРВИСА -->
-        <header class="text-center space-y-1.5 py-1">
+        <!-- КОМПАКТНЫЙ ЗАГОЛОВОК (КАК НА СКРИНЕ 916) -->
+        <header class="text-center space-y-1 py-1">
             <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center justify-center">
                 Lexify <i class="fa-solid fa-scale-balanced ml-2 text-blue-500"></i>
             </h1>
             <p class="text-xs text-gray-300 max-w-lg mx-auto leading-relaxed font-normal">
-                Профессиональный ИИ-сервис правовой поддержки. Выявляет скрытые риски, кабальные условия и несоответствия законам за 1 минуту.
+                Сервис правовой поддержки для анализа рисков и подготовки документов.
             </p>
-            <div class="bg-blue-950/40 border border-blue-800/50 rounded-lg p-2 text-[11px] text-blue-200 text-left space-y-1 mt-2">
-                <div class="font-semibold text-blue-300 mb-0.5"><i class="fa-solid fa-circle-info mr-1"></i> Порядок работы с сервисом:</div>
-                <div>1. Выберите применимую юрисдикцию для точной правовой оценки.</div>
-                <div>2. Переключите режим: <b>Анализ договора</b> (проверка готового файла/текста) или <b>Конструктор</b> (создание нового документа).</div>
-                <div>3. Получите структурированное экспертное заключение с указанием статей и скачайте готовые файлы Word (.docx).</div>
-            </div>
         </header>
 
         <!-- ШАГ 1: ВЫБОР ЮРИСДИКЦИИ -->
@@ -173,7 +167,7 @@
             </div>
         </div>
 
-        <!-- РЕЗУЛЬТАТЫ И СКАНЫ / СКАЧИВАНИЕ -->
+        <!-- РЕЗУЛЬТАТЫ И СКАЧИВАНИЕ -->
         <div id="result-wrapper" style="display: none;" class="tg-card rounded-lg p-3 border shadow-sm space-y-2">
             <div class="flex items-center justify-between flex-wrap gap-1.5">
                 <h3 id="result-title" class="text-xs font-semibold text-gray-300">Результат анализа</h3>
