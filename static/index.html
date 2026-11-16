@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Lexify — Проверка договоров и юридических рисков</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="[https://telegram.org/js/telegram-web-app.js](https://telegram.org/js/telegram-web-app.js)"></script>
+    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
+    <script src="[https://cdn.jsdelivr.net/npm/marked/marked.min.js](https://cdn.jsdelivr.net/npm/marked/marked.min.js)"></script>
+    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
     <style>
         body { background-color: #111827; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         .tg-card { background-color: #1f2937; border-color: #374151; word-break: break-word; overflow-wrap: break-word; }
@@ -69,7 +69,7 @@
                 <div class="font-semibold text-blue-300 mb-0.5"><i class="fa-solid fa-circle-info mr-1"></i> Порядок работы с сервисом:</div>
                 <div>1. Выберите применимую юрисдикцию для точной правовой оценки.</div>
                 <div>2. Переключите режим: <b>Анализ договора</b> (проверка готового файла/текста) или <b>Конструктор</b> (создание нового документа).</div>
-                <div>3. Получите структурированное экспертное заключение и скачайте готовые файлы Word (.docx).</div>
+                <div>3. Получите структурированное экспертное заключение с указанием статей и скачайте готовые файлы Word (.docx).</div>
             </div>
         </header>
 
@@ -332,7 +332,7 @@
                     html += `<div class="p-2 rounded-lg border ${badgeColor} mb-2 flex justify-between items-center text-xs font-semibold"><span>Уровень риска: ${lvl}</span></div>`;
                 }
                 if (parsedData.summary) {
-                    html += `<div class="analysis-block"><b class="text-white block mb-0.5">Резюме:</b> ${parsedData.summary}</div>`;
+                    html += `<div class="analysis-block"><b class="text-white block mb-0.5">Резюме и предмет:</b> ${parsedData.summary}</div>`;
                 }
                 if (parsedData.risks && Array.isArray(parsedData.risks)) {
                     parsedData.risks.forEach((r, idx) => {
@@ -340,7 +340,7 @@
                             <div class="analysis-block">
                                 <b class="text-white block">Риск #${idx+1}: ${r.title || 'Замечание'}</b>
                                 <p class="text-gray-300 mt-0.5"><b>Цитата:</b> «${r.quote || ''}»</p>
-                                <p class="text-gray-300 mt-0.5"><b>Суть:</b> ${r.explanation || ''}</p>
+                                <p class="text-gray-300 mt-0.5"><b>Суть и статьи:</b> ${r.explanation || ''}</p>
                                 <p class="text-blue-300 mt-0.5"><b>Рекомендация:</b> ${r.recommendation || ''}</p>
                             </div>
                         `;
