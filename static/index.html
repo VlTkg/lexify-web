@@ -1,145 +1,168 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lexify — Проверка договоров и юридических рисков</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body { background-color: #111827; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        .tg-card { background-color: #1f2937; border-color: #374151; }
-        .identical-input-box { border: 1px solid #374151; background-color: #1f2937; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.85rem; color: #ffffff; width: 100%; outline: none; }
-        .chip-btn {
-            height: 32px; padding: 0 10px; border-radius: 0.4rem; font-size: 0.7rem; font-weight: 500;
-            display: inline-flex; align-items: center; justify-content: center; border: 1px solid #374151; white-space: nowrap; cursor: pointer;
-        }
-        .chip-btn.active { background-color: #3b82f6; color: #ffffff; border-color: #3b82f6; font-weight: 600; }
-        .chip-btn:not(.active) { background-color: #1f2937; color: #9ca3af; }
-        .download-action-btn {
-            height: 34px; padding: 0 12px; border-radius: 0.4rem; font-size: 0.7rem; font-weight: 600;
-            display: inline-flex; align-items: center; justify-content: center; background-color: #2563eb; color: #ffffff; border: 1px solid #3b82f6; cursor: pointer; white-space: nowrap;
-        }
-        .tab-btn {
-            height: 38px; border-radius: 0.4rem; font-size: 0.75rem; font-weight: 600;
-            display: inline-flex; align-items: center; justify-content: center; background-color: rgba(30, 58, 138, 0.4); border: 1px solid rgba(59, 130, 246, 0.5); color: #93c5fd; cursor: pointer; width: 100%;
-        }
-        .tab-btn.active { background-color: #1d4ed8; color: #ffffff; border-color: #60a5fa; }
-        .top-badge-item { height: 26px; padding: 0 6px; display: inline-flex; align-items: center; justify-content: center; border-radius: 0.3rem; font-size: 0.65rem; font-weight: 600; }
-        .analysis-block { background: #111827; border-left: 3px solid #3b82f6; padding: 8px; margin-bottom: 6px; border-radius: 0 0.4rem 0.4rem 0; font-size: 0.75rem; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Lexify — Правовой анализ</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="min-h-screen pb-4">
-    <div class="max-w-2xl mx-auto p-3 space-y-2.5">
-        <div class="flex items-center justify-end gap-1.5">
-            <div id="admin-panel-btn" class="hidden">
-                <button type="button" onclick="openAdminPanel()" class="top-badge-item bg-amber-600 text-white cursor-pointer">Админ <i class="fa-solid fa-shield-halved ml-1"></i></button>
-            </div>
-            <div id="top-admin-badge" class="hidden top-badge-item bg-blue-600/30 border border-blue-500/40 text-blue-300">Безлимит</div>
+<body>
+
+  <!-- ========================================== -->
+  <!-- ОКНО 1: ГЛАВНОЕ МЕНЮ                         -->
+  <!-- ========================================== -->
+  <section id="window-main" class="lexify-screen">
+    <header class="lexify-header">
+      <div class="status-badges">
+        <span class="badge badge-admin">Админ</span>
+        <span class="badge badge-plan">Безлимит</span>
+      </div>
+      <div class="brand-logo">
+        <span class="brand-title">Lexify</span>
+        <svg class="brand-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v18"/><path d="M5 7h14"/><path d="M5 7l-3 7h6l-3-7z"/><path d="M19 7l-3 7h6l-3-7z"/><path d="M8 21h8"/>
+        </svg>
+      </div>
+    </header>
+
+    <main class="lexify-content-main">
+      <div class="welcome-block">
+        <h1 class="main-title">Система правового анализа и генерации</h1>
+        <p class="main-subtitle">Выберите необходимый рабочий режим</p>
+      </div>
+
+      <div class="menu-actions">
+        <button type="button" id="btn-goto-analysis" class="btn-primary-menu">
+          Проверить договор
+        </button>
+        <button type="button" id="btn-goto-generate" class="btn-secondary-menu">
+          Сгенерировать документ
+        </button>
+      </div>
+    </main>
+
+    <footer class="lexify-footer">
+      <p class="disclaimer-text">
+        Дисклеймер: Данный сервис носит рекомендательный характер. Результаты работы не являются окончательной юридической консультацией. Для принятия окончательных решений рекомендуется привлекать квалифицированных юристов.
+      </p>
+      <div class="bot-handle">@Lexifytelbot</div>
+    </footer>
+  </section>
+
+  <!-- ========================================== -->
+  <!-- ОКНО 2: АНАЛИЗ ДОГОВОРА                      -->
+  <!-- ========================================== -->
+  <section id="window-analysis" class="lexify-screen hidden">
+    <header class="lexify-header">
+      <div class="status-badges">
+        <span class="badge badge-admin">Админ</span>
+        <span class="badge badge-plan">Безлимит</span>
+      </div>
+      <div class="brand-logo">
+        <span class="brand-title">Lexify</span>
+        <svg class="brand-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v18"/><path d="M5 7h14"/><path d="M5 7l-3 7h6l-3-7z"/><path d="M19 7l-3 7h6l-3-7z"/><path d="M8 21h8"/>
+        </svg>
+      </div>
+    </header>
+
+    <main class="lexify-content">
+      <h1 class="screen-title">Режим: <span class="accent-text">Анализ договора</span></h1>
+      
+      <div class="form-group">
+        <label class="group-label">Способ предоставления материала</label>
+        <div class="input-mode-grid">
+          <button type="button" class="mode-btn active" id="mode-text">Вставить текст</button>
+          <button type="button" class="mode-btn" id="mode-file">Выбрать файл (.docx, .pdf)</button>
         </div>
+      </div>
 
-        <header class="text-center space-y-1 py-1">
-            <h1 class="text-xl font-extrabold text-white flex items-center justify-center">Lexify <i class="fa-solid fa-scale-balanced ml-2 text-blue-500"></i></h1>
-            <p class="text-xs text-gray-300">Сервис правовой поддержки для анализа рисков и подготовки документов.</p>
-        </header>
+      <div class="form-group">
+        <textarea id="analysis-input" class="lexify-textarea" rows="6" placeholder="Вставьте текст договора для анализа..."></textarea>
+      </div>
 
-        <div class="tg-card rounded-lg p-3 border space-y-1.5">
-            <label class="text-[11px] font-medium text-gray-300 block">Шаг 1. Выберите юрисдикцию</label>
-            <div class="flex flex-wrap gap-1.5" id="jurisdiction-group">
-                <button type="button" class="chip-btn active" onclick="setJurisdiction('Россия (РФ)', this)">Россия (РФ)</button>
-                <button type="button" class="chip-btn" onclick="setJurisdiction('Казахстан', this)">Казахстан</button>
-                <button type="button" class="chip-btn" onclick="setJurisdiction('Беларусь', this)">Беларусь</button>
-            </div>
+      <button type="button" id="btn-run-analysis" class="btn-primary">
+        Провести правовой анализ договора
+      </button>
+
+      <!-- Динамический блок результатов (изначально скрыт) -->
+      <div id="analysis-result-box" class="result-panel hidden">
+        <div class="result-header">Результат анализа</div>
+        <p class="result-text">Правовой анализ успешно завершен. Выявлено 4 критических риска и 3 неблагоприятных условия.</p>
+        <button type="button" id="btn-download-conclusion" class="btn-primary btn-download">Скачать экспертное заключение (.docx)</button>
+        <button type="button" id="btn-download-protocol" class="btn-primary btn-download" style="margin-top: 8px;">Скачать протокол разногласий (.docx)</button>
+      </div>
+
+      <button type="button" id="btn-back-from-analysis" class="btn-secondary">
+        ← Назад к выбору режима
+      </button>
+    </main>
+
+    <footer class="lexify-footer">
+      <p class="disclaimer-text">
+        Дисклеймер: Данный сервис носит рекомендательный характер. Результаты анализа не являются окончательной юридической консультацией. Для принятия окончательных решений рекомендуется привлекать квалифицированных юристов.
+      </p>
+      <div class="bot-handle">@Lexifytelbot</div>
+    </footer>
+  </section>
+
+  <!-- ========================================== -->
+  <!-- ОКНО 3: ГЕНЕРАЦИЯ ДОКУМЕНТА                  -->
+  <!-- ========================================== -->
+  <section id="window-generate" class="lexify-screen hidden">
+    <header class="lexify-header">
+      <div class="status-badges">
+        <span class="badge badge-admin">Админ</span>
+        <span class="badge badge-plan">Безлимит</span>
+      </div>
+      <div class="brand-logo">
+        <span class="brand-title">Lexify</span>
+        <svg class="brand-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v18"/><path d="M5 7h14"/><path d="M5 7l-3 7h6l-3-7z"/><path d="M19 7l-3 7h6l-3-7z"/><path d="M8 21h8"/>
+        </svg>
+      </div>
+    </header>
+
+    <main class="lexify-content">
+      <h1 class="screen-title">Режим: <span class="accent-text">Генерация документа</span></h1>
+
+      <div class="form-group">
+        <label class="group-label">Выбор типа документа</label>
+        <div class="doc-type-grid">
+          <button type="button" class="type-btn active" data-doc-type="contract">Договор (основной)</button>
+          <button type="button" class="type-btn" data-doc-type="addendum">Дополнительное соглашение</button>
+          <button type="button" class="type-btn type-btn-wide" data-doc-type="claim">Претензия / Письмо</button>
         </div>
+      </div>
 
-        <div class="space-y-1">
-            <label class="text-[11px] font-medium text-gray-300 block">Шаг 2. Выберите режим работы</label>
-            <div class="grid grid-cols-2 gap-2">
-                <button type="button" onclick="switchTab('analyze')" id="tab-btn-analyze" class="tab-btn active flex items-center justify-center">Анализировать договор <i class="fa-solid fa-magnifying-glass-chart ml-1.5"></i></button>
-                <button type="button" onclick="switchTab('generate')" id="tab-btn-generate" class="tab-btn flex items-center justify-center">Сгенерировать документ <i class="fa-solid fa-file-contract ml-1.5"></i></button>
-            </div>
-        </div>
+      <div class="form-group">
+        <textarea id="gen-params-input" class="lexify-textarea" rows="5" placeholder="Введите параметры, условия или реквизиты..."></textarea>
+      </div>
 
-        <div id="section-analyze" class="tg-card rounded-lg p-3 border border-gray-700 space-y-2.5">
-            <div class="border-b border-gray-700 pb-1.5"><h2 class="text-xs font-semibold text-blue-400">Режим: Экспресс-анализ рисков</h2></div>
-            <div class="flex gap-1.5">
-                <button type="button" class="chip-btn active" onclick="setAnalyzeInputType('text', this)">Вставить текст</button>
-                <button type="button" class="chip-btn" onclick="setAnalyzeInputType('file', this)">Выбрать файл (.docx, .pdf, .txt, .odt)</button>
-            </div>
-            <div id="analyze-input-text-container">
-                <textarea id="analyze-text-input" rows="4" class="identical-input-box text-xs" placeholder="Вставьте текст сюда..."></textarea>
-            </div>
-            <div id="analyze-input-file-container" class="hidden">
-                <input type="file" id="analyze-file-input" accept=".docx,.pdf,.txt,.odt" class="w-full text-xs text-gray-300">
-            </div>
-            <button type="button" onclick="runAnalysis()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg font-semibold text-xs flex items-center justify-center cursor-pointer">Проверить текст или договор <i class="fa-solid fa-shield-cat ml-1.5"></i></button>
-        </div>
+      <button type="button" id="btn-run-generate" class="btn-primary">
+        Сформировать документ
+      </button>
 
-        <div id="result-wrapper" style="display: none;" class="tg-card rounded-lg p-3 border space-y-2">
-            <div class="flex items-center justify-between flex-wrap gap-1.5">
-                <h3 id="result-title" class="text-xs font-semibold text-gray-300">Результат анализа</h3>
-                <div class="flex gap-1.5">
-                    <button type="button" id="download-analysis-btn" onclick="requestFileDownload('analysis')" class="hidden download-action-btn">скачать результат анализа <i class="fa-solid fa-file-word ml-1.5"></i></button>
-                    <button type="button" id="download-protocol-btn" onclick="requestFileDownload('protocol')" class="hidden download-action-btn">скачать протокол разногласий <i class="fa-solid fa-file-word ml-1.5"></i></button>
-                </div>
-            </div>
-            <div id="result-container" class="bg-gray-900 p-3 rounded-lg text-xs text-gray-300 max-h-[350px] overflow-y-auto">Результат появится здесь...</div>
-        </div>
-    </div>
-    <script>
-        let currentJurisdiction = 'Россия (РФ)';
-        let currentAnalyzeMode = 'text';
-        let lastAnalysisResult = null;
+      <!-- Динамический блок результата (изначально скрыт) -->
+      <div id="gen-result-box" class="result-panel hidden">
+        <div class="result-header">Результат формирования</div>
+        <p id="gen-result-summary" class="result-text">Проект документа успешно сформирован и готов к выгрузке.</p>
+        <button type="button" id="btn-download-generated" class="btn-primary btn-download">Скачать документ (.docx)</button>
+      </div>
 
-        function switchTab(tab) {
-            document.getElementById('section-analyze').style.display = tab === 'analyze' ? 'block' : 'none';
-            document.getElementById('tab-btn-analyze').classList.toggle('active', tab === 'analyze');
-            document.getElementById('tab-btn-generate').classList.toggle('active', tab === 'generate');
-        }
-        function setJurisdiction(jur, btn) {
-            currentJurisdiction = jur;
-            document.querySelectorAll('#jurisdiction-group button').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        }
-        function setAnalyzeInputType(mode, btn) {
-            currentAnalyzeMode = mode;
-            btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            document.getElementById('analyze-input-text-container').classList.toggle('hidden', mode !== 'text');
-            document.getElementById('analyze-input-file-container').classList.toggle('hidden', mode !== 'file');
-        }
-        function runAnalysis() {
-            const text = document.getElementById('analyze-text-input').value.trim();
-            if (!text) { alert("Введите текст"); return; }
-            document.getElementById('result-wrapper').style.display = 'block';
-            document.getElementById('download-analysis-btn').classList.remove('hidden');
-            document.getElementById('download-protocol-btn').classList.remove('hidden');
-            document.getElementById('result-container').innerHTML = 'Анализ...';
-            
-            fetch('/api/analyze', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({text: text, jurisdiction: currentJurisdiction})
-            })
-            .then(r => r.json())
-            .then(data => {
-                lastAnalysisResult = data.result;
-                document.getElementById('result-container').innerHTML = marked.parse(typeof data.result === 'string' ? data.result : data.result.summary || JSON.stringify(data.result));
-            });
-        }
-        function requestFileDownload(type) {
-            fetch('/generate-protocol', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({doc_type: type === 'analysis' ? 'Результат анализа' : 'Протокол разногласий', jurisdiction: currentJurisdiction, risks: lastAnalysisResult?.risks || []})
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.download_url) window.open(data.download_url, '_blank');
-            });
-        }
-    </script>
+      <button type="button" id="btn-back-from-generate" class="btn-secondary">
+        ← Назад к выбору режима
+      </button>
+    </main>
+
+    <footer class="lexify-footer">
+      <p class="disclaimer-text">
+        Дисклеймер: Данный сервис носит рекомендательный характер. Результаты генерации не являются окончательной юридической консультацией. Для принятия окончательных решений рекомендуется привлекать квалифицированных юристов.
+      </p>
+      <div class="bot-handle">@Lexifytelbot</div>
+    </footer>
+  </section>
+
+  <script src="script.js"></script>
 </body>
 </html>
