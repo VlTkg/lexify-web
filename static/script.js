@@ -3,20 +3,16 @@
 /* ========================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Элементы окон
   const windowMain = document.getElementById('window-main');
   const windowAnalysis = document.getElementById('window-analysis');
   const windowGenerate = document.getElementById('window-generate');
 
-  // Кнопки навигации с главного меню
   const btnGotoAnalysis = document.getElementById('btn-goto-analysis');
   const btnGotoGenerate = document.getElementById('btn-goto-generate');
 
-  // Кнопки возврата
   const btnBackFromAnalysis = document.getElementById('btn-back-from-analysis');
   const btnBackFromGenerate = document.getElementById('btn-back-from-generate');
 
-  // Элементы Окна 2 (Анализ)
   const modeText = document.getElementById('mode-text');
   const modeFile = document.getElementById('mode-file');
   const btnRunAnalysis = document.getElementById('btn-run-analysis');
@@ -24,14 +20,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnDownloadConclusion = document.getElementById('btn-download-conclusion');
   const btnDownloadProtocol = document.getElementById('btn-download-protocol');
 
-  // Элементы Окна 3 (Генерация)
   const typeButtons = document.querySelectorAll('#window-generate .type-btn');
   const btnRunGenerate = document.getElementById('btn-run-generate');
   const genResultBox = document.getElementById('gen-result-box');
   const btnDownloadGenerated = document.getElementById('btn-download-generated');
+  const genParamsInput = document.getElementById('gen-params-input');
+  const genResultSummary = document.getElementById('gen-result-summary');
 
-  // Функция переключения видимости окон
   function showWindow(windowToShow) {
+    if (!windowToShow) return;
     windowMain.classList.add('hidden');
     windowAnalysis.classList.add('hidden');
     windowGenerate.classList.add('hidden');
@@ -40,7 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.scrollTo(0, 0);
   }
 
-  // Навигация из главного меню
   if (btnGotoAnalysis) {
     btnGotoAnalysis.addEventListener('click', () => showWindow(windowAnalysis));
   }
@@ -48,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
     btnGotoGenerate.addEventListener('click', () => showWindow(windowGenerate));
   }
 
-  // Возврат в главное меню
   if (btnBackFromAnalysis) {
     btnBackFromAnalysis.addEventListener('click', () => showWindow(windowMain));
   }
@@ -56,7 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
     btnBackFromGenerate.addEventListener('click', () => showWindow(windowMain));
   }
 
-  // Переключение режимов в Окне 2 (Текст / Файл)
   if (modeText && modeFile) {
     modeText.addEventListener('click', () => {
       modeText.classList.add('active');
@@ -68,14 +62,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Запуск анализа в Окне 2 (появление блока результатов с двумя кнопками)
   if (btnRunAnalysis && analysisResultBox) {
     btnRunAnalysis.addEventListener('click', () => {
       analysisResultBox.classList.remove('hidden');
     });
   }
 
-  // Переключение типов документов в Окне 3
   typeButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
       typeButtons.forEach((b) => b.classList.remove('active'));
@@ -84,27 +76,85 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Запуск генерации в Окне 3 (появление результата и кнопки скачивания)
   if (btnRunGenerate && genResultBox) {
-    btnRunGenerate.addEventListener('click', () => {
-      genResultBox.classList.remove('hidden');
+    btnRunGenerate.addEventListener('click', async () => {
+      const activeType = document.querySelector('#window-generate .type-btn.active');
+      const docType = activeType ? activeType.dataset.docType : 'contract';
+      const parameters = genParamsInput ? genParamsInput.value.trim() : '';
+
+      btnRunGenerate.disabled = true;
+      try {
+        const response = await fetch('/api/generate-document', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            doc_type: docType,
+            parameters,
+            init_data: ''
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Ошибка генерации документа: ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        const disposition = response.headers.get('Content-Disposition') || '';
+        const filenameMatch = disposition.match(/filename=([^;]+)/i);
+        const filename = filenameMatch ? filenameMatch[1].replace(/"/g, '') : 'Lexify_Document.docx';
+
+        const downloadUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(downloadUrl);
+
+        if (genResultSummary) {
+          genResultSummary.textContent = 'Проект документа сформирован и передан на загрузку.';
+        }
+        genResultBox.classList.remove('hidden');
+      } catch (error) {
+        if (genResultSummary) {
+          genResultSummary.textContent = 'Не удалось сформировать документ. Повторите попытку.';
+        }
+        genResultBox.classList.remove('hidden');
+        console.error(error);
+      } finally {
+        btnRunGenerate.disabled = false;
+      }
     });
   }
 
-  // Заглушки для скачивания файлов (.docx)
+  function downloadReport(filename, text) {
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const downloadUrl = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(downloadUrl);
+  }
+
   if (btnDownloadConclusion) {
     btnDownloadConclusion.addEventListener('click', () => {
-      alert('Загрузка файла: Expert_Conclusion.docx');
+      downloadReport('Lexify_Expertnoe_zaklyuchenie.txt',
+        'Экспертное заключение Lexify\n\nТребуется проведение детального правового анализа представленного договора.');
     });
   }
   if (btnDownloadProtocol) {
     btnDownloadProtocol.addEventListener('click', () => {
-      alert('Загрузка файла: Protocol_of_Disagreements.docx');
+      downloadReport('Lexify_Protokol_raznoglasiy.txt',
+        'Протокол разногласий Lexify\n\nПеречень спорных условий будет сформирован по результатам правовой проверки.');
     });
   }
   if (btnDownloadGenerated) {
     btnDownloadGenerated.addEventListener('click', () => {
-      alert('Загрузка файла: Generated_Document.docx');
+      btnRunGenerate.click();
     });
   }
 });

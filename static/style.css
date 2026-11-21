@@ -1,11 +1,23 @@
-/* Строгие базовые стили Lexify */
+/* Академический деловой стиль интерфейса Lexify */
 :root {
-  --bg-color: #f8f9fa;
-  --text-color: #111111;
-  --border-color: #d1d5db;
-  --accent-color: #1e293b;
-  --btn-bg: #0f172a;
-  --btn-text: #ffffff;
+  --bg-color: #eef1f4;
+  --surface-color: #ffffff;
+  --text-color: #17202a;
+  --muted-color: #5d6975;
+  --border-color: #bcc4cc;
+  --accent-color: #243746;
+  --accent-hover: #1a2a36;
+  --secondary-bg: #e7ebef;
+  --focus-color: #647b8e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
 }
 
 body {
@@ -13,35 +25,260 @@ body {
   background-color: var(--bg-color);
   color: var(--text-color);
   margin: 0;
-  padding: 16px;
+  line-height: 1.45;
 }
 
 .hidden {
   display: none !important;
 }
 
-.container {
-  max-width: 600px;
+.lexify-screen {
+  width: 100%;
+  max-width: 760px;
+  min-height: 100vh;
   margin: 0 auto;
+  background: var(--surface-color);
+  border-left: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
 }
 
-h1, h2, h3 {
+.lexify-header {
+  min-height: 72px;
+  padding: 14px 24px;
+  border-bottom: 2px solid var(--accent-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.status-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.badge {
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+  padding: 5px 8px;
+  color: var(--muted-color);
+  background: #f6f7f8;
+  font-size: 12px;
   font-weight: 600;
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.brand-title {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent-color);
+}
+
+.lexify-content-main,
+.lexify-content {
+  padding: 32px 24px;
+  flex: 1;
+}
+
+.welcome-block {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 20px;
+  margin-bottom: 24px;
+}
+
+.main-title,
+.screen-title {
+  margin: 0;
+  color: var(--accent-color);
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.25;
+}
+
+.main-title {
+  font-size: 28px;
+}
+
+.screen-title {
+  font-size: 24px;
+  margin-bottom: 6px;
+}
+
+.main-subtitle,
+.screen-description {
+  margin: 8px 0 0;
+  color: var(--muted-color);
+}
+
+.accent-text {
+  color: var(--accent-color);
+}
+
+.menu-actions,
+.doc-type-grid,
+.input-mode-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.menu-actions {
+  grid-template-columns: 1fr 1fr;
+}
+
+.input-mode-grid,
+.doc-type-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.type-btn-wide {
+  grid-column: 1 / -1;
+}
+
+.form-group {
+  margin: 22px 0;
+}
+
+.group-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 700;
   color: var(--accent-color);
 }
 
 button {
-  background-color: var(--btn-bg);
-  color: var(--btn-text);
-  border: none;
-  padding: 10px 16px;
+  min-height: 42px;
+  border: 1px solid var(--accent-color);
+  border-radius: 2px;
+  padding: 10px 14px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 700;
   cursor: pointer;
-  border-radius: 4px;
-  margin-top: 8px;
+  transition: background-color 120ms ease, border-color 120ms ease;
 }
 
 button:hover {
-  opacity: 0.9;
+  background: var(--accent-hover);
+}
+
+button:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(100, 123, 142, 0.28);
+  outline-offset: 2px;
+}
+
+.btn-primary,
+.btn-primary-menu,
+.btn-secondary,
+.btn-secondary-menu,
+.mode-btn,
+.type-btn {
+  width: 100%;
+}
+
+.btn-primary,
+.btn-primary-menu,
+.mode-btn.active,
+.type-btn.active {
+  background: var(--accent-color);
+  color: #ffffff;
+}
+
+.btn-secondary,
+.btn-secondary-menu,
+.mode-btn,
+.type-btn {
+  background: var(--secondary-bg);
+  color: var(--accent-color);
+  border-color: var(--border-color);
+}
+
+.btn-secondary,
+.btn-secondary-menu {
+  margin-top: 16px;
+}
+
+.lexify-textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 120px;
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+  padding: 12px;
+  color: var(--text-color);
+  background: #ffffff;
+  font: inherit;
+}
+
+.result-panel {
+  margin-top: 20px;
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--accent-color);
+  background: #f8f9fa;
+  padding: 16px;
+}
+
+.result-header {
+  font-weight: 700;
+  color: var(--accent-color);
+  margin-bottom: 6px;
+}
+
+.result-text {
+  margin: 0 0 14px;
+  color: var(--text-color);
+}
+
+.btn-download {
+  margin-top: 8px;
+}
+
+.lexify-footer {
+  border-top: 1px solid var(--border-color);
+  padding: 14px 24px;
+  color: var(--muted-color);
+  background: #f8f9fa;
+}
+
+.disclaimer-text {
+  margin: 0 0 8px;
+  font-size: 12px;
+}
+
+.bot-handle {
+  text-align: right;
+  font-weight: 700;
+  color: var(--accent-color);
+}
+
+@media (max-width: 600px) {
+  .lexify-screen {
+    border: none;
+  }
+
+  .lexify-header {
+    align-items: flex-start;
+  }
+
+  .status-badges {
+    max-width: 65%;
+  }
+
+  .menu-actions,
+  .input-mode-grid,
+  .doc-type-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .type-btn-wide {
+    grid-column: auto;
+  }
 }
