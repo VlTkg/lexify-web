@@ -35,6 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('generation-jurisdiction-group')
   ];
   let checksCount = Math.max(0, Number(localStorage.getItem('lexify_checks_count') ?? 3));
+  let isAdmin = false;
+  let adminTelegramId = 0;
   let generatedDocumentBlob = null;
   let generatedDocumentFilename = 'Lexify_Document.docx';
 
@@ -44,16 +46,55 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function updateChecksCount() {
+    ['role-badge-main'].forEach((id) => {
+      const element = document.getElementById(id);
+      if (element) element.textContent = isAdmin ? 'Режим: Администратор' : 'Режим: Пользователь';
+    });
+    document.querySelectorAll('.lexify-screen .badge-admin').forEach((element) => {
+      if (!element.classList.contains('admin-trigger')) {
+        element.textContent = isAdmin ? 'Режим: Администратор' : 'Режим: Пользователь';
+      }
+    });
     ['checks-count', 'checks-count-analysis', 'checks-count-generation'].forEach((id) => {
       const element = document.getElementById(id);
-      if (element) element.textContent = String(checksCount);
+      if (element) element.textContent = isAdmin ? 'Неограниченно' : String(checksCount);
+    });
+    ['checks-badge'].forEach((id) => {
+      const element = document.getElementById(id);
+      if (element) element.innerHTML = isAdmin
+        ? 'Проверки: <strong>Неограниченно</strong>'
+        : `Осталось проверок: <strong id="checks-count">${checksCount}</strong>`;
+    });
+    ['checks-badge-analysis', 'checks-badge-generation'].forEach((id) => {
+      const element = document.getElementById(id);
+      if (element) element.innerHTML = isAdmin
+        ? 'Проверки: <strong>Неограниченно</strong>'
+        : `Осталось проверок: <strong>${checksCount}</strong>`;
     });
   }
 
   function consumeCheck() {
+    if (isAdmin) return;
     checksCount = Math.max(0, checksCount - 1);
     localStorage.setItem('lexify_checks_count', String(checksCount));
     updateChecksCount();
+    adminTelegramId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id ?? 0;
+    fetch(`/api/user-info/${adminTelegramId}`)
+      .then((response) => {
+        if (!response.ok) throw new Error(`Ошибка проверки прав: ${response.status}`);
+        return response.json();
+      })
+      .then((data) => {
+        isAdmin = Boolean(data.is_admin);
+        if (adminButton) adminButton.classList.toggle('hidden', !isAdmin);
+        updateChecksCount();
+      })
+      .catch((error) => {
+        isAdmin = false;
+        if (adminButton) adminButton.classList.add('hidden');
+        updateChecksCount();
+        console.error(error);
+      });
   }
 
   updateChecksCount();
@@ -234,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
       adminModal.classList.remove('hidden');
       adminStatsContent.textContent = 'Загрузка статистики...';
       try {
-        const response = await fetch('/admin/stats/0');
+        const response = await fetch(`/admin/stats/${adminTelegramId}`);
         if (!response.ok) throw new Error(`Ошибка загрузки статистики: ${response.status}`);
         const stats = await response.json();
         adminStatsContent.innerHTML = `

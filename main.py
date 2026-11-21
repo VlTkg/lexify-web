@@ -1,4 +1,5 @@
 import io
+import os
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, StreamingResponse
@@ -88,10 +89,27 @@ def generate_report(req: GenerateRequest):
 
 @app.get("/api/user-info/{telegram_id}")
 def user_info(telegram_id: int):
-    return {"telegram_id": telegram_id, "free_checks_left": 3, "is_admin": telegram_id == 0}
+    admin_ids = {
+        item.strip()
+        for item in os.environ.get("LEXIFY_ADMIN_TELEGRAM_IDS", "0").split(",")
+        if item.strip()
+    }
+    is_admin = str(telegram_id) in admin_ids
+    return {
+        "telegram_id": telegram_id,
+        "free_checks_left": None if is_admin else 3,
+        "is_admin": is_admin
+    }
 
 @app.get("/admin/stats/{telegram_id}")
 def admin_stats(telegram_id: int):
+    admin_ids = {
+        item.strip()
+        for item in os.environ.get("LEXIFY_ADMIN_TELEGRAM_IDS", "0").split(",")
+        if item.strip()
+    }
+    if str(telegram_id) not in admin_ids:
+        raise HTTPException(status_code=403, detail="Недостаточно прав администратора")
     return {
         "total_users": 1,
         "total_analyses": 12,

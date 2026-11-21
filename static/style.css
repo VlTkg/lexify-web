@@ -70,10 +70,9 @@ body {
 
 .product-description {
   margin: 0 0 24px;
-  padding: 16px;
-  border: 1px solid var(--border-color);
-  border-left: 4px solid var(--accent-color);
-  background: #f8f9fa;
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 
 .product-description h2 {
@@ -98,9 +97,9 @@ body {
   display: flex;
   flex-direction: column;
   gap: 3px;
-  padding: 10px;
-  border: 1px solid var(--border-color);
-  background: #ffffff;
+  padding: 10px 0;
+  border: 0;
+  background: transparent;
 }
 
 .description-grid span {
@@ -200,7 +199,7 @@ body {
 }
 
 .jurisdiction-btn {
-  background: #ffffff;
+  background: var(--secondary-bg);
   color: var(--accent-color);
   border: 1px solid var(--border-color);
 }
@@ -208,9 +207,9 @@ body {
 .jurisdiction-btn.active,
 .mode-btn.active,
 .type-btn.active {
-  background: var(--accent-color);
-  color: #ffffff;
-  border-color: var(--accent-color);
+  background: var(--secondary-bg);
+  color: var(--accent-color);
+  border-color: var(--border-color);
 }
 
 .jurisdiction-btn:hover,
@@ -224,9 +223,9 @@ body {
 .jurisdiction-btn.active:hover,
 .mode-btn.active:hover,
 .type-btn.active:hover {
-  background: var(--accent-hover);
-  color: #ffffff;
-  border-color: var(--accent-hover);
+  background: var(--secondary-bg);
+  color: var(--accent-color);
+  border-color: var(--border-color);
 }
 
 .type-btn-wide {
@@ -256,7 +255,7 @@ button {
 }
 
 button:hover {
-  background: var(--accent-hover);
+  background: var(--secondary-bg);
 }
 
 button:focus-visible,
@@ -274,17 +273,9 @@ textarea:focus-visible {
   width: 100%;
 }
 
-.btn-primary,
-.btn-primary-menu,
-.mode-btn.active,
-.type-btn.active {
-  background: var(--accent-color);
-  color: #ffffff;
-}
-
 .btn-primary-menu,
 .btn-secondary-menu {
-  background: #ffffff;
+  background: var(--secondary-bg);
   color: var(--accent-color);
   border: 1px solid var(--border-color);
 }
@@ -296,13 +287,35 @@ textarea:focus-visible {
   border-color: var(--accent-color);
 }
 
+.menu-subtitle {
+  margin: 0 0 10px;
+  color: var(--text-color);
+  font-weight: 700;
+}
+
 .btn-secondary,
 .btn-secondary-menu,
 .mode-btn,
-.type-btn {
+.type-btn,
+.jurisdiction-btn,
+.btn-primary,
+.btn-download,
+.modal-close {
   background: var(--secondary-bg);
   color: var(--accent-color);
   border-color: var(--border-color);
+}
+
+.btn-primary:hover,
+.btn-secondary:hover,
+.mode-btn:hover,
+.type-btn:hover,
+.jurisdiction-btn:hover,
+.btn-download:hover,
+.modal-close:hover {
+  background: var(--secondary-bg);
+  color: var(--accent-color);
+  border-color: var(--accent-color);
 }
 
 .btn-secondary,

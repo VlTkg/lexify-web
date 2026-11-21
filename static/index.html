@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Lexify — Правовой анализ</title>
-  <link rel="stylesheet" href="/static/style.css?v=1.0.1">
+  <link rel="stylesheet" href="/static/style.css?v=1.0.2">
 </head>
 <body>
 
@@ -14,9 +14,9 @@
   <section id="window-main" class="lexify-screen">
     <header class="lexify-header">
       <div class="status-badges">
-        <span class="badge badge-admin">Пользователь: Администратор</span>
-        <span class="badge badge-plan">Осталось проверок: <strong id="checks-count">3</strong></span>
-        <button type="button" id="admin-btn" class="badge badge-admin admin-trigger">Админ-панель</button>
+        <span class="badge badge-admin" id="role-badge-main">Режим: Пользователь</span>
+        <span class="badge badge-plan" id="checks-badge">Осталось проверок: <strong id="checks-count">3</strong></span>
+        <button type="button" id="admin-btn" class="badge badge-admin admin-trigger hidden">Админ-панель</button>
       </div>
       <div class="brand-logo">
         <span class="brand-title">Lexify</span>
@@ -29,11 +29,10 @@
     <main class="lexify-content-main">
       <div class="welcome-block">
         <h1 class="main-title">Система правового анализа и генерации</h1>
-        <p class="main-subtitle">Выберите необходимый рабочий режим</p>
       </div>
 
       <section class="product-description" aria-label="Описание возможностей Lexify">
-        <h2>Расширенное описание системы</h2>
+        <h2>Описание системы</h2>
         <p>
           Lexify выполняет правовой анализ договоров с учётом выбранной юрисдикции,
           формирует экспертные заключения и протоколы разногласий, а также создаёт
@@ -46,6 +45,7 @@
         </div>
       </section>
 
+      <p class="main-subtitle menu-subtitle">Выберите необходимый рабочий режим</p>
       <div class="menu-actions">
         <button type="button" id="btn-goto-analysis" class="btn-primary-menu">
           Анализ договора
@@ -70,8 +70,8 @@
   <section id="window-analysis" class="lexify-screen hidden">
     <header class="lexify-header">
       <div class="status-badges">
-        <span class="badge badge-admin">Пользователь: Администратор</span>
-        <span class="badge badge-plan">Осталось проверок: <strong id="checks-count-analysis">3</strong></span>
+        <span class="badge badge-admin">Режим: Пользователь</span>
+        <span class="badge badge-plan" id="checks-badge-analysis">Осталось проверок: <strong id="checks-count-analysis">3</strong></span>
       </div>
       <div class="brand-logo">
         <span class="brand-title">Lexify</span>
@@ -137,8 +137,8 @@
   <section id="window-generate" class="lexify-screen hidden">
     <header class="lexify-header">
       <div class="status-badges">
-        <span class="badge badge-admin">Пользователь: Администратор</span>
-        <span class="badge badge-plan">Осталось проверок: <strong id="checks-count-generation">3</strong></span>
+        <span class="badge badge-admin">Режим: Пользователь</span>
+        <span class="badge badge-plan" id="checks-badge-generation">Осталось проверок: <strong id="checks-count-generation">3</strong></span>
       </div>
       <div class="brand-logo">
         <span class="brand-title">Lexify</span>
@@ -208,6 +208,6 @@
     </div>
   </div>
 
-  <script src="/static/script.js?v=1.0.1"></script>
+  <script src="/static/script.js?v=1.0.2"></script>
 </body>
 </html>
