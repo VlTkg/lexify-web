@@ -54,6 +54,60 @@ body {
   gap: 16px;
 }
 
+.admin-trigger {
+  cursor: pointer;
+  font-family: inherit;
+  background: #f6f7f8;
+  color: var(--accent-color);
+  min-height: 28px;
+  padding: 4px 8px;
+}
+
+.admin-trigger:hover {
+  background: var(--secondary-bg);
+  color: var(--accent-color);
+}
+
+.product-description {
+  margin: 0 0 24px;
+  padding: 16px;
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--accent-color);
+  background: #f8f9fa;
+}
+
+.product-description h2 {
+  margin: 0 0 8px;
+  font-family: Georgia, "Times New Roman", serif;
+  color: var(--accent-color);
+  font-size: 18px;
+}
+
+.product-description p {
+  margin: 0 0 12px;
+  color: var(--muted-color);
+}
+
+.description-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.description-grid div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  background: #ffffff;
+}
+
+.description-grid span {
+  color: var(--muted-color);
+  font-size: 12px;
+}
+
 .status-badges {
   display: flex;
   flex-wrap: wrap;
@@ -139,6 +193,42 @@ body {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.jurisdiction-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.jurisdiction-btn {
+  background: #ffffff;
+  color: var(--accent-color);
+  border: 1px solid var(--border-color);
+}
+
+.jurisdiction-btn.active,
+.mode-btn.active,
+.type-btn.active {
+  background: var(--accent-color);
+  color: #ffffff;
+  border-color: var(--accent-color);
+}
+
+.jurisdiction-btn:hover,
+.mode-btn:hover,
+.type-btn:hover {
+  background: #e7ebef;
+  color: var(--accent-color);
+  border-color: var(--border-color);
+}
+
+.jurisdiction-btn.active:hover,
+.mode-btn.active:hover,
+.type-btn.active:hover {
+  background: var(--accent-hover);
+  color: #ffffff;
+  border-color: var(--accent-hover);
+}
+
 .type-btn-wide {
   grid-column: 1 / -1;
 }
@@ -190,6 +280,20 @@ textarea:focus-visible {
 .type-btn.active {
   background: var(--accent-color);
   color: #ffffff;
+}
+
+.btn-primary-menu,
+.btn-secondary-menu {
+  background: #ffffff;
+  color: var(--accent-color);
+  border: 1px solid var(--border-color);
+}
+
+.btn-primary-menu:hover,
+.btn-secondary-menu:hover {
+  background: var(--secondary-bg);
+  color: var(--accent-color);
+  border-color: var(--accent-color);
 }
 
 .btn-secondary,
@@ -248,6 +352,83 @@ textarea:focus-visible {
   background: #f8f9fa;
 }
 
+.admin-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(23, 32, 42, 0.55);
+}
+
+.admin-modal-card {
+  width: min(520px, 100%);
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+  padding: 18px;
+  box-shadow: 0 12px 32px rgba(23, 32, 42, 0.22);
+}
+
+.admin-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.admin-modal-header h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  color: var(--accent-color);
+  font-size: 20px;
+}
+
+.modal-close {
+  width: auto;
+  min-height: 34px;
+  background: #ffffff;
+  color: var(--accent-color);
+  border: 1px solid var(--border-color);
+}
+
+.badge.admin-trigger,
+button.admin-trigger {
+  background: #ffffff;
+  color: var(--accent-color);
+  border: 1px solid var(--border-color);
+}
+
+.badge.admin-trigger:hover,
+button.admin-trigger:hover {
+  background: var(--secondary-bg);
+  color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  padding-top: 14px;
+}
+
+.admin-stat {
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  background: #f8f9fa;
+}
+
+.admin-stat strong {
+  display: block;
+  color: var(--accent-color);
+  font-size: 20px;
+}
+
 .disclaimer-text {
   margin: 0 0 8px;
   font-size: 12px;
@@ -274,7 +455,9 @@ textarea:focus-visible {
 
   .menu-actions,
   .input-mode-grid,
-  .doc-type-grid {
+  .doc-type-grid,
+  .jurisdiction-grid,
+  .description-grid {
     grid-template-columns: 1fr;
   }
 

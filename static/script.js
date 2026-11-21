@@ -26,6 +26,45 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnDownloadGenerated = document.getElementById('btn-download-generated');
   const genParamsInput = document.getElementById('gen-params-input');
   const genResultSummary = document.getElementById('gen-result-summary');
+  const adminButton = document.getElementById('admin-btn');
+  const adminModal = document.getElementById('admin-modal');
+  const adminModalClose = document.getElementById('admin-modal-close');
+  const adminStatsContent = document.getElementById('admin-stats-content');
+  const jurisdictionGroups = [
+    document.getElementById('analysis-jurisdiction-group'),
+    document.getElementById('generation-jurisdiction-group')
+  ];
+  let checksCount = Math.max(0, Number(localStorage.getItem('lexify_checks_count') ?? 3));
+  let generatedDocumentBlob = null;
+  let generatedDocumentFilename = 'Lexify_Document.docx';
+
+  function selectedJurisdiction(containerId) {
+    const container = document.getElementById(containerId);
+    return container?.querySelector('.jurisdiction-btn.active')?.dataset.jurisdiction || 'Россия (РФ)';
+  }
+
+  function updateChecksCount() {
+    ['checks-count', 'checks-count-analysis', 'checks-count-generation'].forEach((id) => {
+      const element = document.getElementById(id);
+      if (element) element.textContent = String(checksCount);
+    });
+  }
+
+  function consumeCheck() {
+    checksCount = Math.max(0, checksCount - 1);
+    localStorage.setItem('lexify_checks_count', String(checksCount));
+    updateChecksCount();
+  }
+
+  updateChecksCount();
+  jurisdictionGroups.filter(Boolean).forEach((group) => {
+    group.querySelectorAll('.jurisdiction-btn').forEach((button) => {
+      button.addEventListener('click', () => {
+        group.querySelectorAll('.jurisdiction-btn').forEach((item) => item.classList.remove('active'));
+        button.classList.add('active');
+      });
+    });
+  });
 
   function showWindow(windowToShow) {
     if (!windowToShow) return;
@@ -65,6 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnRunAnalysis && analysisResultBox) {
     btnRunAnalysis.addEventListener('click', () => {
       analysisResultBox.classList.remove('hidden');
+      consumeCheck();
     });
   }
 
@@ -81,6 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const activeType = document.querySelector('#window-generate .type-btn.active');
       const docType = activeType ? activeType.dataset.docType : 'contract';
       const parameters = genParamsInput ? genParamsInput.value.trim() : '';
+      const jurisdiction = selectedJurisdiction('generation-jurisdiction-group');
 
       btnRunGenerate.disabled = true;
       try {
@@ -90,7 +131,8 @@ document.addEventListener('DOMContentLoaded', () => {
           body: JSON.stringify({
             doc_type: docType,
             parameters,
-            init_data: ''
+            init_data: '',
+            jurisdiction
           })
         });
 
@@ -102,6 +144,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const disposition = response.headers.get('Content-Disposition') || '';
         const filenameMatch = disposition.match(/filename=([^;]+)/i);
         const filename = filenameMatch ? filenameMatch[1].replace(/"/g, '') : 'Lexify_Document.docx';
+        generatedDocumentBlob = blob;
+        generatedDocumentFilename = filename;
 
         const downloadUrl = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -116,6 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
           genResultSummary.textContent = 'Проект документа сформирован и передан на загрузку.';
         }
         genResultBox.classList.remove('hidden');
+        consumeCheck();
       } catch (error) {
         if (genResultSummary) {
           genResultSummary.textContent = 'Не удалось сформировать документ. Повторите попытку.';
@@ -129,32 +174,85 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function downloadReport(filename, text) {
-    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-    const downloadUrl = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(downloadUrl);
+    return fetch('/api/generate-report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        doc_type: filename,
+        parameters: text,
+        init_data: '',
+        jurisdiction: selectedJurisdiction('analysis-jurisdiction-group')
+      })
+    }).then((response) => {
+      if (!response.ok) throw new Error(`Ошибка формирования файла: ${response.status}`);
+      return response.blob();
+    }).then((blob) => {
+      const downloadUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename === 'protocol'
+        ? 'Protocol_Raznoglasiy.docx'
+        : 'Lexify_Result_Analysis.docx';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(downloadUrl);
+    }).catch((error) => console.error(error));
   }
 
   if (btnDownloadConclusion) {
     btnDownloadConclusion.addEventListener('click', () => {
-      downloadReport('Lexify_Expertnoe_zaklyuchenie.txt',
-        'Экспертное заключение Lexify\n\nТребуется проведение детального правового анализа представленного договора.');
+      downloadReport('analysis',
+        'Экспертное заключение Lexify. Требуется проведение детального правового анализа представленного договора.');
     });
   }
   if (btnDownloadProtocol) {
     btnDownloadProtocol.addEventListener('click', () => {
-      downloadReport('Lexify_Protokol_raznoglasiy.txt',
-        'Протокол разногласий Lexify\n\nПеречень спорных условий будет сформирован по результатам правовой проверки.');
+      downloadReport('protocol',
+        'Перечень спорных условий по результатам правовой проверки и предложенные редакции.');
     });
   }
   if (btnDownloadGenerated) {
     btnDownloadGenerated.addEventListener('click', () => {
-      btnRunGenerate.click();
+      if (!generatedDocumentBlob) {
+        btnRunGenerate.click();
+        return;
+      }
+      const downloadUrl = URL.createObjectURL(generatedDocumentBlob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = generatedDocumentFilename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(downloadUrl);
+    });
+  }
+
+  if (adminButton && adminModal && adminModalClose && adminStatsContent) {
+    adminButton.addEventListener('click', async () => {
+      adminModal.classList.remove('hidden');
+      adminStatsContent.textContent = 'Загрузка статистики...';
+      try {
+        const response = await fetch('/admin/stats/0');
+        if (!response.ok) throw new Error(`Ошибка загрузки статистики: ${response.status}`);
+        const stats = await response.json();
+        adminStatsContent.innerHTML = `
+          <div class="admin-stat"><strong>${stats.total_users}</strong>Пользователей</div>
+          <div class="admin-stat"><strong>${stats.total_analyses}</strong>Анализов договоров</div>
+          <div class="admin-stat"><strong>${stats.total_generations}</strong>Сгенерированных документов</div>
+          <div class="admin-stat"><strong>${stats.total_payments}</strong>Платёжных операций</div>
+        `;
+      } catch (error) {
+        adminStatsContent.textContent = 'Не удалось загрузить статистику админ-панели.';
+        console.error(error);
+      }
+    });
+
+    const closeAdminModal = () => adminModal.classList.add('hidden');
+    adminModalClose.addEventListener('click', closeAdminModal);
+    adminModal.addEventListener('click', (event) => {
+      if (event.target === adminModal) closeAdminModal();
     });
   }
 });

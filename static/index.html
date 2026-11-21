@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Lexify — Правовой анализ</title>
-  <link rel="stylesheet" href="/static/style.css?v=1.0.0">
+  <link rel="stylesheet" href="/static/style.css?v=1.0.1">
 </head>
 <body>
 
@@ -15,7 +15,8 @@
     <header class="lexify-header">
       <div class="status-badges">
         <span class="badge badge-admin">Пользователь: Администратор</span>
-        <span class="badge badge-plan">Статус: Активен</span>
+        <span class="badge badge-plan">Осталось проверок: <strong id="checks-count">3</strong></span>
+        <button type="button" id="admin-btn" class="badge badge-admin admin-trigger">Админ-панель</button>
       </div>
       <div class="brand-logo">
         <span class="brand-title">Lexify</span>
@@ -30,6 +31,20 @@
         <h1 class="main-title">Система правового анализа и генерации</h1>
         <p class="main-subtitle">Выберите необходимый рабочий режим</p>
       </div>
+
+      <section class="product-description" aria-label="Описание возможностей Lexify">
+        <h2>Расширенное описание системы</h2>
+        <p>
+          Lexify выполняет правовой анализ договоров с учётом выбранной юрисдикции,
+          формирует экспертные заключения и протоколы разногласий, а также создаёт
+          проекты договоров, дополнительных соглашений и претензионной корреспонденции.
+        </p>
+        <div class="description-grid">
+          <div><strong>Анализ</strong><span>Риски, статьи закона и рекомендации</span></div>
+          <div><strong>Документы</strong><span>Подготовка в формате DOCX</span></div>
+          <div><strong>Юрисдикция</strong><span>Россия, Казахстан или Беларусь</span></div>
+        </div>
+      </section>
 
       <div class="menu-actions">
         <button type="button" id="btn-goto-analysis" class="btn-primary-menu">
@@ -56,7 +71,7 @@
     <header class="lexify-header">
       <div class="status-badges">
         <span class="badge badge-admin">Пользователь: Администратор</span>
-        <span class="badge badge-plan">Статус: Активен</span>
+        <span class="badge badge-plan">Осталось проверок: <strong id="checks-count-analysis">3</strong></span>
       </div>
       <div class="brand-logo">
         <span class="brand-title">Lexify</span>
@@ -69,6 +84,15 @@
     <main class="lexify-content">
       <h1 class="screen-title"><span class="accent-text">Анализ договоров</span></h1>
       <p class="screen-description">Проведение правовой проверки и подготовка протокола разногласий.</p>
+
+      <div class="form-group">
+        <label class="group-label">Юрисдикция</label>
+        <div class="jurisdiction-grid" id="analysis-jurisdiction-group" aria-label="Выбор юрисдикции">
+          <button type="button" class="jurisdiction-btn active" data-jurisdiction="Россия (РФ)">Россия (РФ)</button>
+          <button type="button" class="jurisdiction-btn" data-jurisdiction="Казахстан">Казахстан</button>
+          <button type="button" class="jurisdiction-btn" data-jurisdiction="Беларусь">Беларусь</button>
+        </div>
+      </div>
       
       <div class="form-group">
         <label class="group-label">Способ предоставления материала</label>
@@ -90,8 +114,8 @@
       <div id="analysis-result-box" class="result-panel hidden">
         <div class="result-header">Результат анализа</div>
         <p class="result-text">Правовой анализ успешно завершен. Выявлено 4 критических риска и 3 неблагоприятных условия.</p>
-        <button type="button" id="btn-download-conclusion" class="btn-primary btn-download">Скачать экспертное заключение (.docx)</button>
-        <button type="button" id="btn-download-protocol" class="btn-primary btn-download" style="margin-top: 8px;">Скачать протокол разногласий (.docx)</button>
+        <button type="button" id="btn-download-conclusion" class="btn-primary btn-download">Скачать результат анализа</button>
+        <button type="button" id="btn-download-protocol" class="btn-primary btn-download" style="margin-top: 8px;">Скачать протокол разногласий</button>
       </div>
 
       <button type="button" id="btn-back-from-analysis" class="btn-secondary">
@@ -114,7 +138,7 @@
     <header class="lexify-header">
       <div class="status-badges">
         <span class="badge badge-admin">Пользователь: Администратор</span>
-        <span class="badge badge-plan">Статус: Активен</span>
+        <span class="badge badge-plan">Осталось проверок: <strong id="checks-count-generation">3</strong></span>
       </div>
       <div class="brand-logo">
         <span class="brand-title">Lexify</span>
@@ -127,6 +151,15 @@
     <main class="lexify-content">
       <h1 class="screen-title"><span class="accent-text">Генерация документов</span></h1>
       <p class="screen-description">Формирование проекта документа по установленному типу и введённым реквизитам.</p>
+
+      <div class="form-group">
+        <label class="group-label">Юрисдикция</label>
+        <div class="jurisdiction-grid" id="generation-jurisdiction-group" aria-label="Выбор юрисдикции">
+          <button type="button" class="jurisdiction-btn active" data-jurisdiction="Россия (РФ)">Россия (РФ)</button>
+          <button type="button" class="jurisdiction-btn" data-jurisdiction="Казахстан">Казахстан</button>
+          <button type="button" class="jurisdiction-btn" data-jurisdiction="Беларусь">Беларусь</button>
+        </div>
+      </div>
 
       <div class="form-group">
         <label class="group-label">Выбор типа документа</label>
@@ -149,7 +182,7 @@
       <div id="gen-result-box" class="result-panel hidden">
         <div class="result-header">Результат формирования</div>
         <p id="gen-result-summary" class="result-text">Проект документа успешно сформирован и готов к выгрузке.</p>
-        <button type="button" id="btn-download-generated" class="btn-primary btn-download">Скачать документ (.docx)</button>
+        <button type="button" id="btn-download-generated" class="btn-primary btn-download">Скачать сгенерированный документ</button>
       </div>
 
       <button type="button" id="btn-back-from-generate" class="btn-secondary">
@@ -165,6 +198,16 @@
     </footer>
   </section>
 
-  <script src="/static/script.js?v=1.0.0"></script>
+  <div id="admin-modal" class="admin-modal hidden" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
+    <div class="admin-modal-card">
+      <div class="admin-modal-header">
+        <h2 id="admin-modal-title">Панель администратора</h2>
+        <button type="button" id="admin-modal-close" class="modal-close" aria-label="Закрыть">Закрыть</button>
+      </div>
+      <div id="admin-stats-content" class="admin-stats">Загрузка статистики...</div>
+    </div>
+  </div>
+
+  <script src="/static/script.js?v=1.0.1"></script>
 </body>
 </html>

@@ -18,6 +18,7 @@ class GenerateRequest(BaseModel):
     doc_type: str
     parameters: str
     init_data: str = ""
+    jurisdiction: str = "Россия (РФ)"
 
 @app.post("/api/generate-document")
 def generate_document(req: GenerateRequest):
@@ -56,3 +57,44 @@ def generate_document(req: GenerateRequest):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/generate-report")
+def generate_report(req: GenerateRequest):
+    try:
+        doc = Document()
+        if req.doc_type == "protocol":
+            title = "ПРОТОКОЛ РАЗНОГЛАСИЙ"
+            filename = "Protocol_Raznoglasiy.docx"
+        else:
+            title = "ЭКСПЕРТНОЕ ЗАКЛЮЧЕНИЕ ПО РЕЗУЛЬТАТАМ АНАЛИЗА"
+            filename = "Lexify_Result_Analysis.docx"
+
+        doc.add_heading(title, level=1)
+        doc.add_paragraph(f"Юрисдикция: {req.jurisdiction}")
+        doc.add_paragraph(req.parameters if req.parameters else "Результаты правовой проверки не предоставлены.")
+        doc.add_paragraph("Документ сформирован сервисом Lexify и подлежит правовой экспертизе.")
+
+        file_stream = io.BytesIO()
+        doc.save(file_stream)
+        file_stream.seek(0)
+
+        return StreamingResponse(
+            file_stream,
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/user-info/{telegram_id}")
+def user_info(telegram_id: int):
+    return {"telegram_id": telegram_id, "free_checks_left": 3, "is_admin": telegram_id == 0}
+
+@app.get("/admin/stats/{telegram_id}")
+def admin_stats(telegram_id: int):
+    return {
+        "total_users": 1,
+        "total_analyses": 12,
+        "total_generations": 5,
+        "total_payments": 0
+    }
